@@ -4,6 +4,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/go-sql-driver/mysql"
 	"os"
+	"github.com/satori/go.uuid"
 )
 
 var DB *sqlx.DB
@@ -24,8 +25,10 @@ func Config() (*sqlx.DB, error) {
 	DB.MustExec(schema)
 
 	tx := DB.MustBegin()
-	tx.MustExec("INSERT INTO merchant (phone_number, email, name, password) VALUES (?, ?, ?, ?)", "3023324324","icecream@truck.com","Ice Cream Truck", "Password")
-	tx.MustExec("INSERT INTO merchant (phone_number, email, name, password) VALUES (?, ?, ?, ?)", "8013215431","hotdog@truck.com", "Hot Dog Truck", "hot dog password")
+	uid, _ := uuid.NewV4()
+	tx.MustExec("INSERT INTO merchant (id, phone_number, email, name, password) VALUES (?, ?, ?, ?, ?)", uid.String(), "3023324324","icecream@truck.com","Ice Cream Truck", "Password")
+	uid, _ = uuid.NewV4()
+	tx.MustExec("INSERT INTO merchant (id, phone_number, email, name, password) VALUES (?, ?, ?, ?, ?)", uid.String(), "8013215431","hotdog@truck.com", "Hot Dog Truck", "hot dog password")
 	tx.Commit()
 
 	return DB, err
