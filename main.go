@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/UpToEleven1102/freezeapp-rest/controllers"
-	"github.com/UpToEleven1102/freezeapp-rest/config"
+	"./controllers"
+	"./config"
 	"net/http"
 	"os"
 	"strings"

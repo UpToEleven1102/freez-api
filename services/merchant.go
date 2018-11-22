@@ -2,9 +2,9 @@ package services
 
 import (
 	"golang.org/x/crypto/bcrypt"
-	"github.com/UpToEleven1102/freezeapp-rest/models"
+	"../models"
 	"github.com/jmoiron/sqlx"
-	"github.com/UpToEleven1102/freezeapp-rest/db"
+	"../db"
 	"github.com/satori/go.uuid"
 	"errors"
 )

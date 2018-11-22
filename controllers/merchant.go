@@ -3,7 +3,7 @@ package controllers
 import (
 	"net/http"
 	"encoding/json"
-	"github.com/UpToEleven1102/freezeapp-rest/services"
+	"../services"
 )
 
 func MerchantHandler(w http.ResponseWriter, req *http.Request, attribute string, objectID string) {
