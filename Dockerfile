@@ -1,6 +1,7 @@
 FROM golang:alpine
 
 RUN apk update && apk upgrade && apk add --no-cache bash git
+
 RUN go get github.com/satori/go.uuid
 RUN go get golang.org/x/crypto/bcrypt
 RUN go get github.com/dgrijalva/jwt-go
@@ -18,3 +19,4 @@ WORKDIR ${SOURCES}
 CMD ${SOURCES}freezeapp-rest
 
 EXPOSE 8080
+EXPOSE 3360

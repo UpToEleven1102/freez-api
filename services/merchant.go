@@ -50,7 +50,7 @@ func GetMerchantByEmail(email string) (interface{}, error) {
 	return nil, nil
 }
 
-func GetMerchantById(id int64) (interface{}, error) {
+func GetMerchantById(id string) (interface{}, error) {
 	var merchant models.Merchant
 
 	r, err := DB.Query(`SELECT * FROM merchant WHERE id=?`, id)
