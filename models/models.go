@@ -1,7 +1,8 @@
 package models
 
+
 type Merchant struct {
-	ID int64 `json:"id"`
+	ID string `json:"id"`
 	PhoneNumber string `json:"phone-number"`
 	Email string `json:"email"`
 	Name string `json:"name"`
