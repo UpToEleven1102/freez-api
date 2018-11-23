@@ -18,11 +18,11 @@ import (
 
 type response struct {
 	Message string `json:"message"`
-	Role string `json:"role"`
+	Role    string `json:"role"`
 }
 
 type Credentials struct {
-	Email string `json:"email"`
+	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
@@ -62,19 +62,39 @@ func AuthenticateTokenMiddleWare(w http.ResponseWriter, req *http.Request) (JwtC
 	return JwtClaims{}, err
 }
 
-func createToken(merchant models.Merchant) (string, error) {
-	claims := JWTData{
-		jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Hour * 72).Unix(),
-			Id:        merchant.ID,
-			IssuedAt:  time.Now().Unix(),
-			Subject:   "merchant",
-		},
-		//map[string]string{
-		//	"Id": merchant.ID,
-		//	"Role": "merchant",
-		//},
+func createToken(acc interface{}) (string, error) {
+	var claims JWTData
+	switch acc.(type) {
+	case models.Merchant:
+		merchant := acc.(models.Merchant)
+		claims = JWTData{
+			jwt.StandardClaims{
+				ExpiresAt: time.Now().Add(time.Hour * 72).Unix(),
+				Id:        merchant.ID,
+				IssuedAt:  time.Now().Unix(),
+				Subject:   "merchant",
+			},
+			//map[string]string{
+			//	"Id": merchant.ID,
+			//	"Role": "merchant",
+			//},
+		}
+	case models.User:
+		user := acc.(models.User)
+		claims = JWTData{
+			jwt.StandardClaims{
+				ExpiresAt: time.Now().Add(time.Hour * 72).Unix(),
+				Id:        user.ID,
+				IssuedAt:  time.Now().Unix(),
+				Subject:   "user",
+			},
+			//map[string]string{
+			//	"Id": user.ID,
+			//	"Role": "user",
+			//},
+		}
 	}
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &claims)
 
 	secretKey := os.Getenv("SECRET_KEY")
@@ -93,14 +113,14 @@ func AccountExists(w http.ResponseWriter, req *http.Request) {
 	var r response
 	json.Unmarshal(body, &r)
 
-	if	merchant, _ := services.GetMerchantByEmail(r.Message); merchant!= nil {
+	if merchant, _ := services.GetMerchantByEmail(r.Message); merchant != nil {
 		r.Message = "true"
 		r.Role = c.Merchant
 	} else {
-		if	merchant, _ = services.GetUserByEmail(r.Message); merchant!= nil{
+		if merchant, _ = services.GetUserByEmail(r.Message); merchant != nil {
 			r.Message = "true"
 			r.Role = c.User
-		} else{
+		} else {
 			r.Message = "false"
 		}
 	}
@@ -122,7 +142,7 @@ func GetUserInfo(w http.ResponseWriter, req *http.Request) {
 		}
 
 		if merchant == nil {
-			http.Error(w, "User not exists", http.StatusUnauthorized)
+			http.Error(w, "Account not exists", http.StatusUnauthorized)
 			return
 		}
 		res := merchant.(models.Merchant)
@@ -131,6 +151,19 @@ func GetUserInfo(w http.ResponseWriter, req *http.Request) {
 		w.Write(b)
 
 	} else if claims.Role == c.User {
-		//do something
+		user, err := services.GetUserById(claims.Id)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
+
+		if user == nil {
+			http.Error(w, "Account not exists", http.StatusUnauthorized)
+			return
+		}
+		res := user.(models.User)
+		res.Role = claims.Role
+		b, _ := json.Marshal(res)
+		w.Write(b)
 	}
 }
