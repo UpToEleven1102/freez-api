@@ -2,7 +2,7 @@ package main
 
 import (
 	"./controllers"
-	"./config"
+	c "./config"
 	"net/http"
 	"os"
 	"strings"
@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	config.ConfigEnv()
+	c.ConfigEnv()
 }
 
 func urlMatch(url string) (repository string, objectID string) {
@@ -39,8 +39,10 @@ func apiHandler(w http.ResponseWriter, req *http.Request) {
 
 	w.Header().Set("Content-type", "application/json")
 	switch repository{
-	case "merchants":
+	case c.Merchant:
 		controllers.MerchantHandler(w, req, objectID)
+	case c.User:
+		controllers.UserHandler(w, req, objectID)
 	default:
 		http.NotFound(w, req)
 	}

@@ -11,10 +11,6 @@ import (
 
 var DB *sqlx.DB
 
-type _response struct {
-	data interface{}
-}
-
 func init() {
 	DB, _ = db.Config()
 }

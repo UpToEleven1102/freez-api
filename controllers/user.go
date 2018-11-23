@@ -1,11 +1,17 @@
 package controllers
 
-import "net/http"
+import (
+	"net/http"
+	auth "../identity"
+)
 
 func UserHandler(w http.ResponseWriter, req *http.Request, objectID string){
-	method:= req.Method
+	if claims, err := auth.AuthenticateTokenMiddleWare(w,req); err!=nil && claims.Role!="admin" {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
 
-	switch method {
+	switch req.Method {
 	case "GET":
 	case "POST":
 	}
