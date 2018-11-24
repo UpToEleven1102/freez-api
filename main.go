@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-
 	"fmt"
 )
 
@@ -43,6 +42,8 @@ func apiHandler(w http.ResponseWriter, req *http.Request) {
 		controllers.MerchantHandler(w, req, objectID)
 	case c.User:
 		controllers.UserHandler(w, req, objectID)
+	case c.Request:
+		controllers.RequestHandler(w, req, objectID)
 	default:
 		http.NotFound(w, req)
 	}

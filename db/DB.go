@@ -23,10 +23,15 @@ func Config() (*sqlx.DB, error) {
 
 	DB.MustExec("DROP TABLE IF EXISTS merchant")
 	DB.MustExec("DROP TABLE IF EXISTS user")
+	DB.MustExec("DROP TABLE IF EXISTS request")
 	DB.MustExec(schemaMerchant)
 	DB.MustExec(schemaUser)
+	DB.MustExec(schemaRequest)
 
 	tx := DB.MustBegin()
+
+	tx.MustExec("INSERT INTO request (user_id, location) VALUES (123, ST_GeomFromText('POINT(1 1)'))")
+
 	uid, _ := uuid.NewV4()
 	tx.MustExec("INSERT INTO merchant (id, phone_number, email, name, password) VALUES (?, ?, ?, ?, ?)", uid.String(), "3023324324","icecream@truck.com","Ice Cream Truck", "Password")
 	uid, _ = uuid.NewV4()

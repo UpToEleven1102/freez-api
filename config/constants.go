@@ -7,4 +7,5 @@ const (
 	User = "user"
 	UserInfo = "userinfo"
 	Verify = "verify"
+	Request = "request"
 )

@@ -20,3 +20,10 @@ type User struct {
 	Image string `json:"image"`
 	Role string `json:"role"`
 }
+
+type Request struct {
+	ID int `json:"id"`
+	Email string `json:"email"`
+	Lat float32 `json:"lat"`
+	Long float32 `json:"long"`
+}
