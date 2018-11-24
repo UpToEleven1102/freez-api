@@ -1,5 +1,6 @@
 package models
 
+import "github.com/paulsmith/gogeos/geos"
 
 type Merchant struct {
 	ID string `json:"id"`
@@ -22,8 +23,13 @@ type User struct {
 }
 
 type Request struct {
-	ID int `json:"id"`
 	Email string `json:"email"`
 	Lat float32 `json:"lat"`
 	Long float32 `json:"long"`
+}
+
+type RequestEntity struct {
+	ID int `json:"id"`
+	UserId string `json:"user_id"`
+	Location *geos.Geometry `json:"location"`
 }

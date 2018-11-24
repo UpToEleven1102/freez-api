@@ -1,12 +1,12 @@
 package identity
 
 import (
-	"net/http"
-	"io/ioutil"
 	"encoding/json"
-	"../models"
-	"../services"
+	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
+	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
 	"golang.org/x/crypto/bcrypt"
+	"io/ioutil"
+	"net/http"
 )
 
 func SignUpUser(w http.ResponseWriter, req *http.Request) {
@@ -48,6 +48,6 @@ func SignInUser(w http.ResponseWriter, req *http.Request) {
 	}
 
 	token, _ := createToken(r)
-	b, _:= json.Marshal(token)
+	b, _ := json.Marshal(token)
 	w.Write(b)
 }

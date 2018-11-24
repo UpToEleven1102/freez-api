@@ -1,14 +1,14 @@
 package controllers
 
 import (
-	"net/http"
 	"encoding/json"
-	"../services"
-	auth "../identity"
+	auth "git.nextgencode.io/huyen.vu/freeze-app-rest/identity"
+	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
+	"net/http"
 )
 
 func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string) {
-	if claims, err := auth.AuthenticateTokenMiddleWare(w,req); err!=nil && claims.Role!="admin" {
+	if claims, err := auth.AuthenticateTokenMiddleWare(w, req); err != nil && claims.Role != "admin" {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}

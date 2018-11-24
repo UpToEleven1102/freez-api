@@ -1,9 +1,9 @@
 package controllers
 
 import (
+	c "git.nextgencode.io/huyen.vu/freeze-app-rest/config"
+	auth "git.nextgencode.io/huyen.vu/freeze-app-rest/identity"
 	"net/http"
-	c "../config"
-	auth "../identity"
 )
 
 func AuthHandler(w http.ResponseWriter, req *http.Request, route string, userType string) {
@@ -30,7 +30,7 @@ func AuthHandler(w http.ResponseWriter, req *http.Request, route string, userTyp
 		}
 		auth.GetUserInfo(w, req)
 	case c.Verify:
-		if	len(userType) == 0 {
+		if len(userType) == 0 {
 			auth.AccountExists(w, req)
 		} else {
 			http.NotFound(w, req)

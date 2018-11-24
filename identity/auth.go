@@ -1,19 +1,19 @@
 package identity
 
 import (
-	"github.com/dgrijalva/jwt-go"
-	"net/http"
-	"strings"
-	"log"
+	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
-	"time"
+	c "git.nextgencode.io/huyen.vu/freeze-app-rest/config"
+	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
+	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
+	"github.com/dgrijalva/jwt-go"
 	"io/ioutil"
-	"encoding/json"
-	"../services"
-	"../models"
-	c "../config"
+	"log"
+	"net/http"
+	"os"
+	"strings"
+	"time"
 )
 
 type response struct {
@@ -42,7 +42,7 @@ func AuthenticateTokenMiddleWare(w http.ResponseWriter, req *http.Request) (JwtC
 
 	if len(authArr) != 2 {
 		log.Println("Authentication header is invalid" + authToken)
-		return JwtClaims{}, errors.New("Request failed!")
+		return JwtClaims{}, errors.New("RequestEntity failed!")
 	}
 	jwtToken := authArr[1]
 	token, err := jwt.ParseWithClaims(jwtToken, &JWTData{}, func(token *jwt.Token) (interface{}, error) {

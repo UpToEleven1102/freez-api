@@ -1,10 +1,11 @@
 package services
 
 import (
-	"../models"
-	"golang.org/x/crypto/bcrypt"
+	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"github.com/satori/go.uuid"
+	"golang.org/x/crypto/bcrypt"
 )
+
 func CreateUser(user models.User) (interface{}, error) {
 	uid, _ := uuid.NewV4()
 	user.ID = uid.String()

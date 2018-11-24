@@ -1,17 +1,17 @@
 package controllers
 
 import (
-	"net/http"
-	"io/ioutil"
-	"../models"
 	"encoding/json"
-	"../services"
-	"../identity"
+	"git.nextgencode.io/huyen.vu/freeze-app-rest/identity"
+	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
+	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
+	"io/ioutil"
+	"net/http"
 )
 
 func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string) {
-	_ , err :=identity.AuthenticateTokenMiddleWare(w, req)
-	if err!=nil {
+	claims, err := identity.AuthenticateTokenMiddleWare(w, req)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
@@ -23,14 +23,13 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string) {
 			return
 		}
 
-		body, err := ioutil.ReadAll(req.Body)
+		body, _ := ioutil.ReadAll(req.Body)
+		var request models.Request
+		err := json.Unmarshal(body, &request)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-
-		var request models.Request
-		json.Unmarshal(body, &request)
 
 		err = services.CreateRequest(request)
 		if err != nil {
@@ -40,23 +39,45 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string) {
 
 		w.WriteHeader(http.StatusOK)
 	case "GET":
-		r, err := services.GetUserByEmail(objectID)
-		if err != nil || r == nil {
-			http.Error(w, "user not exists", http.StatusBadRequest)
+		switch len(objectID) {
+		case 0 :
+			r, err := services.GetRequests()
+			if err != nil {
+				http.Error(w, "", http.StatusInternalServerError)
+				return
+			}
+
+			b, _ := json.Marshal(r)
+			w.Write(b)
+		default:
+			r, err := services.GetUserByEmail(objectID)
+			if err != nil || r == nil {
+				http.Error(w, "user not exists", http.StatusBadRequest)
+				return
+			}
+			user := r.(models.User)
+			r, err = services.GetRequestByUserID(user.ID)
+
+			if err != nil {
+				http.Error(w, "", http.StatusInternalServerError)
+				return
+			}
+
+			request := r.(models.Request)
+
+			b, _ := json.Marshal(request)
+			w.Write(b)
+		}
+	case "DELETE":
+		if len(objectID) > 0 {
+			http.NotFound(w, req)
 			return
 		}
-		user := r.(models.User)
-		r, err = services.GetRequest(user.ID)
 
-		if err != nil {
-			http.Error(w, "", http.StatusInternalServerError)
+		err = services.RemoveRequestsByUserID(claims.Id)
+		if	err!=nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-
-		request := r.(models.Request)
-
-		b, _ := json.Marshal(request)
-		w.Write(b)
 	}
-
 }

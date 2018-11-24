@@ -1,23 +1,23 @@
 package main
 
 import (
-	"./controllers"
-	c "./config"
+	"fmt"
+	c "git.nextgencode.io/huyen.vu/freeze-app-rest/config"
+	"git.nextgencode.io/huyen.vu/freeze-app-rest/controllers"
 	"net/http"
 	"os"
 	"strings"
-	"fmt"
 )
 
 func init() {
-	c.ConfigEnv()
+	c.SetEnv()
 }
 
 func urlMatch(url string) (repository string, objectID string) {
 	fragments := strings.SplitN(url, "/", -1)
 	repository = fragments[2]
 	objectID = ""
-	 if len(fragments) > 3 {
+	if len(fragments) > 3 {
 		objectID = fragments[3]
 	}
 
@@ -37,7 +37,7 @@ func apiHandler(w http.ResponseWriter, req *http.Request) {
 	repository, objectID := urlMatch(req.URL.Path)
 
 	w.Header().Set("Content-type", "application/json")
-	switch repository{
+	switch repository {
 	case c.Merchant:
 		controllers.MerchantHandler(w, req, objectID)
 	case c.User:
@@ -60,12 +60,12 @@ func authHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
-	port:=getPort()
+	port := getPort()
 
 	http.HandleFunc("/api/", apiHandler)
 
 	http.HandleFunc("/auth/", authHandler)
 
 	fmt.Printf("Running on port %s \n", port)
-	http.ListenAndServe(port, nil)
+	panic(http.ListenAndServe(port, nil))
 }

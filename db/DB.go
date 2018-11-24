@@ -1,26 +1,21 @@
 package db
 
 import (
-	"github.com/jmoiron/sqlx"
+	"git.nextgencode.io/huyen.vu/freeze-app-rest/config"
 	_ "github.com/go-sql-driver/mysql"
-	"os"
+	"github.com/jmoiron/sqlx"
 	"github.com/satori/go.uuid"
+	"os"
 )
 
 var DB *sqlx.DB
 var err error
 
-func Config() (*sqlx.DB, error) {
-	dbUri := getMysqlUri()
+func init() {
+	config.SetEnv()
+}
 
-	if DB == nil {
-		DB, err = sqlx.Connect("mysql", dbUri)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-
+func seed(DB *sqlx.DB) {
 	DB.MustExec("DROP TABLE IF EXISTS merchant")
 	DB.MustExec("DROP TABLE IF EXISTS user")
 	DB.MustExec("DROP TABLE IF EXISTS request")
@@ -42,6 +37,21 @@ func Config() (*sqlx.DB, error) {
 	tx.MustExec("INSERT INTO user (id, phone_number, email, name, password) VALUES (?, ?, ?, ?, ?)", uid.String(), "8013215431","a@truck.com", "H", "hot dog password")
 
 	tx.Commit()
+}
+
+func Config() (*sqlx.DB, error) {
+	dbUri := getMysqlUri()
+
+	if DB == nil {
+		DB, err = sqlx.Connect("mysql", dbUri)
+		if err != nil {
+			panic(err)
+		}
+
+	}
+
+	//seed(DB)
+
 
 	return DB, err
 }

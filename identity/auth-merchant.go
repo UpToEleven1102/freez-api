@@ -1,17 +1,17 @@
 package identity
 
 import (
-	"net/http"
-	"io/ioutil"
 	"encoding/json"
+	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
+	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
 	"golang.org/x/crypto/bcrypt"
-	"../services"
-	"../models"
+	"io/ioutil"
+	"net/http"
 )
 
 func SignInMerchant(w http.ResponseWriter, req *http.Request) {
 	var credentials Credentials
-	body, err:= ioutil.ReadAll(req.Body)
+	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -26,7 +26,7 @@ func SignInMerchant(w http.ResponseWriter, req *http.Request) {
 
 	if res != nil {
 		merchant := res.(models.Merchant)
-		err = bcrypt.CompareHashAndPassword([]byte(merchant.Password),[]byte(credentials.Password))
+		err = bcrypt.CompareHashAndPassword([]byte(merchant.Password), []byte(credentials.Password))
 		if err == nil {
 			token, err := createToken(merchant)
 			if err != nil {

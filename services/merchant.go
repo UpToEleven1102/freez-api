@@ -1,12 +1,12 @@
 package services
 
 import (
-	"golang.org/x/crypto/bcrypt"
-	"../models"
-	"github.com/jmoiron/sqlx"
-	"../db"
-	"github.com/satori/go.uuid"
 	"errors"
+	"git.nextgencode.io/huyen.vu/freeze-app-rest/db"
+	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
+	"github.com/jmoiron/sqlx"
+	"github.com/satori/go.uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var DB *sqlx.DB
@@ -70,7 +70,6 @@ func CreateMerchant(merchant models.Merchant) (models.Merchant, error) {
 	merchant.Password = string(password)
 	uid, _ := uuid.NewV4()
 	merchant.ID = uid.String()
-
 
 	_, err = DB.Exec(`INSERT INTO merchant (id, phone_number, email, name, password) VALUES (?, ?, ?, ?, ?)`, merchant.ID, merchant.PhoneNumber, merchant.Email, merchant.Name, merchant.Password)
 
