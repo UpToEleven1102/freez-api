@@ -2,59 +2,40 @@ package controllers
 
 import (
 	"net/http"
-	"io/ioutil"
-	"encoding/json"
-	"github.com/UpToEleven1102/freezeapp-rest/services"
-	"github.com/UpToEleven1102/freezeapp-rest/models"
-	"github.com/dgrijalva/jwt-go"
-	"time"
-	"os"
+	c "../config"
+	auth "../identity"
 )
 
-type _tokenResponse struct {
-	token string
-}
-
-func createToken(merchant models.Merchant) (string, error) {
-
-	claims := &jwt.StandardClaims{
-		ExpiresAt: time.Now().Add(time.Hour * 72).Unix(),
-		Id:        merchant.ID,
+func AuthHandler(w http.ResponseWriter, req *http.Request, route string, userType string) {
+	switch route {
+	case c.SignUp:
+		if userType == c.Merchant {
+			auth.SignUpMerchant(w, req)
+		} else if userType == c.User {
+			auth.SignUpUser(w, req)
+		} else {
+			http.NotFound(w, req)
+		}
+	case c.SignIn:
+		if userType == c.Merchant {
+			auth.SignInMerchant(w, req)
+		} else if userType == c.User {
+			auth.SignInUser(w, req)
+		} else {
+			http.NotFound(w, req)
+		}
+	case c.UserInfo:
+		if len(userType) > 0 {
+			http.NotFound(w, req)
+		}
+		auth.GetUserInfo(w, req)
+	case c.Verify:
+		if	len(userType) == 0 {
+			auth.AccountExists(w, req)
+		} else {
+			http.NotFound(w, req)
+		}
+	default:
+		http.NotFound(w, req)
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	secretKey := os.Getenv("SECRET_KEY")
-
-	tokenString, err := token.SignedString([]byte(secretKey))
-
-	if err != nil {
-		panic(err)
-	}
-
-	return tokenString, nil
-}
-
-func SignUp(w http.ResponseWriter, req *http.Request) {
-	body, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-	}
-
-	var merchant models.Merchant
-
-	json.Unmarshal(body, &merchant)
-
-	merchant, err = services.CreateMerchant(merchant)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-
-	token, _ := createToken(merchant)
-	b, _ := json.Marshal(token)
-	w.WriteHeader(http.StatusCreated)
-	w.Write(b)
-}
-
-func SignIn(w http.ResponseWriter, req *http.Request) {
-
 }

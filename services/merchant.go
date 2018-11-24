@@ -2,18 +2,14 @@ package services
 
 import (
 	"golang.org/x/crypto/bcrypt"
-	"github.com/UpToEleven1102/freezeapp-rest/models"
+	"../models"
 	"github.com/jmoiron/sqlx"
-	"github.com/UpToEleven1102/freezeapp-rest/db"
+	"../db"
 	"github.com/satori/go.uuid"
 	"errors"
 )
 
 var DB *sqlx.DB
-
-type _response struct {
-	data interface{}
-}
 
 func init() {
 	DB, _ = db.Config()
@@ -50,7 +46,7 @@ func GetMerchantByEmail(email string) (interface{}, error) {
 	return nil, nil
 }
 
-func GetMerchantById(id int64) (interface{}, error) {
+func GetMerchantById(id string) (interface{}, error) {
 	var merchant models.Merchant
 
 	r, err := DB.Query(`SELECT * FROM merchant WHERE id=?`, id)

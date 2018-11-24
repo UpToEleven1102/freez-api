@@ -22,13 +22,25 @@ func Config() (*sqlx.DB, error) {
 
 
 	DB.MustExec("DROP TABLE IF EXISTS merchant")
-	DB.MustExec(schema)
+	DB.MustExec("DROP TABLE IF EXISTS user")
+	DB.MustExec("DROP TABLE IF EXISTS request")
+	DB.MustExec(schemaMerchant)
+	DB.MustExec(schemaUser)
+	DB.MustExec(schemaRequest)
 
 	tx := DB.MustBegin()
+
+	tx.MustExec("INSERT INTO request (user_id, location) VALUES (123, ST_GeomFromText('POINT(1 1)'))")
+
 	uid, _ := uuid.NewV4()
 	tx.MustExec("INSERT INTO merchant (id, phone_number, email, name, password) VALUES (?, ?, ?, ?, ?)", uid.String(), "3023324324","icecream@truck.com","Ice Cream Truck", "Password")
 	uid, _ = uuid.NewV4()
 	tx.MustExec("INSERT INTO merchant (id, phone_number, email, name, password) VALUES (?, ?, ?, ?, ?)", uid.String(), "8013215431","hotdog@truck.com", "Hot Dog Truck", "hot dog password")
+	uid, _ = uuid.NewV4()
+	tx.MustExec("INSERT INTO user (id, phone_number, email, name, password) VALUES (?, ?, ?, ?, ?)", uid.String(), "8013215431","h@truck.com", "AJ", "hot dog password")
+	uid, _ = uuid.NewV4()
+	tx.MustExec("INSERT INTO user (id, phone_number, email, name, password) VALUES (?, ?, ?, ?, ?)", uid.String(), "8013215431","a@truck.com", "H", "hot dog password")
+
 	tx.Commit()
 
 	return DB, err
