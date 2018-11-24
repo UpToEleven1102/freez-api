@@ -1,19 +1,15 @@
 package services
 
 import (
-	"golang.org/x/crypto/bcrypt"
-	"github.com/UpToEleven1102/freezeapp-rest/models"
-	"github.com/jmoiron/sqlx"
-	"github.com/UpToEleven1102/freezeapp-rest/db"
-	"github.com/satori/go.uuid"
 	"errors"
+	"git.nextgencode.io/huyen.vu/freeze-app-rest/db"
+	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
+	"github.com/jmoiron/sqlx"
+	"github.com/satori/go.uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var DB *sqlx.DB
-
-type _response struct {
-	data interface{}
-}
 
 func init() {
 	DB, _ = db.Config()
@@ -50,7 +46,7 @@ func GetMerchantByEmail(email string) (interface{}, error) {
 	return nil, nil
 }
 
-func GetMerchantById(id int64) (interface{}, error) {
+func GetMerchantById(id string) (interface{}, error) {
 	var merchant models.Merchant
 
 	r, err := DB.Query(`SELECT * FROM merchant WHERE id=?`, id)
@@ -74,7 +70,6 @@ func CreateMerchant(merchant models.Merchant) (models.Merchant, error) {
 	merchant.Password = string(password)
 	uid, _ := uuid.NewV4()
 	merchant.ID = uid.String()
-
 
 	_, err = DB.Exec(`INSERT INTO merchant (id, phone_number, email, name, password) VALUES (?, ?, ?, ?, ?)`, merchant.ID, merchant.PhoneNumber, merchant.Email, merchant.Name, merchant.Password)
 

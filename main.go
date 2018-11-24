@@ -1,32 +1,27 @@
 package main
 
 import (
-	"github.com/UpToEleven1102/freezeapp-rest/controllers"
-	"github.com/UpToEleven1102/freezeapp-rest/config"
+	"fmt"
+	c "git.nextgencode.io/huyen.vu/freeze-app-rest/config"
+	"git.nextgencode.io/huyen.vu/freeze-app-rest/controllers"
 	"net/http"
 	"os"
 	"strings"
-
-	"fmt"
 )
 
 func init() {
-	config.ConfigEnv()
+	c.SetEnv()
 }
 
-func urlMatch(url string) (repository string, attribute string, objectID string) {
+func urlMatch(url string) (repository string, objectID string) {
 	fragments := strings.SplitN(url, "/", -1)
 	repository = fragments[2]
 	objectID = ""
-	attribute = ""
-	if len(fragments) == 4 {
+	if len(fragments) > 3 {
 		objectID = fragments[3]
-	} else if len(fragments) > 4 {
-		attribute = fragments[3]
-		objectID = fragments[4]
 	}
 
-	return repository, attribute, objectID
+	return repository, objectID
 }
 
 func getPort() string {
@@ -39,41 +34,38 @@ func getPort() string {
 }
 
 func apiHandler(w http.ResponseWriter, req *http.Request) {
-	repository, attribute,  objectID := urlMatch(req.URL.Path)
+	repository, objectID := urlMatch(req.URL.Path)
 
 	w.Header().Set("Content-type", "application/json")
-	switch repository{
-	case "merchants":
-		controllers.MerchantHandler(w, req, attribute, objectID)
+	switch repository {
+	case c.Merchant:
+		controllers.MerchantHandler(w, req, objectID)
+	case c.User:
+		controllers.UserHandler(w, req, objectID)
+	case c.Request:
+		controllers.RequestHandler(w, req, objectID)
 	default:
 		http.NotFound(w, req)
 	}
 }
 
 func authHandler(w http.ResponseWriter, req *http.Request) {
-	route, _, _ := urlMatch(req.URL.Path)
-	w.Header().Set("Content-type", "application/json")
+	route, userType := urlMatch(req.URL.Path)
+	w.Header().Set("Content-Type", "application/json")
 	if req.Method != "POST" {
 		http.NotFound(w, req)
 	}
 
-	switch route {
-	case "signup":
-		controllers.SignUp(w, req)
-	case "signin":
-		controllers.SignIn(w, req)
-	default:
-		http.NotFound(w, req)
-	}
+	controllers.AuthHandler(w, req, route, userType)
 }
 
 func main() {
-	port:=getPort()
+	port := getPort()
 
 	http.HandleFunc("/api/", apiHandler)
 
 	http.HandleFunc("/auth/", authHandler)
 
 	fmt.Printf("Running on port %s \n", port)
-	http.ListenAndServe(port, nil)
+	panic(http.ListenAndServe(port, nil))
 }

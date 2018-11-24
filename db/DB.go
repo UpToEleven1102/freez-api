@@ -1,14 +1,43 @@
 package db
 
 import (
-	"github.com/jmoiron/sqlx"
+	"git.nextgencode.io/huyen.vu/freeze-app-rest/config"
 	_ "github.com/go-sql-driver/mysql"
-	"os"
+	"github.com/jmoiron/sqlx"
 	"github.com/satori/go.uuid"
+	"os"
 )
 
 var DB *sqlx.DB
 var err error
+
+func init() {
+	config.SetEnv()
+}
+
+func seed(DB *sqlx.DB) {
+	DB.MustExec("DROP TABLE IF EXISTS merchant")
+	DB.MustExec("DROP TABLE IF EXISTS user")
+	DB.MustExec("DROP TABLE IF EXISTS request")
+	DB.MustExec(schemaMerchant)
+	DB.MustExec(schemaUser)
+	DB.MustExec(schemaRequest)
+
+	tx := DB.MustBegin()
+
+	tx.MustExec("INSERT INTO request (user_id, location) VALUES (123, ST_GeomFromText('POINT(1 1)'))")
+
+	uid, _ := uuid.NewV4()
+	tx.MustExec("INSERT INTO merchant (id, phone_number, email, name, password) VALUES (?, ?, ?, ?, ?)", uid.String(), "3023324324","icecream@truck.com","Ice Cream Truck", "Password")
+	uid, _ = uuid.NewV4()
+	tx.MustExec("INSERT INTO merchant (id, phone_number, email, name, password) VALUES (?, ?, ?, ?, ?)", uid.String(), "8013215431","hotdog@truck.com", "Hot Dog Truck", "hot dog password")
+	uid, _ = uuid.NewV4()
+	tx.MustExec("INSERT INTO user (id, phone_number, email, name, password) VALUES (?, ?, ?, ?, ?)", uid.String(), "8013215431","h@truck.com", "AJ", "hot dog password")
+	uid, _ = uuid.NewV4()
+	tx.MustExec("INSERT INTO user (id, phone_number, email, name, password) VALUES (?, ?, ?, ?, ?)", uid.String(), "8013215431","a@truck.com", "H", "hot dog password")
+
+	tx.Commit()
+}
 
 func Config() (*sqlx.DB, error) {
 	dbUri := getMysqlUri()
@@ -18,18 +47,11 @@ func Config() (*sqlx.DB, error) {
 		if err != nil {
 			panic(err)
 		}
+
 	}
 
+	//seed(DB)
 
-	DB.MustExec("DROP TABLE IF EXISTS merchant")
-	DB.MustExec(schema)
-
-	tx := DB.MustBegin()
-	uid, _ := uuid.NewV4()
-	tx.MustExec("INSERT INTO merchant (id, phone_number, email, name, password) VALUES (?, ?, ?, ?, ?)", uid.String(), "3023324324","icecream@truck.com","Ice Cream Truck", "Password")
-	uid, _ = uuid.NewV4()
-	tx.MustExec("INSERT INTO merchant (id, phone_number, email, name, password) VALUES (?, ?, ?, ?, ?)", uid.String(), "8013215431","hotdog@truck.com", "Hot Dog Truck", "hot dog password")
-	tx.Commit()
 
 	return DB, err
 }
