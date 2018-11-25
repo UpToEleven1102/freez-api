@@ -9,12 +9,16 @@ import (
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
 	"github.com/dgrijalva/jwt-go"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 )
+
+type JWTData struct {
+	jwt.StandardClaims
+	//CustomClaims map[string]string `json:"custom,omitempty"`
+}
 
 type response struct {
 	Message string `json:"message"`
@@ -26,25 +30,33 @@ type Credentials struct {
 	Password string `json:"password"`
 }
 
-type JWTData struct {
-	jwt.StandardClaims
-	//CustomClaims map[string]string `json:"custom,omitempty"`
-}
 
-type JwtClaims struct {
-	Id   string
-	Role string
-}
-
-func AuthenticateTokenMiddleWare(w http.ResponseWriter, req *http.Request) (JwtClaims, error) {
+func getToken(w http.ResponseWriter, req *http.Request) (string, error) {
 	authToken := req.Header.Get("Authorization")
 	authArr := strings.SplitN(authToken, " ", 2)
 
 	if len(authArr) != 2 {
-		log.Println("Authentication header is invalid" + authToken)
-		return JwtClaims{}, errors.New("RequestEntity failed!")
+		return "", errors.New("Authentication header is invalid" + authToken)
 	}
-	jwtToken := authArr[1]
+	return authArr[1], nil
+}
+
+func AuthorizeMiddleware(w http.ResponseWriter, req *http.Request, objectID string, handler models.FuncHandler) error {
+	token, err := getToken(w, req)
+	if err != nil{
+		return err
+	}
+	claims, err := AuthenticateToken(token)
+	if err != nil {
+		return err
+	}
+
+	err = handler(w, req, objectID, claims)
+	return err
+}
+
+
+func AuthenticateToken(jwtToken string) (models.JwtClaims, error) {
 	token, err := jwt.ParseWithClaims(jwtToken, &JWTData{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New(fmt.Sprintf("Unexpected signing method: %v", token.Header["alg"]))
@@ -57,13 +69,14 @@ func AuthenticateTokenMiddleWare(w http.ResponseWriter, req *http.Request) (JwtC
 		id := claims.Id
 		role := claims.Subject
 
-		return JwtClaims{Id: id, Role: role}, err
+		return models.JwtClaims{Id: id, Role: role}, err
 	}
-	return JwtClaims{}, err
+	return models.JwtClaims{}, err
 }
 
 func createToken(acc interface{}) (string, error) {
 	var claims JWTData
+
 	switch acc.(type) {
 	case models.Merchant:
 		merchant := acc.(models.Merchant)
@@ -111,7 +124,12 @@ func createToken(acc interface{}) (string, error) {
 func AccountExists(w http.ResponseWriter, req *http.Request) {
 	body, _ := ioutil.ReadAll(req.Body)
 	var r response
-	json.Unmarshal(body, &r)
+	err := json.Unmarshal(body, &r)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	if merchant, _ := services.GetMerchantByEmail(r.Message); merchant != nil {
 		r.Message = "true"
@@ -130,10 +148,13 @@ func AccountExists(w http.ResponseWriter, req *http.Request) {
 }
 
 func GetUserInfo(w http.ResponseWriter, req *http.Request) {
-	claims, err := AuthenticateTokenMiddleWare(w, req)
+	token, err := getToken(w, req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 	}
+
+	claims, err := AuthenticateToken(token)
+
 	if claims.Role == c.Merchant {
 		merchant, err := services.GetMerchantById(claims.Id)
 		if err != nil {
