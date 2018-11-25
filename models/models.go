@@ -45,3 +45,19 @@ type RequestEntity struct {
 	UserId string `json:"user_id"`
 	Location *geos.Geometry `json:"location"`
 }
+
+type LatLong struct {
+	Lat float32 `json:"lat"`
+	Long float32 `json:"long"`
+}
+
+type Location struct {
+	MerchantID string `json:"merchant_id"`
+	Location LatLong `json:"location"`
+}
+
+type LocationEntity struct {
+	ID int `json:"id"`
+	MerchantID string `json:"merchant_id"`
+	Location *geos.Geometry `json:"location"`
+}

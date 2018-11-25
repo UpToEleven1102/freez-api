@@ -47,6 +47,8 @@ func apiHandler(w http.ResponseWriter, req *http.Request) {
 		err = identity.AuthorizeMiddleware(w, req, objectID, controllers.UserHandler)
 	case c.Request:
 		err = identity.AuthorizeMiddleware(w, req, objectID, controllers.RequestHandler)
+	case c.Location:
+		err = identity.AuthorizeMiddleware(w, req, objectID, controllers.LocationHandler)
 	default:
 		http.NotFound(w, req)
 	}

@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"fmt"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/db"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"github.com/jmoiron/sqlx"
@@ -78,4 +79,37 @@ func CreateMerchant(merchant models.Merchant) (models.Merchant, error) {
 	}
 
 	return merchant, nil
+}
+
+func AddNewLocation(location models.Location) (error) {
+	point := fmt.Sprintf(`POINT(%f %f)`, location.Location.Lat, location.Location.Long)
+	_, err:= DB.Exec(`INSERT INTO location (merchant_id, location) VALUES (?, ST_GeomFromText(?))`, location.MerchantID, point)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetLastPositionByMerchantID(merchantID string) (interface{}, error) {
+	r, err := DB.Query(`SELECT merchant_id, ST_AsText(location) FROM location WHERE merchant_id=? ORDER BY ts DESC LIMIT 1;`, merchantID)
+	if err != nil {
+		return nil, err
+	}
+
+	var location models.Location
+	var point string
+	if r.Next() {
+		err = r.Scan(&location.MerchantID, &point)
+		if err != nil {
+			return nil, err
+		}
+		location.Location.Lat, location.Location.Long, _ = getLatLong(point)
+
+		return location, nil
+	}
+	return nil, nil
+}
+
+func GetNearMerchantsLastLocation(location models.Location) {
+
 }

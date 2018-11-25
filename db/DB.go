@@ -19,9 +19,11 @@ func seed(DB *sqlx.DB) {
 	DB.MustExec("DROP TABLE IF EXISTS merchant")
 	DB.MustExec("DROP TABLE IF EXISTS user")
 	DB.MustExec("DROP TABLE IF EXISTS request")
+	DB.MustExec("DROP TABLE IF EXISTS location")
 	DB.MustExec(schemaMerchant)
 	DB.MustExec(schemaUser)
 	DB.MustExec(schemaRequest)
+	DB.MustExec(schemaLocation)
 
 	tx := DB.MustBegin()
 
@@ -47,11 +49,9 @@ func Config() (*sqlx.DB, error) {
 		if err != nil {
 			panic(err)
 		}
-
 	}
 
-	seed(DB)
-
+	//seed(DB)
 
 	return DB, err
 }

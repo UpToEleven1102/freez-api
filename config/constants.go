@@ -8,4 +8,5 @@ const (
 	UserInfo = "userinfo"
 	Verify = "verify"
 	Request = "request"
+	Location = "location"
 )

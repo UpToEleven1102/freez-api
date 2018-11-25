@@ -11,6 +11,18 @@ const schemaMerchant = `
 		PRIMARY KEY (email)
 	);
 `
+
+const schemaLocation = `
+	CREATE TABLE location(
+		id INT NOT NULL AUTO_INCREMENT,
+		ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+		merchant_id VARCHAR(64) NOT NULL,
+		location POINT NOT NULL,
+		SPATIAL INDEX(location),
+		PRIMARY KEY(id)
+	);
+`
+
 const schemaUser = `
 	CREATE TABLE user(
 		id VARCHAR(64) NOT NULL,
