@@ -4,6 +4,7 @@ import (
 	"fmt"
 	c "git.nextgencode.io/huyen.vu/freeze-app-rest/config"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/controllers"
+	"git.nextgencode.io/huyen.vu/freeze-app-rest/identity"
 	"net/http"
 	"os"
 	"strings"
@@ -37,15 +38,21 @@ func apiHandler(w http.ResponseWriter, req *http.Request) {
 	repository, objectID := urlMatch(req.URL.Path)
 
 	w.Header().Set("Content-type", "application/json")
+
+	var err error
 	switch repository {
 	case c.Merchant:
-		controllers.MerchantHandler(w, req, objectID)
+		err = identity.AuthorizeMiddleware(w, req, objectID, controllers.MerchantHandler)
 	case c.User:
-		controllers.UserHandler(w, req, objectID)
+		err = identity.AuthorizeMiddleware(w, req, objectID, controllers.UserHandler)
 	case c.Request:
-		controllers.RequestHandler(w, req, objectID)
+		err = identity.AuthorizeMiddleware(w, req, objectID, controllers.RequestHandler)
 	default:
 		http.NotFound(w, req)
+	}
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
 	}
 }
 

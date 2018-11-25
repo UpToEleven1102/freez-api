@@ -2,24 +2,22 @@ package controllers
 
 import (
 	"encoding/json"
-	auth "git.nextgencode.io/huyen.vu/freeze-app-rest/identity"
+	"errors"
+	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
 	"net/http"
 )
 
-func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string) {
-	if claims, err := auth.AuthenticateTokenMiddleWare(w, req); err != nil && claims.Role != "admin" {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
-		return
+func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, claims models.JwtClaims) error {
+	if claims.Role != "admin" {
+		return errors.New("Failed to authorize")
 	}
 
-	method := req.Method
-	switch method {
+	switch req.Method {
 	case "GET":
 		merchant, err := services.GetMerchantByEmail(objectID)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			return err
 		}
 		b, _ := json.Marshal(merchant)
 		w.Write([]byte(b))
@@ -27,4 +25,6 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string) 
 	default:
 		http.NotFound(w, req)
 	}
+
+	return nil
 }

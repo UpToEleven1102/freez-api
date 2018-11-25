@@ -1,6 +1,18 @@
 package models
 
-import "github.com/paulsmith/gogeos/geos"
+import (
+	"github.com/paulsmith/gogeos/geos"
+	"net/http"
+)
+
+type AuthFuncHandler func(http.ResponseWriter,*http.Request, string, string)
+
+type FuncHandler func(http.ResponseWriter, *http.Request, string, JwtClaims) error
+
+type JwtClaims struct {
+	Id   string
+	Role string
+}
 
 type Merchant struct {
 	ID string `json:"id"`

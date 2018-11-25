@@ -2,25 +2,18 @@ package controllers
 
 import (
 	"encoding/json"
-	"git.nextgencode.io/huyen.vu/freeze-app-rest/identity"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
 	"io/ioutil"
 	"net/http"
 )
 
-func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string) {
-	claims, err := identity.AuthenticateTokenMiddleWare(w, req)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
-		return
-	}
-
+func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, claims models.JwtClaims) error {
 	switch req.Method {
 	case "POST":
 		if len(objectID) > 0 {
 			http.NotFound(w, req)
-			return
+			return nil
 		}
 
 		body, _ := ioutil.ReadAll(req.Body)
@@ -28,13 +21,13 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string) {
 		err := json.Unmarshal(body, &request)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			return nil
 		}
 
 		err = services.CreateRequest(request)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			return nil
 		}
 
 		w.WriteHeader(http.StatusOK)
@@ -44,7 +37,7 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string) {
 			r, err := services.GetRequests()
 			if err != nil {
 				http.Error(w, "", http.StatusInternalServerError)
-				return
+				return nil
 			}
 
 			b, _ := json.Marshal(r)
@@ -53,14 +46,14 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string) {
 			r, err := services.GetUserByEmail(objectID)
 			if err != nil || r == nil {
 				http.Error(w, "user not exists", http.StatusBadRequest)
-				return
+				return nil
 			}
 			user := r.(models.User)
 			r, err = services.GetRequestByUserID(user.ID)
 
 			if err != nil {
 				http.Error(w, "", http.StatusInternalServerError)
-				return
+				return nil
 			}
 
 			request := r.(models.Request)
@@ -71,13 +64,15 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string) {
 	case "DELETE":
 		if len(objectID) > 0 {
 			http.NotFound(w, req)
-			return
+			return nil
 		}
 
-		err = services.RemoveRequestsByUserID(claims.Id)
+		err := services.RemoveRequestsByUserID(claims.Id)
 		if	err!=nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			return nil
 		}
 	}
+
+	return nil
 }
