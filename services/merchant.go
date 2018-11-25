@@ -110,6 +110,42 @@ func GetLastPositionByMerchantID(merchantID string) (interface{}, error) {
 	return nil, nil
 }
 
-func GetNearMerchantsLastLocation(location models.Location) {
+func GetNearMerchantsLastLocation(location models.Location) (merchants []interface{}, err error){
+	userLocation := fmt.Sprintf(`POINT(%f %f)`, location.Location.Lat, location.Location.Long)
 
+	//r, err := DB.Query(`SELECT email, name, phone_number, image, l.merchant_id, ST_Distance(ST_AsText(l.location), ?) as distance
+	//							FROM location l INNER JOIN (
+	//							    SELECT merchant_id, location, MAX(ts) FROM location GROUP BY merchant_id
+	//							  ) latestLocations
+	//							  JOIN merchant m
+	//							    ON latestLocations.merchant_id=m.id
+	//								  HAVING ST_Distance(ST_AsText(latestLocations.location), ?) < 3`, userLocation, userLocation)
+
+	r, err := DB.Query(`SELECT email, name, phone_number, image, l.merchant_id, ST_AsText(location) as location, ST_Distance(location, ST_GeomFromText(?)) as distance
+								FROM location l INNER JOIN (
+								    SELECT merchant_id, MAX(ts) AS ts FROM location GROUP BY merchant_id
+								  ) latest 
+								  ON l.ts=latest.ts
+								  JOIN merchant m
+								    ON l.merchant_id=m.id
+									  HAVING ST_Distance(ST_GeomFromText(location), ST_GeomFromText(?)) < 3`, userLocation, userLocation)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var loc string
+
+	for r.Next()  {
+		var merchant models.MerchantInfo
+		_ = r.Scan(&merchant.Email, &merchant.Name, &merchant.PhoneNumber, &merchant.Image, &merchant.MerchantID, &loc, &merchant.Distance)
+
+		merchant.Location.Lat, merchant.Location.Long, err = getLatLong(loc)
+		if err != nil {
+			return nil, err
+		}
+		merchants = append(merchants, merchant)
+	}
+
+	return merchants, nil
 }

@@ -23,7 +23,13 @@ func CreateRequest(request models.Request) error {
 
 func getLatLong(point string) (lat float32, long float32, err error) {
 	ptArr := strings.Split(strings.Replace(point, ")", "", -1), "(")
+	if len(ptArr) < 2 {
+		return 0, 0, errors.New("index out of range")
+	}
 	ptArr = strings.Split(ptArr[1], " ")
+	if len(ptArr) < 2 {
+		return 0, 0, errors.New("index out of range")
+	}
 	lat64, _ := strconv.ParseFloat(ptArr[0], 32)
 	long64, _ := strconv.ParseFloat(ptArr[1], 32)
 	lat = float32(lat64)

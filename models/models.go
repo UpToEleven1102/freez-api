@@ -61,3 +61,14 @@ type LocationEntity struct {
 	MerchantID string `json:"merchant_id"`
 	Location *geos.Geometry `json:"location"`
 }
+
+type MerchantInfo struct {
+	MerchantID string `json:"merchant_id"`
+	Location LatLong `json:"location"`
+	Distance float32 `json:"distance"`
+	Name string `json:"name"`
+	PhoneNumber string `json:"phone_number"`
+	Email string `json:"email"`
+	Image string `json:"image"`
+	//Product string `json:"product"`
+}
