@@ -14,7 +14,7 @@ func CreateRequest(request models.Request) error {
 		return errors.New("bad request")
 	}
 
-	point := fmt.Sprintf(`POINT(%f %f)`, request.Lat, request.Long)
+	point := fmt.Sprintf(`POINT(%f %f)`, request.Location.Lat, request.Location.Long)
 
 	_, err = DB.Exec(`INSERT INTO request (user_id, location) VALUES (?, ST_GeomFromText(?))`, user.(models.User).ID, point)
 
@@ -55,37 +55,42 @@ func GetRequestByUserID(userID string) (interface{}, error) {
 
 		var request models.Request
 		request.Email = user.(models.User).Email
-		request.Lat, request.Long, _ = getLatLong(point)
+		request.Location.Lat, request.Location.Long, err = getLatLong(point)
+		if err != nil {
+			return nil, err
+		}
 		return request, nil
 	}
 	return nil, nil
 }
 
 func GetRequests() (requests []interface{}, err error) {
-	r, err := DB.Query(`SELECT id, user_id, ST_AsText(location) FROM request;`)
-	var userID, location string
+	r, err := DB.Query(`SELECT id, user_id, email, ST_AsText(location) FROM request r JOIN user u ON r.user_id=u.id;`)
+	if err != nil {
+		return nil, err
+	}
+
+	var userID, location, email string
 	var id int
+
 	for r.Next()  {
 
-
-		err = r.Scan(&id, &userID, &location)
+		err = r.Scan(&id, &userID, &email, &location)
 		if err != nil {
 			return nil, err
 		}
+
 		var request models.Request
 
-		user, err := GetUserById(userID)
+		request.Email = email
+		request.Location.Lat, request.Location.Long, err = getLatLong(location)
 		if err != nil {
 			return nil, err
 		}
 
-		if user != nil {
-			request.Email = user.(models.User).Email
-			request.Lat, request.Long, _ = getLatLong(location)
-			requests = append(requests, request)
-		}
+		requests = append(requests, request)
 	}
-	return requests, err
+	return requests, nil
 }
 
 func RemoveRequestsByUserID(userID string) (err error) {

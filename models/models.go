@@ -36,8 +36,7 @@ type User struct {
 
 type Request struct {
 	Email string `json:"email"`
-	Lat float32 `json:"lat"`
-	Long float32 `json:"long"`
+	Location LatLong `json:"location"`
 }
 
 type RequestEntity struct {
