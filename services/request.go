@@ -65,17 +65,16 @@ func GetRequestByUserID(userID string) (interface{}, error) {
 }
 
 func GetRequests() (requests []interface{}, err error) {
-	r, err := DB.Query(`SELECT id, user_id, email, ST_AsText(location) FROM request r JOIN user u ON r.user_id=u.id;`)
+	r, err := DB.Query(`SELECT email, ST_AsText(location) FROM request r JOIN user u ON r.user_id=u.id;`)
 	if err != nil {
 		return nil, err
 	}
 
-	var userID, location, email string
-	var id int
+	var location, email string
 
 	for r.Next()  {
 
-		err = r.Scan(&id, &userID, &email, &location)
+		err = r.Scan(&email, &location)
 		if err != nil {
 			return nil, err
 		}

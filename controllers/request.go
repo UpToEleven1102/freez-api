@@ -36,26 +36,26 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 		case 0 :
 			r, err := services.GetRequests()
 			if err != nil {
-				http.Error(w, "", http.StatusInternalServerError)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return nil
 			}
 
 			b, _ := json.Marshal(r)
 			w.Write(b)
+			return nil
 		default:
-			r, err := services.GetUserByEmail(objectID)
-			if err != nil || r == nil {
-				http.Error(w, "user not exists", http.StatusBadRequest)
-				return nil
-			}
-			user := r.(models.User)
-			r, err = services.GetRequestByUserID(user.ID)
+			id := claims.Id
+			r, err := services.GetRequestByUserID(id)
 
 			if err != nil {
 				http.Error(w, "", http.StatusInternalServerError)
 				return nil
 			}
 
+			if r == nil {
+				w.Write(nil)
+				return nil
+			}
 			request := r.(models.Request)
 
 			b, _ := json.Marshal(request)
