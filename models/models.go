@@ -1,7 +1,6 @@
 package models
 
 import (
-	"github.com/paulsmith/gogeos/geos"
 	"net/http"
 )
 
@@ -16,6 +15,7 @@ type JwtClaims struct {
 
 type Merchant struct {
 	ID string `json:"id"`
+	Online bool `json:"online"`
 	PhoneNumber string `json:"phone_number"`
 	Email string `json:"email"`
 	Name string `json:"name"`
@@ -42,7 +42,7 @@ type Request struct {
 type RequestEntity struct {
 	ID int `json:"id"`
 	UserId string `json:"user_id"`
-	Location *geos.Geometry `json:"location"`
+	//Location *geos.Geometry `json:"location"`
 }
 
 type LatLong struct {
@@ -58,7 +58,7 @@ type Location struct {
 type LocationEntity struct {
 	ID int `json:"id"`
 	MerchantID string `json:"merchant_id"`
-	Location *geos.Geometry `json:"location"`
+	//Location *geos.Geometry `json:"location"`
 }
 
 type MerchantInfo struct {

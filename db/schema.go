@@ -3,6 +3,7 @@ package db
 const schemaMerchant = `
 	CREATE TABLE merchant(
 		id VARCHAR(64) NOT NULL,
+		online BOOLEAN NOT NULL DEFAULT 0,
 		phone_number text NOT NULL,
 		email VARCHAR(64) NOT NULL,
 		name text NOT NULL,
