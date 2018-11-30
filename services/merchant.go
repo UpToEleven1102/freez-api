@@ -1,6 +1,7 @@
 package services
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/db"
@@ -26,12 +27,34 @@ func GetMerchants() (merchants []models.Merchant, err error) {
 	defer r.Close()
 
 	for r.Next() {
-		r.Scan(&merchant.ID, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image)
+		r.Scan(&merchant.ID, &merchant.Online, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image)
 		merchants = append(merchants, merchant)
 	}
 	return merchants, err
 }
 
+func ChangeOnlineStatus(merchantId string) error {
+	m, err := GetMerchantById(merchantId)
+	if err != nil {
+		return err
+	}
+
+	if m == nil {
+		return errors.New("Unauthorized")
+	}
+
+	merchant := m.(models.Merchant)
+
+	merchant.Online	= !merchant.Online
+
+	_, err = DB.Exec(`UPDATE merchant SET online=? WHERE id=?;`, merchant.Online, merchant.ID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 func GetMerchantByEmail(email string) (interface{}, error) {
 	var merchant models.Merchant
 
@@ -41,7 +64,7 @@ func GetMerchantByEmail(email string) (interface{}, error) {
 	}
 
 	if r.Next() {
-		r.Scan(&merchant.ID, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image)
+		r.Scan(&merchant.ID, &merchant.Online, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image)
 		return merchant, nil
 	}
 	return nil, nil
@@ -56,7 +79,7 @@ func GetMerchantById(id string) (interface{}, error) {
 	}
 
 	if r.Next() {
-		r.Scan(&merchant.ID, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image)
+		r.Scan(&merchant.ID, &merchant.Online, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image)
 		return merchant, nil
 	}
 	return nil, nil
@@ -121,7 +144,7 @@ func GetNearMerchantsLastLocation(location models.Location) (merchants []interfa
 	//							    ON latestLocations.merchant_id=m.id
 	//								  HAVING ST_Distance(ST_AsText(latestLocations.location), ?) < 3`, userLocation, userLocation)
 
-	r, err := DB.Query(`SELECT email, name, phone_number, image, l.merchant_id, ST_AsText(location) as location, ST_Distance(location, ST_GeomFromText(?)) as distance
+	r, err := DB.Query(`SELECT online, email, name, phone_number, image, l.merchant_id, ST_AsText(location) as location, ST_Distance(location, ST_GeomFromText(?)) as distance
 								FROM location l INNER JOIN (
 								    SELECT merchant_id, MAX(ts) AS ts FROM location GROUP BY merchant_id
 								  ) latest 
@@ -138,7 +161,7 @@ func GetNearMerchantsLastLocation(location models.Location) (merchants []interfa
 
 	for r.Next()  {
 		var merchant models.MerchantInfo
-		_ = r.Scan(&merchant.Email, &merchant.Name, &merchant.PhoneNumber, &merchant.Image, &merchant.MerchantID, &loc, &merchant.Distance)
+		_ = r.Scan(&merchant.Online ,&merchant.Email, &merchant.Name, &merchant.PhoneNumber, &merchant.Image, &merchant.MerchantID, &loc, &merchant.Distance)
 
 		merchant.Location.Lat, merchant.Location.Long, err = getLatLong(loc)
 		if err != nil {
@@ -146,6 +169,9 @@ func GetNearMerchantsLastLocation(location models.Location) (merchants []interfa
 		}
 		merchants = append(merchants, merchant)
 	}
+	b, _ := json.Marshal(merchants)
+
+	fmt.Println(string(b))
 
 	return merchants, nil
 }
