@@ -69,6 +69,23 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 			b, _ := json.Marshal(request)
 			w.Write(b)
 		case "merchant":
+			id := claims.Id
+			r, err := services.GetRequestByMerchantID(id)
+
+			if err != nil {
+				http.Error(w, "", http.StatusInternalServerError)
+				return nil
+			}
+
+			if r == nil {
+				w.Write(nil)
+				return nil
+			}
+			request := r.(models.Request)
+
+			b, _ := json.Marshal(request)
+			w.Write(b)
+
 		default:
 			http.NotFound(w,req)
 		}

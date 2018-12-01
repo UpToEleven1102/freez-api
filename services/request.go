@@ -63,33 +63,31 @@ func GetRequestByUserID(userID string) (interface{}, error) {
 	return nil, nil
 }
 
-func GetRequests() (requests []interface{}, err error) {
-	_, err = DB.Query(`SELECT email, ST_AsText(location) FROM request r JOIN user u ON r.user_id=u.id;`)
+func GetRequestByMerchantID(merchantID string) (interface{}, error) {
+	r, err := DB.Query(`SELECT user_id, merchant_id, ST_ASTEXT(location) FROM request WHERE merchant_id=?`, merchantID)
+
 	if err != nil {
 		return nil, err
 	}
 
-	//var location, email string
-	//
-	//for r.Next()  {
-	//
-	//	err = r.Scan(&email, &location)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//
-	//	var request models.Request
-	//
-	//	request.Email = email
-	//	request.Location.Lat, request.Location.Long, err = getLatLong(location)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//
-	//	requests = append(requests, request)
-	//}
+	var point string
 
-	return requests, nil
+	if r.Next() {
+		var request models.Request
+
+		err = r.Scan(&request.UserId, &request.MerchantID, &point)
+		request.Location.Lat, request.Location.Long, err = getLatLong(point)
+		if err != nil {
+			return nil, err
+		}
+
+		if err != nil {
+			return nil, err
+		}
+		return request, nil
+	}
+
+	return nil, nil
 }
 
 func RemoveRequestsByUserID(userID string) (err error) {
