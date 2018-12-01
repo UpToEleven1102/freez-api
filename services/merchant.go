@@ -151,7 +151,7 @@ func GetNearMerchantsLastLocation(location models.Location) (merchants []interfa
 								  ON l.ts=latest.ts
 								  JOIN merchant m
 								    ON l.merchant_id=m.id
-									  HAVING ST_Distance(ST_GeomFromText(location), ST_GeomFromText(?)) < 10`, userLocation, userLocation)
+									  HAVING ST_Distance(ST_GeomFromText(location), ST_GeomFromText(?)) < 3 AND online=TRUE`, userLocation, userLocation)
 
 	if err != nil {
 		return nil, err
