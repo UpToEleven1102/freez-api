@@ -40,8 +40,8 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 
 		w.WriteHeader(http.StatusOK)
 	case "GET":
-		switch len(objectID) {
-		case 0 :
+		switch objectID {
+		case "" :
 			r, err := services.GetRequests()
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -51,7 +51,7 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 			b, _ := json.Marshal(r)
 			w.Write(b)
 			return nil
-		default:
+		case "user":
 			id := claims.Id
 			r, err := services.GetRequestByUserID(id)
 
@@ -68,6 +68,9 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 
 			b, _ := json.Marshal(request)
 			w.Write(b)
+		case "merchant":
+		default:
+			http.NotFound(w,req)
 		}
 	case "DELETE":
 		if len(objectID) > 0 {

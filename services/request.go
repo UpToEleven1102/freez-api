@@ -38,29 +38,28 @@ func getLatLong(point string) (lat float32, long float32, err error) {
 }
 
 func GetRequestByUserID(userID string) (interface{}, error) {
-	//r, err := DB.Query(`SELECT id, ST_AsText(location) FROM request WHERE user_id=?`, userID)
-	//
-	//if err != nil {
-	//	return nil, err
-	//}
-	//var id int
-	//var point string
-	//if r.Next() {
-	//	err = r.Scan(&id, &point)
-	//
-	//	user, err := GetUserById(userID)
-	//	if err != nil || user == nil{
-	//		return nil, err
-	//	}
-	//
-	//	var request models.Request
-	//	request.Email = user.(models.User).Email
-	//	request.Location.Lat, request.Location.Long, err = getLatLong(point)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//	return request, nil
-	//}
+	r, err := DB.Query(`SELECT user_id, merchant_id, ST_AsText(location) FROM request WHERE user_id=?`, userID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var point string
+	if r.Next() {
+		var request models.Request
+
+		err = r.Scan(&request.UserId, &request.MerchantID, &point)
+		request.Location.Lat, request.Location.Long, err = getLatLong(point)
+		if err != nil {
+			return nil, err
+		}
+
+
+		if err != nil {
+			return nil, err
+		}
+		return request, nil
+	}
 	return nil, nil
 }
 
@@ -89,6 +88,7 @@ func GetRequests() (requests []interface{}, err error) {
 	//
 	//	requests = append(requests, request)
 	//}
+
 	return requests, nil
 }
 
