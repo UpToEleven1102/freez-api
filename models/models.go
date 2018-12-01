@@ -47,7 +47,8 @@ type User struct {
 }
 
 type Request struct {
-	Email string `json:"email"`
+	UserId string `json:"user_id"`
+	MerchantID string `json:"merchant_id"`
 	Location LatLong `json:"location"`
 }
 

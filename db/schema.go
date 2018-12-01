@@ -39,6 +39,7 @@ const schemaUser = `
 const schemaRequest = `CREATE TABLE request(
 		id INT NOT NULL AUTO_INCREMENT,
 		user_id VARCHAR(64) NOT NULL,
+		merchant_id VARCHAR(64) NOT NULL,
 		location POINT NOT NULL,
 		SPATIAL INDEX(location),
 		PRIMARY KEY (id)

@@ -11,18 +11,26 @@ import (
 func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, claims models.JwtClaims) error {
 	switch req.Method {
 	case "POST":
+		if claims.Role != "user" {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return nil
+		}
+
 		if len(objectID) > 0 {
 			http.NotFound(w, req)
 			return nil
 		}
 
 		body, _ := ioutil.ReadAll(req.Body)
+
 		var request models.Request
 		err := json.Unmarshal(body, &request)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return nil
 		}
+
+		request.UserId = claims.Id
 
 		err = services.CreateRequest(request)
 		if err != nil {

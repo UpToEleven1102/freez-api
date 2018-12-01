@@ -9,15 +9,15 @@ import (
 )
 
 func CreateRequest(request models.Request) error {
-	user, err := GetUserByEmail(request.Email)
-	if err != nil || user == nil {
-		return errors.New("bad request")
-	}
+	//use userId from claims instead
 
 	point := fmt.Sprintf(`POINT(%f %f)`, request.Location.Lat, request.Location.Long)
 
-	_, err = DB.Exec(`INSERT INTO request (user_id, location) VALUES (?, ST_GeomFromText(?))`, user.(models.User).ID, point)
+	if r, err := GetMerchantById(request.MerchantID); err != nil || r == nil {
+		return errors.New("merchant doesn't exist")
+	}
 
+	_, err := DB.Exec(`INSERT INTO request (user_id, merchant_id, location) VALUES (?, ?, ST_GeomFromText(?))`, request.UserId, request.MerchantID, point)
 	return err
 }
 
@@ -38,57 +38,57 @@ func getLatLong(point string) (lat float32, long float32, err error) {
 }
 
 func GetRequestByUserID(userID string) (interface{}, error) {
-	r, err := DB.Query(`SELECT id, ST_AsText(location) FROM request WHERE user_id=?`, userID)
-
-	if err != nil {
-		return nil, err
-	}
-	var id int
-	var point string
-	if r.Next() {
-		err = r.Scan(&id, &point)
-
-		user, err := GetUserById(userID)
-		if err != nil || user == nil{
-			return nil, err
-		}
-
-		var request models.Request
-		request.Email = user.(models.User).Email
-		request.Location.Lat, request.Location.Long, err = getLatLong(point)
-		if err != nil {
-			return nil, err
-		}
-		return request, nil
-	}
+	//r, err := DB.Query(`SELECT id, ST_AsText(location) FROM request WHERE user_id=?`, userID)
+	//
+	//if err != nil {
+	//	return nil, err
+	//}
+	//var id int
+	//var point string
+	//if r.Next() {
+	//	err = r.Scan(&id, &point)
+	//
+	//	user, err := GetUserById(userID)
+	//	if err != nil || user == nil{
+	//		return nil, err
+	//	}
+	//
+	//	var request models.Request
+	//	request.Email = user.(models.User).Email
+	//	request.Location.Lat, request.Location.Long, err = getLatLong(point)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//	return request, nil
+	//}
 	return nil, nil
 }
 
 func GetRequests() (requests []interface{}, err error) {
-	r, err := DB.Query(`SELECT email, ST_AsText(location) FROM request r JOIN user u ON r.user_id=u.id;`)
+	_, err = DB.Query(`SELECT email, ST_AsText(location) FROM request r JOIN user u ON r.user_id=u.id;`)
 	if err != nil {
 		return nil, err
 	}
 
-	var location, email string
-
-	for r.Next()  {
-
-		err = r.Scan(&email, &location)
-		if err != nil {
-			return nil, err
-		}
-
-		var request models.Request
-
-		request.Email = email
-		request.Location.Lat, request.Location.Long, err = getLatLong(location)
-		if err != nil {
-			return nil, err
-		}
-
-		requests = append(requests, request)
-	}
+	//var location, email string
+	//
+	//for r.Next()  {
+	//
+	//	err = r.Scan(&email, &location)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//
+	//	var request models.Request
+	//
+	//	request.Email = email
+	//	request.Location.Lat, request.Location.Long, err = getLatLong(location)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//
+	//	requests = append(requests, request)
+	//}
 	return requests, nil
 }
 
