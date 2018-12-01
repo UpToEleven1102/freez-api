@@ -90,6 +90,29 @@ func GetRequestByMerchantID(merchantID string) (interface{}, error) {
 	return nil, nil
 }
 
+func GetRequests() (interface{}, error){
+	r, err := DB.Query(`SELECT user_id, merchant_id, ST_ASTEXT(location) FROM request`)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var requests []models.Request
+	var request models.Request
+	var point string
+	if r.Next() {
+		err = r.Scan(&request.UserId, &request.MerchantID, &point)
+		if err != nil {
+			return nil, err
+		}
+
+		request.Location.Lat, request.Location.Long, _ = getLatLong(point)
+		requests = append(requests, request)
+	}
+
+	return requests, nil
+}
+
 func RemoveRequestsByUserID(userID string) (err error) {
 	_, err = DB.Exec(`DELETE FROM request WHERE user_id=?`, userID)
 	return err
