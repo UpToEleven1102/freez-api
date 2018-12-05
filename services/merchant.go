@@ -105,7 +105,7 @@ func CreateMerchant(merchant models.Merchant) (models.Merchant, error) {
 }
 
 func AddNewLocation(location models.Location) (error) {
-	point := fmt.Sprintf(`POINT(%f %f)`, location.Location.Lat, location.Location.Long)
+	point := fmt.Sprintf(`POINT(%f %f)`, location.Location.Long, location.Location.Lat)
 	_, err:= DB.Exec(`INSERT INTO location (merchant_id, location) VALUES (?, ST_GeomFromText(?))`, location.MerchantID, point)
 	if err != nil {
 		return err
@@ -126,7 +126,7 @@ func GetLastPositionByMerchantID(merchantID string) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		location.Location.Lat, location.Location.Long, _ = getLatLong(point)
+		location.Location.Long, location.Location.Lat, _ = getLongLat(point)
 
 		return location, nil
 	}
@@ -134,7 +134,7 @@ func GetLastPositionByMerchantID(merchantID string) (interface{}, error) {
 }
 
 func GetNearMerchantsLastLocation(location models.Location) (merchants []interface{}, err error){
-	userLocation := fmt.Sprintf(`POINT(%f %f)`, location.Location.Lat, location.Location.Long)
+	userLocation := fmt.Sprintf(`POINT(%f %f)`, location.Location.Long, location.Location.Lat)
 
 	//r, err := DB.Query(`SELECT email, name, phone_number, image, l.merchant_id, ST_Distance(ST_AsText(l.location), ?) as distance
 	//							FROM location l INNER JOIN (
@@ -144,14 +144,23 @@ func GetNearMerchantsLastLocation(location models.Location) (merchants []interfa
 	//							    ON latestLocations.merchant_id=m.id
 	//								  HAVING ST_Distance(ST_AsText(latestLocations.location), ?) < 3`, userLocation, userLocation)
 
-	r, err := DB.Query(`SELECT online, email, name, phone_number, image, l.merchant_id, ST_AsText(location) as location, ST_Distance(location, ST_GeomFromText(?)) as distance
+	r, err := DB.Query(`SELECT online, email, name, phone_number, image, l.merchant_id, ST_AsText(location) as location, ST_Distance_Sphere(location, ST_GeomFromText(?))*.000621371192 as distance
 								FROM location l INNER JOIN (
 								    SELECT merchant_id, MAX(ts) AS ts FROM location GROUP BY merchant_id
 								  ) latest 
 								  ON l.ts=latest.ts
 								  JOIN merchant m
 								    ON l.merchant_id=m.id
-									  HAVING ST_Distance(ST_GeomFromText(location), ST_GeomFromText(?)) < 3 AND online=TRUE`, userLocation, userLocation)
+									  HAVING online=FALSE`, userLocation)
+
+	//r, err := DB.Query(`SELECT online, email, name, phone_number, image, l.merchant_id, ST_AsText(location) as location, ST_Distance(location, ST_GeomFromText(?))*.000621371192 as distance
+	//							FROM location l INNER JOIN (
+	//							    SELECT merchant_id, MAX(ts) AS ts FROM location GROUP BY merchant_id
+	//							  ) latest
+	//							  ON l.ts=latest.ts
+	//							  JOIN merchant m
+	//							    ON l.merchant_id=m.id
+	//								  HAVING online=FALSE`, userLocation)
 
 	if err != nil {
 		return nil, err
@@ -163,12 +172,13 @@ func GetNearMerchantsLastLocation(location models.Location) (merchants []interfa
 		var merchant models.MerchantInfo
 		_ = r.Scan(&merchant.Online ,&merchant.Email, &merchant.Name, &merchant.PhoneNumber, &merchant.Image, &merchant.MerchantID, &loc, &merchant.Distance)
 
-		merchant.Location.Lat, merchant.Location.Long, err = getLatLong(loc)
+		merchant.Location.Lat, merchant.Location.Long, err = getLongLat(loc)
 		if err != nil {
 			return nil, err
 		}
 		merchants = append(merchants, merchant)
 	}
+
 	b, _ := json.Marshal(merchants)
 
 	fmt.Println(string(b))

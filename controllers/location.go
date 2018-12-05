@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/config"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
@@ -36,6 +37,7 @@ func LocationHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 			b, _ := json.Marshal(merchants)
 			w.Write(b)
 		} else if len(objectID) == 0 {
+			//api/location : used for merchant to push location to the db
 			if claims.Role != config.Merchant {
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return nil
@@ -46,6 +48,9 @@ func LocationHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 			location.MerchantID = claims.Id
 
 			err = json.Unmarshal(body, &location.Location)
+
+			b, err := json.Marshal(location)
+			fmt.Println(string(b))
 
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)

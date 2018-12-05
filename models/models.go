@@ -25,14 +25,14 @@ type Merchant struct {
 }
 
 type MerchantInfo struct {
-	Online bool `json:"online"`
-	MerchantID string `json:"merchant_id"`
-	Location LatLong `json:"location"`
-	Distance float32 `json:"distance"`
-	Name string `json:"name"`
-	PhoneNumber string `json:"phone_number"`
-	Email string `json:"email"`
-	Image string `json:"image"`
+	Online      bool    `json:"online"`
+	MerchantID  string  `json:"merchant_id"`
+	Location    LongLat `json:"location"`
+	Distance    float32 `json:"distance"`
+	Name        string  `json:"name"`
+	PhoneNumber string  `json:"phone_number"`
+	Email       string  `json:"email"`
+	Image       string  `json:"image"`
 	//Product string `json:"product"`
 }
 
@@ -47,9 +47,9 @@ type User struct {
 }
 
 type Request struct {
-	UserId string `json:"user_id"`
-	MerchantID string `json:"merchant_id"`
-	Location LatLong `json:"location"`
+	UserId     string  `json:"user_id"`
+	MerchantID string  `json:"merchant_id"`
+	Location   LongLat `json:"location"`
 }
 
 type RequestEntity struct {
@@ -58,14 +58,14 @@ type RequestEntity struct {
 	//Location *geos.Geometry `json:"location"`
 }
 
-type LatLong struct {
-	Lat float32 `json:"lat"`
+type LongLat struct {
 	Long float32 `json:"long"`
+	Lat float32 `json:"lat"`
 }
 
 type Location struct {
-	MerchantID string `json:"merchant_id"`
-	Location LatLong `json:"location"`
+	MerchantID string  `json:"merchant_id"`
+	Location   LongLat `json:"location"`
 }
 
 type LocationEntity struct {
@@ -73,4 +73,3 @@ type LocationEntity struct {
 	MerchantID string `json:"merchant_id"`
 	//Location *geos.Geometry `json:"location"`
 }
-

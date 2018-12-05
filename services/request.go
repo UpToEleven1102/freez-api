@@ -11,7 +11,7 @@ import (
 func CreateRequest(request models.Request) error {
 	//use userId from claims instead
 
-	point := fmt.Sprintf(`POINT(%f %f)`, request.Location.Lat, request.Location.Long)
+	point := fmt.Sprintf(`POINT(%f %f)`, request.Location.Long, request.Location.Lat)
 
 	if r, err := GetMerchantById(request.MerchantID); err != nil || r == nil {
 		return errors.New("merchant doesn't exist")
@@ -21,7 +21,7 @@ func CreateRequest(request models.Request) error {
 	return err
 }
 
-func getLatLong(point string) (lat float32, long float32, err error) {
+func getLongLat(point string) (long float32, lat float32, err error) {
 	ptArr := strings.Split(strings.Replace(point, ")", "", -1), "(")
 	if len(ptArr) < 2 {
 		return 0, 0, errors.New("index out of range")
@@ -30,11 +30,11 @@ func getLatLong(point string) (lat float32, long float32, err error) {
 	if len(ptArr) < 2 {
 		return 0, 0, errors.New("index out of range")
 	}
-	lat64, _ := strconv.ParseFloat(ptArr[0], 32)
-	long64, _ := strconv.ParseFloat(ptArr[1], 32)
+	long64, _ := strconv.ParseFloat(ptArr[0], 32)
+	lat64, _ := strconv.ParseFloat(ptArr[1], 32)
 	lat = float32(lat64)
 	long = float32(long64)
-	return lat,long, nil
+	return long, lat,nil
 }
 
 func GetRequestByUserID(userID string) (interface{}, error) {
@@ -49,7 +49,7 @@ func GetRequestByUserID(userID string) (interface{}, error) {
 		var request models.Request
 
 		err = r.Scan(&request.UserId, &request.MerchantID, &point)
-		request.Location.Lat, request.Location.Long, err = getLatLong(point)
+		request.Location.Long, request.Location.Lat, err = getLongLat(point)
 		if err != nil {
 			return nil, err
 		}
@@ -76,7 +76,7 @@ func GetRequestByMerchantID(merchantID string) (interface{}, error) {
 		var request models.Request
 
 		err = r.Scan(&request.UserId, &request.MerchantID, &point)
-		request.Location.Lat, request.Location.Long, err = getLatLong(point)
+		request.Location.Long, request.Location.Lat, err = getLongLat(point)
 		if err != nil {
 			return nil, err
 		}
@@ -106,7 +106,7 @@ func GetRequests() (interface{}, error){
 			return nil, err
 		}
 
-		request.Location.Lat, request.Location.Long, _ = getLatLong(point)
+		request.Location.Long, request.Location.Lat, _ = getLongLat(point)
 		requests = append(requests, request)
 	}
 

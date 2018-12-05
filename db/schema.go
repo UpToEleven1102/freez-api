@@ -4,6 +4,7 @@ const schemaMerchant = `
 	CREATE TABLE merchant(
 		id VARCHAR(64) NOT NULL,
 		online BOOLEAN NOT NULL DEFAULT 0,
+		mobile BOOLEAN NOT NULL DEFAULT 0,
 		phone_number text NOT NULL,
 		email VARCHAR(64) NOT NULL,
 		name text NOT NULL,
@@ -16,7 +17,7 @@ const schemaMerchant = `
 const schemaLocation = `
 	CREATE TABLE location(
 		id INT NOT NULL AUTO_INCREMENT,
-		ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+		ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP UNIQUE,
 		merchant_id VARCHAR(64) NOT NULL,
 		location POINT NOT NULL,
 		SPATIAL INDEX(location),
@@ -45,3 +46,7 @@ const schemaRequest = `CREATE TABLE request(
 		PRIMARY KEY (id)
 	);
 `
+
+const schemaProduct = `CREATE TABLE product(
+	
+)`

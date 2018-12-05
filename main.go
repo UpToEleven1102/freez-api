@@ -31,6 +31,7 @@ func getPort() string {
 	if len(port) == 0 {
 		port = ":8080"
 	}
+
 	return port
 }
 
