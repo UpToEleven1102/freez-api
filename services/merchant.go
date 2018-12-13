@@ -27,7 +27,7 @@ func GetMerchants() (merchants []models.Merchant, err error) {
 	defer r.Close()
 
 	for r.Next() {
-		r.Scan(&merchant.ID, &merchant.Online, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image)
+		r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image)
 		merchants = append(merchants, merchant)
 	}
 	return merchants, err
@@ -64,7 +64,7 @@ func GetMerchantByEmail(email string) (interface{}, error) {
 	}
 
 	if r.Next() {
-		r.Scan(&merchant.ID, &merchant.Online, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image)
+		r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image)
 		return merchant, nil
 	}
 	return nil, nil
@@ -79,13 +79,17 @@ func GetMerchantById(id string) (interface{}, error) {
 	}
 
 	if r.Next() {
-		r.Scan(&merchant.ID, &merchant.Online, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image)
+		r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image)
 		return merchant, nil
 	}
 	return nil, nil
 }
 
 func CreateMerchant(merchant models.Merchant) (models.Merchant, error) {
+	b, _ := json.Marshal(merchant)
+
+	fmt.Println(string(b))
+
 	password, err := bcrypt.GenerateFromPassword([]byte(merchant.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return merchant, err
@@ -95,7 +99,7 @@ func CreateMerchant(merchant models.Merchant) (models.Merchant, error) {
 	uid, _ := uuid.NewV4()
 	merchant.ID = uid.String()
 
-	_, err = DB.Exec(`INSERT INTO merchant (id, phone_number, email, name, password) VALUES (?, ?, ?, ?, ?)`, merchant.ID, merchant.PhoneNumber, merchant.Email, merchant.Name, merchant.Password)
+	_, err = DB.Exec(`INSERT INTO merchant (id, mobile, phone_number, email, name, password) VALUES (?, ?, ?, ?, ?, ?)`, merchant.ID, merchant.Mobile, merchant.PhoneNumber, merchant.Email, merchant.Name, merchant.Password)
 
 	if err != nil {
 		return merchant, errors.New("email exists")

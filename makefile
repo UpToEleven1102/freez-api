@@ -1,4 +1,5 @@
 all:
+	go get github.com/tbalthazar/onesignal-go
 	go get github.com/paulsmith/gogeos/geos
 	go get github.com/satori/go.uuid
 	go get github.com/jmoiron/sqlx

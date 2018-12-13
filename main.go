@@ -5,6 +5,7 @@ import (
 	c "git.nextgencode.io/huyen.vu/freeze-app-rest/config"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/controllers"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/identity"
+	"github.com/tbalthazar/onesignal-go"
 	"net/http"
 	"os"
 	"strings"
@@ -71,6 +72,7 @@ func authHandler(w http.ResponseWriter, req *http.Request) {
 
 func main() {
 	port := getPort()
+	_ = onesignal.NewClient(nil)
 
 	http.HandleFunc("/api/", apiHandler)
 

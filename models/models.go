@@ -4,7 +4,7 @@ import (
 	"net/http"
 )
 
-type AuthFuncHandler func(http.ResponseWriter,*http.Request, string, string)
+type AuthFuncHandler func(http.ResponseWriter, *http.Request, string, string)
 
 type FuncHandler func(http.ResponseWriter, *http.Request, string, JwtClaims) error
 
@@ -14,14 +14,15 @@ type JwtClaims struct {
 }
 
 type Merchant struct {
-	ID string `json:"id"`
-	Online bool `json:"online"`
+	ID          string `json:"id"`
+	Online      bool   `json:"online"`
 	PhoneNumber string `json:"phone_number"`
-	Email string `json:"email"`
-	Name string `json:"name"`
-	Password string `json:"password"`
-	Image string `json:"image"`
-	Role string `json:"role"`
+	Email       string `json:"email"`
+	Name        string `json:"name"`
+	Mobile      bool   `json:"mobile"`
+	Password    string `json:"password"`
+	Image       string `json:"image"`
+	Role        string `json:"role"`
 }
 
 type MerchantInfo struct {
@@ -32,18 +33,19 @@ type MerchantInfo struct {
 	Name        string  `json:"name"`
 	PhoneNumber string  `json:"phone_number"`
 	Email       string  `json:"email"`
+	Mobile      bool    `json:"mobile"`
 	Image       string  `json:"image"`
 	//Product string `json:"product"`
 }
 
 type User struct {
-	ID string `json:"id"`
+	ID          string `json:"id"`
 	PhoneNumber string `json:"phone_number"`
-	Email string `json:"email"`
-	Name string `json:"name"`
-	Password string `json:"password"`
-	Image string `json:"image"`
-	Role string `json:"role"`
+	Email       string `json:"email"`
+	Name        string `json:"name"`
+	Password    string `json:"password"`
+	Image       string `json:"image"`
+	Role        string `json:"role"`
 }
 
 type Request struct {
@@ -53,14 +55,14 @@ type Request struct {
 }
 
 type RequestEntity struct {
-	ID int `json:"id"`
+	ID     int    `json:"id"`
 	UserId string `json:"user_id"`
 	//Location *geos.Geometry `json:"location"`
 }
 
 type LongLat struct {
 	Long float32 `json:"long"`
-	Lat float32 `json:"lat"`
+	Lat  float32 `json:"lat"`
 }
 
 type Location struct {
@@ -69,7 +71,7 @@ type Location struct {
 }
 
 type LocationEntity struct {
-	ID int `json:"id"`
+	ID         int    `json:"id"`
 	MerchantID string `json:"merchant_id"`
 	//Location *geos.Geometry `json:"location"`
 }
