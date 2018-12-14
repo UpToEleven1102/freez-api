@@ -140,7 +140,7 @@ func GetLastPositionByMerchantID(merchantID string) (interface{}, error) {
 func GetNearMerchantsLastLocation(location models.Location) (merchants []interface{}, err error){
 	userLocation := fmt.Sprintf(`POINT(%f %f)`, location.Location.Long, location.Location.Lat)
 
-	r, err := DB.Query(`SELECT online, email, name, phone_number, image, l.merchant_id, ST_AsText(location) as location, ST_Distance_Sphere(location, ST_GeomFromText(?))*.000621371192 as distance
+	r, err := DB.Query(`SELECT online, email, name, mobile, phone_number, image, l.merchant_id, ST_AsText(location) as location, ST_Distance_Sphere(location, ST_GeomFromText(?))*.000621371192 as distance
 								FROM location l INNER JOIN (
 								    SELECT merchant_id, MAX(ts) AS ts FROM location GROUP BY merchant_id
 								  ) latest
@@ -157,7 +157,7 @@ func GetNearMerchantsLastLocation(location models.Location) (merchants []interfa
 
 	for r.Next()  {
 		var merchant models.MerchantInfo
-		_ = r.Scan(&merchant.Online ,&merchant.Email, &merchant.Name, &merchant.PhoneNumber, &merchant.Image, &merchant.MerchantID, &loc, &merchant.Distance)
+		_ = r.Scan(&merchant.Online ,&merchant.Email, &merchant.Name, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Image, &merchant.MerchantID, &loc, &merchant.Distance)
 
 		merchant.Location.Long, merchant.Location.Lat, err = getLongLat(loc)
 		if err != nil {
