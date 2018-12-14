@@ -46,7 +46,7 @@ func Config() (*sqlx.DB, error) {
 		}
 	}
 
-	seed(DB)
+	//seed(DB)
 
 	return DB, err
 }
