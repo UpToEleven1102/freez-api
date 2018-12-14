@@ -159,7 +159,7 @@ func GetNearMerchantsLastLocation(location models.Location) (merchants []interfa
 		var merchant models.MerchantInfo
 		_ = r.Scan(&merchant.Online ,&merchant.Email, &merchant.Name, &merchant.PhoneNumber, &merchant.Image, &merchant.MerchantID, &loc, &merchant.Distance)
 
-		merchant.Location.Lat, merchant.Location.Long, err = getLongLat(loc)
+		merchant.Location.Long, merchant.Location.Lat, err = getLongLat(loc)
 		if err != nil {
 			return nil, err
 		}
