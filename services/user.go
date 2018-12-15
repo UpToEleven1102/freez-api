@@ -29,12 +29,14 @@ func GetUserByEmail(email string) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	var location string
 	var user models.User
 	if r.Next() {
-		r.Scan(&user.ID, &user.PhoneNumber, &user.Email, &user.Name, &user.Password, &user.Image)
+		r.Scan(&user.ID, &user.PhoneNumber, &user.Email, &user.Name, &user.Password, &user.Image, &location)
 		return user, nil
 	}
+
+	user.LastLocation.Long, user.LastLocation.Lat, _ = getLongLat(location)
 
 	return nil, nil
 }
@@ -46,11 +48,14 @@ func GetUserById(id string) (interface{}, error) {
 		return nil, err
 	}
 
+	var location string
 	var user models.User
 	if r.Next() {
-		r.Scan(&user.ID, &user.PhoneNumber, &user.Email, &user.Name, &user.Password, &user.Image)
+		r.Scan(&user.ID, &user.PhoneNumber, &user.Email, &user.Name, &user.Password, &user.Image, &location)
 		return user, nil
 	}
+
+	user.LastLocation.Long, user.LastLocation.Lat, _ = getLongLat(location)
 
 	return nil, nil
 }

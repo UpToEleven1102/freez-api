@@ -173,9 +173,5 @@ func GetNearMerchantsLastLocation(location models.Location) (merchants []interfa
 		merchants = append(merchants, merchant)
 	}
 
-	b, _ := json.Marshal(merchants)
-
-	fmt.Println(string(b))
-
 	return merchants, nil
 }
