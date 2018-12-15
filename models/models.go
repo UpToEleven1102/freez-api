@@ -44,6 +44,7 @@ type User struct {
 	Email       string `json:"email"`
 	Name        string `json:"name"`
 	Password    string `json:"password"`
+	LastLocation LongLat `json:"last_location"`
 	Image       string `json:"image"`
 	Role        string `json:"role"`
 }

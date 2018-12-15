@@ -20,10 +20,12 @@ func seed(DB *sqlx.DB) {
 	DB.MustExec("DROP TABLE IF EXISTS user")
 	DB.MustExec("DROP TABLE IF EXISTS request")
 	DB.MustExec("DROP TABLE IF EXISTS location")
+	DB.MustExec("DROP TABLE IF EXISTS favorite")
 	DB.MustExec(schemaMerchant)
 	DB.MustExec(schemaUser)
 	DB.MustExec(schemaRequest)
 	DB.MustExec(schemaLocation)
+	DB.MustExec(schemaFavorites)
 
 	tx := DB.MustBegin()
 

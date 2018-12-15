@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -14,6 +15,17 @@ func CreateUser(user models.User) (interface{}, error) {
 	user.Password = string(hashedPassword)
 
 	_, err := DB.Exec(`INSERT INTO user (id, phone_number, email, name, password) VALUES(?,?,?,?,?)`, user.ID, user.PhoneNumber, user.Email, user.Name, user.Password);
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func UpdateUserLocation(user models.User) (interface{}, error) {
+	point:= fmt.Sprintf(`POINT(%f %f)`,user.LastLocation.Long, user.LastLocation.Lat)
+
+	_, err := DB.Exec(`UPDATE user SET last_location=ST_GeomFromText(?) WHERE id=?`, point, user.ID)
 	if err != nil {
 		return nil, err
 	}

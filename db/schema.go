@@ -25,6 +25,10 @@ const schemaLocation = `
 	);
 `
 
+const schemaProduct = `CREATE TABLE product(
+	
+)`
+
 const schemaUser = `
 	CREATE TABLE user(
 		id VARCHAR(64) NOT NULL,
@@ -33,7 +37,17 @@ const schemaUser = `
 		name text NOT NULL,
 		password text NOT NULL,
 		image VARCHAR(50) NOT NULL DEFAULT './assets/profile.jpg',
+		last_location POINT,
 		PRIMARY KEY (email)
+	);
+`
+
+const schemaFavorites = `
+	CREATE TABLE favorite(
+		id INT NOT NULL AUTO_INCREMENT,
+		user_id VARCHAR(64) NOT NULL,
+		merchant_id VARCHAR(64) NOT NULL,
+		PRIMARY KEY(id)
 	);
 `
 
@@ -47,6 +61,3 @@ const schemaRequest = `CREATE TABLE request(
 	);
 `
 
-const schemaProduct = `CREATE TABLE product(
-	
-)`
