@@ -42,12 +42,17 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 	case "GET":
 		switch objectID {
 		case "" :
-			r, err := services.GetRequests()
+			r, err := services.GetRequestByUserID(claims.Id)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return nil
 			}
-
+			if r != nil {
+				m, _ := services.GetMerchantById(r.(models.Request).MerchantID)
+				b, _ := json.Marshal(m)
+				w.Write(b)
+				return nil
+			}
 			b, _ := json.Marshal(r)
 			w.Write(b)
 			return nil
