@@ -44,10 +44,9 @@ const schemaUser = `
 
 const schemaFavorites = `
 	CREATE TABLE favorite(
-		id INT NOT NULL AUTO_INCREMENT,
 		user_id VARCHAR(64) NOT NULL,
 		merchant_id VARCHAR(64) NOT NULL,
-		PRIMARY KEY(id)
+		PRIMARY KEY(user_id, merchant_id)
 	);
 `
 

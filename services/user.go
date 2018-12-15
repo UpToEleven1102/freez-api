@@ -7,6 +7,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+
 func CreateUser(user models.User) (interface{}, error) {
 	uid, _ := uuid.NewV4()
 	user.ID = uid.String()
@@ -15,17 +16,6 @@ func CreateUser(user models.User) (interface{}, error) {
 	user.Password = string(hashedPassword)
 
 	_, err := DB.Exec(`INSERT INTO user (id, phone_number, email, name, password) VALUES(?,?,?,?,?)`, user.ID, user.PhoneNumber, user.Email, user.Name, user.Password);
-	if err != nil {
-		return nil, err
-	}
-
-	return user, nil
-}
-
-func UpdateUserLocation(user models.User) (interface{}, error) {
-	point:= fmt.Sprintf(`POINT(%f %f)`,user.LastLocation.Long, user.LastLocation.Lat)
-
-	_, err := DB.Exec(`UPDATE user SET last_location=ST_GeomFromText(?) WHERE id=?`, point, user.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -63,4 +53,25 @@ func GetUserById(id string) (interface{}, error) {
 	}
 
 	return nil, nil
+}
+
+func UpdateUserLocation(user models.User) (interface{}, error) {
+	point:= fmt.Sprintf(`POINT(%f %f)`,user.LastLocation.Long, user.LastLocation.Lat)
+
+	_, err := DB.Exec(`UPDATE user SET last_location=ST_GeomFromText(?) WHERE id=?`, point, user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func AddFavorite(data models.RequestData) (err error) {
+	_, err = DB.Exec(`INSERT INTO favorite (user_id, merchant_id) VALUES(?,?)`, data.UserId, data.Data)
+	return err
+}
+
+func RemoveFavorite(data models.RequestData) (err error) {
+	_, err = DB.Exec(`DELETE FROM favorite WHERE user_id=? AND merchant_id=?`, data.UserId, data.Data)
+	return err
 }

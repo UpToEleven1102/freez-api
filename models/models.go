@@ -13,6 +13,11 @@ type JwtClaims struct {
 	Role string
 }
 
+type RequestData struct {
+	UserId string `json:"user_id"`
+	Data string `json:"data"`
+}
+
 type Merchant struct {
 	ID          string `json:"id"`
 	Online      bool   `json:"online"`
@@ -74,5 +79,5 @@ type Location struct {
 type LocationEntity struct {
 	ID         int    `json:"id"`
 	MerchantID string `json:"merchant_id"`
-	//Location *geos.Geometry `json:"location"`
+	Location   LongLat `json:"location"`
 }

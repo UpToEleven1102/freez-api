@@ -37,8 +37,46 @@ func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, clai
 				return nil
 			}
 
+		case "favorite":
+			b, err := ioutil.ReadAll(req.Body)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return nil
+			}
+
+			var data models.RequestData
+
+			_ = json.Unmarshal(b, &data)
+			data.UserId = claims.Id
+
+			err = services.AddFavorite(data)
+
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+
 		default:
 			http.NotFound(w, req)
+		}
+	case "DELETE":
+		switch objectID {
+		case "favorite":
+			b, err := ioutil.ReadAll(req.Body)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return nil
+			}
+
+			var data models.RequestData
+
+			_ = json.Unmarshal(b, &data)
+			data.UserId = claims.Id
+
+			err = services.RemoveFavorite(data)
+
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
 		}
 	}
 
