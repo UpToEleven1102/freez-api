@@ -1,11 +1,10 @@
 package models
 
 import (
-	"github.com/paulsmith/gogeos/geos"
 	"net/http"
 )
 
-type AuthFuncHandler func(http.ResponseWriter,*http.Request, string, string)
+type AuthFuncHandler func(http.ResponseWriter, *http.Request, string, string)
 
 type FuncHandler func(http.ResponseWriter, *http.Request, string, JwtClaims) error
 
@@ -14,34 +13,72 @@ type JwtClaims struct {
 	Role string
 }
 
+type RequestData struct {
+	UserId string `json:"user_id"`
+	Data   string `json:"data"`
+}
+
 type Merchant struct {
-	ID string `json:"id"`
+	ID          string `json:"id"`
+	Online      bool   `json:"online"`
 	PhoneNumber string `json:"phone_number"`
-	Email string `json:"email"`
-	Name string `json:"name"`
-	Password string `json:"password"`
-	Image string `json:"image"`
-	Role string `json:"role"`
+	Email       string `json:"email"`
+	Name        string `json:"name"`
+	Mobile      bool   `json:"mobile"`
+	Password    string `json:"password"`
+	Image       string `json:"image"`
+	Role        string `json:"role"`
+}
+
+type MerchantInfo struct {
+	Online      bool    `json:"online"`
+	MerchantID  string  `json:"merchant_id"`
+	Location    LongLat `json:"location"`
+	Distance    float32 `json:"distance"`
+	Name        string  `json:"name"`
+	PhoneNumber string  `json:"phone_number"`
+	Email       string  `json:"email"`
+	Mobile      bool    `json:"mobile"`
+	Image       string  `json:"image"`
+	IsFavorite  bool    `json:"is_favorite"`
+	//Product string `json:"product"`
 }
 
 type User struct {
-	ID string `json:"id"`
-	PhoneNumber string `json:"phone_number"`
-	Email string `json:"email"`
-	Name string `json:"name"`
-	Password string `json:"password"`
-	Image string `json:"image"`
-	Role string `json:"role"`
+	ID           string  `json:"id"`
+	PhoneNumber  string  `json:"phone_number"`
+	Email        string  `json:"email"`
+	Name         string  `json:"name"`
+	Password     string  `json:"password"`
+	LastLocation LongLat `json:"last_location"`
+	Image        string  `json:"image"`
+	Role         string  `json:"role"`
 }
 
 type Request struct {
-	Email string `json:"email"`
-	Lat float32 `json:"lat"`
-	Long float32 `json:"long"`
+	UserId     string  `json:"user_id"`
+	MerchantID string  `json:"merchant_id"`
+	Location   LongLat `json:"location"`
 }
 
 type RequestEntity struct {
-	ID int `json:"id"`
+	ID     int    `json:"id"`
 	UserId string `json:"user_id"`
-	Location *geos.Geometry `json:"location"`
+	//Location *geos.Geometry `json:"location"`
+}
+
+type LongLat struct {
+	Long float32 `json:"long"`
+	Lat  float32 `json:"lat"`
+}
+
+type Location struct {
+	Id       string  `json:"id"`
+	Location LongLat `json:"location"`
+}
+
+type LocationEntity struct {
+	ID         int     `json:"id"`
+	MerchantID string  `json:"merchant_id"`
+	Location   LongLat `json:"location"`
 }

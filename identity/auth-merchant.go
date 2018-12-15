@@ -17,7 +17,11 @@ func SignInMerchant(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	json.Unmarshal(body, &credentials)
+	err = json.Unmarshal(body, &credentials)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	res, err := services.GetMerchantByEmail(credentials.Email)
 	if err != nil {
@@ -50,7 +54,10 @@ func SignUpMerchant(w http.ResponseWriter, req *http.Request) {
 
 	var merchant models.Merchant
 
-	json.Unmarshal(body, &merchant)
+	err = json.Unmarshal(body, &merchant)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
 
 	merchant, err = services.CreateMerchant(merchant)
 	if err != nil {

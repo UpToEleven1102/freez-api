@@ -8,4 +8,6 @@ const (
 	UserInfo = "userinfo"
 	Verify = "verify"
 	Request = "request"
+	Location = "location"
+	SRID = 3857
 )

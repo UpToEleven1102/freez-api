@@ -5,6 +5,7 @@ import (
 	c "git.nextgencode.io/huyen.vu/freeze-app-rest/config"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/controllers"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/identity"
+	"github.com/tbalthazar/onesignal-go"
 	"net/http"
 	"os"
 	"strings"
@@ -31,6 +32,7 @@ func getPort() string {
 	if len(port) == 0 {
 		port = ":8080"
 	}
+
 	return port
 }
 
@@ -47,6 +49,8 @@ func apiHandler(w http.ResponseWriter, req *http.Request) {
 		err = identity.AuthorizeMiddleware(w, req, objectID, controllers.UserHandler)
 	case c.Request:
 		err = identity.AuthorizeMiddleware(w, req, objectID, controllers.RequestHandler)
+	case c.Location:
+		err = identity.AuthorizeMiddleware(w, req, objectID, controllers.LocationHandler)
 	default:
 		http.NotFound(w, req)
 	}
@@ -68,6 +72,7 @@ func authHandler(w http.ResponseWriter, req *http.Request) {
 
 func main() {
 	port := getPort()
+	_ = onesignal.NewClient(nil)
 
 	http.HandleFunc("/api/", apiHandler)
 

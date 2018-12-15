@@ -11,18 +11,26 @@ import (
 func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, claims models.JwtClaims) error {
 	switch req.Method {
 	case "POST":
+		if claims.Role != "user" {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return nil
+		}
+
 		if len(objectID) > 0 {
 			http.NotFound(w, req)
 			return nil
 		}
 
 		body, _ := ioutil.ReadAll(req.Body)
+
 		var request models.Request
 		err := json.Unmarshal(body, &request)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return nil
 		}
+
+		request.UserId = claims.Id
 
 		err = services.CreateRequest(request)
 		if err != nil {
@@ -32,34 +40,54 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 
 		w.WriteHeader(http.StatusOK)
 	case "GET":
-		switch len(objectID) {
-		case 0 :
+		switch objectID {
+		case "" :
 			r, err := services.GetRequests()
 			if err != nil {
-				http.Error(w, "", http.StatusInternalServerError)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return nil
 			}
 
 			b, _ := json.Marshal(r)
 			w.Write(b)
-		default:
-			r, err := services.GetUserByEmail(objectID)
-			if err != nil || r == nil {
-				http.Error(w, "user not exists", http.StatusBadRequest)
-				return nil
-			}
-			user := r.(models.User)
-			r, err = services.GetRequestByUserID(user.ID)
+			return nil
+		case "user":
+			id := claims.Id
+			r, err := services.GetRequestByUserID(id)
 
 			if err != nil {
 				http.Error(w, "", http.StatusInternalServerError)
 				return nil
 			}
 
+			if r == nil {
+				w.Write(nil)
+				return nil
+			}
 			request := r.(models.Request)
 
 			b, _ := json.Marshal(request)
 			w.Write(b)
+		case "merchant":
+			id := claims.Id
+			r, err := services.GetRequestByMerchantID(id)
+
+			if err != nil {
+				http.Error(w, "", http.StatusInternalServerError)
+				return nil
+			}
+
+			if r == nil {
+				w.Write(nil)
+				return nil
+			}
+			request := r.(models.Request)
+
+			b, _ := json.Marshal(request)
+			w.Write(b)
+
+		default:
+			http.NotFound(w,req)
 		}
 	case "DELETE":
 		if len(objectID) > 0 {

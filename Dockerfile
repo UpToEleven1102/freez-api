@@ -8,7 +8,7 @@ RUN go get github.com/dgrijalva/jwt-go
 RUN go get github.com/go-sql-driver/mysql
 RUN go get github.com/jmoiron/sqlx
 
-ENV SOURCES /work/src/github.com/UpToEleven1102/freezeapp-rest/
+ENV SOURCES /go/src/git.nextgencode.io/huyen.vu/freeze-app-rest/
 
 COPY . ${SOURCES}
 
@@ -16,6 +16,6 @@ RUN cd ${SOURCES} && CGO_ENABLED=0 go build
 
 WORKDIR ${SOURCES}
 
-CMD ${SOURCES}freezeapp-rest
+CMD ${SOURCES}freeze-app-rest
 
 EXPOSE 8080

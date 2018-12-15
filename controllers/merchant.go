@@ -9,18 +9,31 @@ import (
 )
 
 func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, claims models.JwtClaims) error {
-	if claims.Role != "admin" {
-		return errors.New("Failed to authorize")
-	}
-
 	switch req.Method {
 	case "GET":
+		if claims.Role != "admin" {
+			return errors.New("Failed to authorize")
+		}
 		merchant, err := services.GetMerchantByEmail(objectID)
 		if err != nil {
 			return err
 		}
 		b, _ := json.Marshal(merchant)
 		w.Write([]byte(b))
+
+	case "POST":
+		if objectID == "update-status" {
+			id := claims.Id
+			err := services.ChangeOnlineStatus(id)
+
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return nil
+			}
+		} else {
+			http.NotFound(w, req)
+			return nil
+		}
 
 	default:
 		http.NotFound(w, req)
