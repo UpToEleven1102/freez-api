@@ -28,6 +28,8 @@ func LocationHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 				return nil
 			}
 
+			location.Id = claims.Id
+
 			merchants, err := services.GetNearMerchantsLastLocation(location)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -45,7 +47,7 @@ func LocationHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 
 			body, _ := ioutil.ReadAll(req.Body)
 			var location models.Location
-			location.MerchantID = claims.Id
+			location.Id = claims.Id
 
 			err = json.Unmarshal(body, &location.Location)
 

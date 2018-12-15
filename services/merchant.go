@@ -110,7 +110,7 @@ func CreateMerchant(merchant models.Merchant) (models.Merchant, error) {
 
 func AddNewLocation(location models.Location) (error) {
 	point := fmt.Sprintf(`POINT(%f %f)`, location.Location.Long, location.Location.Lat)
-	_, err:= DB.Exec(`INSERT INTO location (merchant_id, location) VALUES (?, ST_GeomFromText(?))`, location.MerchantID, point)
+	_, err:= DB.Exec(`INSERT INTO location (merchant_id, location) VALUES (?, ST_GeomFromText(?))`, location.Id, point)
 	if err != nil {
 		return err
 	}
@@ -126,7 +126,7 @@ func GetLastPositionByMerchantID(merchantID string) (interface{}, error) {
 	var location models.Location
 	var point string
 	if r.Next() {
-		err = r.Scan(&location.MerchantID, &point)
+		err = r.Scan(&location.Id, &point)
 		if err != nil {
 			return nil, err
 		}
@@ -163,6 +163,13 @@ func GetNearMerchantsLastLocation(location models.Location) (merchants []interfa
 		if err != nil {
 			return nil, err
 		}
+
+		var data models.RequestData
+		data.UserId = location.Id
+		data.Data = merchant.MerchantID
+
+		merchant.IsFavorite, _ = isFavorite(data)
+
 		merchants = append(merchants, merchant)
 	}
 

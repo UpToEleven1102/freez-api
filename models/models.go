@@ -15,7 +15,7 @@ type JwtClaims struct {
 
 type RequestData struct {
 	UserId string `json:"user_id"`
-	Data string `json:"data"`
+	Data   string `json:"data"`
 }
 
 type Merchant struct {
@@ -40,18 +40,19 @@ type MerchantInfo struct {
 	Email       string  `json:"email"`
 	Mobile      bool    `json:"mobile"`
 	Image       string  `json:"image"`
+	IsFavorite  bool    `json:"is_favorite"`
 	//Product string `json:"product"`
 }
 
 type User struct {
-	ID          string `json:"id"`
-	PhoneNumber string `json:"phone_number"`
-	Email       string `json:"email"`
-	Name        string `json:"name"`
-	Password    string `json:"password"`
+	ID           string  `json:"id"`
+	PhoneNumber  string  `json:"phone_number"`
+	Email        string  `json:"email"`
+	Name         string  `json:"name"`
+	Password     string  `json:"password"`
 	LastLocation LongLat `json:"last_location"`
-	Image       string `json:"image"`
-	Role        string `json:"role"`
+	Image        string  `json:"image"`
+	Role         string  `json:"role"`
 }
 
 type Request struct {
@@ -72,12 +73,12 @@ type LongLat struct {
 }
 
 type Location struct {
-	MerchantID string  `json:"merchant_id"`
-	Location   LongLat `json:"location"`
+	Id       string  `json:"id"`
+	Location LongLat `json:"location"`
 }
 
 type LocationEntity struct {
-	ID         int    `json:"id"`
-	MerchantID string `json:"merchant_id"`
+	ID         int     `json:"id"`
+	MerchantID string  `json:"merchant_id"`
 	Location   LongLat `json:"location"`
 }

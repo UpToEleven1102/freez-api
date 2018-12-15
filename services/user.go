@@ -75,3 +75,22 @@ func RemoveFavorite(data models.RequestData) (err error) {
 	_, err = DB.Exec(`DELETE FROM favorite WHERE user_id=? AND merchant_id=?`, data.UserId, data.Data)
 	return err
 }
+
+func isFavorite(data models.RequestData) (bool, error) {
+	r, err := DB.Query(`SELECT * FROM favorite WHERE user_id=? AND merchant_id=?`, data.UserId, data.Data)
+	if err != nil {
+		return false, err
+	}
+
+	if r.Next() {
+		return true, nil
+	}
+	return false, nil
+}
+//
+//func GetFavorites(user_id string) (err error) {
+//	_, err = DB.Query(`SELECT online, email, name, mobile, phone_number, image, merchant_id
+//								FROM favorite f
+//								  JOIN merchant m
+//								    ON f.merchant_id=m.id GROUP BY merchant_id`)
+//}
