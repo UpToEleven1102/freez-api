@@ -51,12 +51,13 @@ const schemaFavorites = `
 `
 
 const schemaRequest = `CREATE TABLE request(
-		id INT NOT NULL AUTO_INCREMENT,
 		user_id VARCHAR(64) NOT NULL,
 		merchant_id VARCHAR(64) NOT NULL,
 		location POINT NOT NULL,
 		SPATIAL INDEX(location),
-		PRIMARY KEY (id)
+		comment VARCHAR(200) NULL,
+		accepted BOOLEAN DEFAULT FALSE NOT NULL,
+		PRIMARY KEY (user_id,merchant_id)
 	);
 `
 

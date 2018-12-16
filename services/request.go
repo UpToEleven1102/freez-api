@@ -34,7 +34,7 @@ func getLongLat(point string) (long float32, lat float32, err error) {
 	lat64, _ := strconv.ParseFloat(ptArr[1], 32)
 	lat = float32(lat64)
 	long = float32(long64)
-	return long, lat,nil
+	return long, lat, nil
 }
 
 func GetRequestByUserID(userID string) (interface{}, error) {
@@ -53,7 +53,6 @@ func GetRequestByUserID(userID string) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-
 
 		if err != nil {
 			return nil, err
@@ -90,6 +89,31 @@ func GetRequestByMerchantID(merchantID string) (interface{}, error) {
 	return nil, nil
 }
 
+func GetRequestInfoByMerchantId(merchantId string) (interface{}, error) {
+	position, _ := GetLastPositionByMerchantID(merchantId)
+	location := fmt.Sprintf(`POINT(%f %f)`, position.(models.Location).Location.Long, position.(models.Location).Location.Lat)
+
+	r, err := DB.Query(`SELECT user_id, name, email, phone_number, image, ST_ASTEXT(location), ST_DISTANCE_SPHERE(location, ST_GeomFromText(?))*.000621371192 as distance, comment
+								FROM request r 
+								  JOIN user u 
+								    ON r.user_id=u.id 
+								WHERE merchant_id=?`, location, merchantId)
+	if err != nil {
+		return nil, err
+	}
+
+	var requests []models.RequestInfo
+	location = ""
+
+	for r.Next() {
+		var request models.RequestInfo
+		_ = r.Scan(&request.UserId, &request.Name, &request.Email, &request.PhoneNumber, &request.Image, &location, &request.Distance, &request.Comment)
+		request.Location.Long, request.Location.Lat, _ = getLongLat(location)
+		requests = append(requests, request)
+	}
+	return requests, nil
+}
+
 func GetRequestedMerchantByUserID(userId string) (interface{}, error) {
 	r, err := DB.Query(`SELECT online, m.email, m.name, mobile, m.phone_number, m.image, l.merchant_id, ST_AsText(l.location) as location, ST_DISTANCE_SPHERE(l.location, u.last_location)*.000621371192 as distance
 								FROM location l INNER JOIN (
@@ -112,7 +136,7 @@ func GetRequestedMerchantByUserID(userId string) (interface{}, error) {
 	if r.Next() {
 		err = r.Scan(&merchant.Online, &merchant.Email, &merchant.Name, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Image, &merchant.MerchantID, &location, &merchant.Distance)
 		if err != nil {
-			return nil,err
+			return nil, err
 		}
 		merchant.Location.Long, merchant.Location.Lat, _ = getLongLat(location)
 
@@ -126,7 +150,7 @@ func GetRequestedMerchantByUserID(userId string) (interface{}, error) {
 	return nil, nil
 }
 
-func GetRequests() (interface{}, error){
+func GetRequests() (interface{}, error) {
 	r, err := DB.Query(`SELECT user_id, merchant_id, ST_ASTEXT(location) FROM request`)
 
 	if err != nil {

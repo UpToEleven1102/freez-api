@@ -11,15 +11,18 @@ import (
 func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, claims models.JwtClaims) error {
 	switch req.Method {
 	case "GET":
-		if claims.Role != "admin" {
-			return errors.New("Failed to authorize")
+		switch objectID {
+		case "":
+			if claims.Role != "admin" {
+				return errors.New("Failed to authorize")
+			}
+			merchant, err := services.GetMerchantByEmail(objectID)
+			if err != nil {
+				return err
+			}
+			b, _ := json.Marshal(merchant)
+			w.Write([]byte(b))
 		}
-		merchant, err := services.GetMerchantByEmail(objectID)
-		if err != nil {
-			return err
-		}
-		b, _ := json.Marshal(merchant)
-		w.Write([]byte(b))
 
 	case "POST":
 		if objectID == "update-status" {
