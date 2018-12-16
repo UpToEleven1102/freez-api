@@ -90,6 +90,42 @@ func GetRequestByMerchantID(merchantID string) (interface{}, error) {
 	return nil, nil
 }
 
+func GetRequestedMerchantByUserID(userId string) (interface{}, error) {
+	r, err := DB.Query(`SELECT online, m.email, m.name, mobile, m.phone_number, m.image, l.merchant_id, ST_AsText(l.location) as location, ST_DISTANCE_SPHERE(l.location, u.last_location)*.000621371192 as distance
+								FROM location l INNER JOIN (
+								    SELECT merchant_id, MAX(ts) AS ts FROM location GROUP BY merchant_id
+								  ) latest
+								  ON l.ts=latest.ts
+								  JOIN merchant m
+								    ON l.merchant_id=m.id
+									  JOIN request r
+										ON r.merchant_id=m.id 
+											JOIN user u
+												ON u.id=r.user_id
+										WHERE r.user_id=?`, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	var merchant models.MerchantInfo
+	var location string
+	if r.Next() {
+		err = r.Scan(&merchant.Online, &merchant.Email, &merchant.Name, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Image, &merchant.MerchantID, &location, &merchant.Distance)
+		if err != nil {
+			return nil,err
+		}
+		merchant.Location.Long, merchant.Location.Lat, _ = getLongLat(location)
+
+		var data models.RequestData
+		data.UserId = userId
+		data.Data = merchant.MerchantID
+
+		merchant.IsFavorite, _ = isFavorite(data)
+		return merchant, nil
+	}
+	return nil, nil
+}
+
 func GetRequests() (interface{}, error){
 	r, err := DB.Query(`SELECT user_id, merchant_id, ST_ASTEXT(location) FROM request`)
 
