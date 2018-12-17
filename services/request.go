@@ -115,7 +115,7 @@ func GetRequestInfoByMerchantId(merchantId string) (interface{}, error) {
 }
 
 func GetRequestedMerchantByUserID(userId string) (interface{}, error) {
-	r, err := DB.Query(`SELECT online, m.email, m.name, mobile, m.phone_number, m.image, l.merchant_id, ST_AsText(l.location) as location, ST_DISTANCE_SPHERE(l.location, u.last_location)*.000621371192 as distance
+	r, err := DB.Query(`SELECT online, m.email, m.name, mobile, m.phone_number, m.image, l.merchant_id, ST_AsText(l.location) as location, ST_DISTANCE_SPHERE(l.location, u.last_location)*.000621371192 as distance, accepted
 								FROM location l INNER JOIN (
 								    SELECT merchant_id, MAX(ts) AS ts FROM location GROUP BY merchant_id
 								  ) latest
@@ -134,7 +134,7 @@ func GetRequestedMerchantByUserID(userId string) (interface{}, error) {
 	var merchant models.MerchantInfo
 	var location string
 	if r.Next() {
-		err = r.Scan(&merchant.Online, &merchant.Email, &merchant.Name, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Image, &merchant.MerchantID, &location, &merchant.Distance)
+		err = r.Scan(&merchant.Online, &merchant.Email, &merchant.Name, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Image, &merchant.MerchantID, &location, &merchant.Distance, &merchant.Accepted)
 		if err != nil {
 			return nil, err
 		}

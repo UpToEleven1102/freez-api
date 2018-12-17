@@ -41,6 +41,7 @@ type MerchantInfo struct {
 	Mobile      bool    `json:"mobile"`
 	Image       string  `json:"image"`
 	IsFavorite  bool    `json:"is_favorite"`
+	Accepted    int     `json:"accepted"`
 	//Product string `json:"product"`
 }
 
@@ -65,23 +66,23 @@ type RequestInfo struct {
 	PhoneNumber string  `json:"phone_number"`
 	Image       string  `json:"image"`
 	Distance    float32 `json:"distance"`
-	Accepted    int    `json:"accepted"`
+	Accepted    int     `json:"accepted"`
 }
 
 type Request struct {
 	UserId     string  `json:"user_id"`
-	Comment string `json:"comment"`
+	Comment    string  `json:"comment"`
 	MerchantID string  `json:"merchant_id"`
 	Location   LongLat `json:"location"`
 }
 
 type RequestEntity struct {
-	ID int `json:"id"`
-	UserID string `json:"user_id"`
-	MerchantID string `json:"merchant_id"`
-	Location LongLat `json:"location"`
-	Comment string `json:"comment"`
-	Accepted int `json:"accepted"`
+	ID         int     `json:"id"`
+	UserID     string  `json:"user_id"`
+	MerchantID string  `json:"merchant_id"`
+	Location   LongLat `json:"location"`
+	Comment    string  `json:"comment"`
+	Accepted   int     `json:"accepted"`
 }
 
 type LongLat struct {
