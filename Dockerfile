@@ -9,7 +9,7 @@ RUN go get github.com/dgrijalva/jwt-go
 RUN go get github.com/go-sql-driver/mysql
 RUN go get github.com/jmoiron/sqlx
 
-ENV SOURCES /work/src/git.nextgencode.io/huyen.vu/freeze-app-rest/
+ENV SOURCES /go/src/git.nextgencode.io/huyen.vu/freeze-app-rest/
 
 COPY . ${SOURCES}
 

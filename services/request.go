@@ -91,14 +91,18 @@ func GetRequestByMerchantID(merchantID string) (interface{}, error) {
 
 func GetRequestInfoByMerchantId(merchantId string) (interface{}, error) {
 	position, _ := GetLastPositionByMerchantID(merchantId)
-	location := fmt.Sprintf(`POINT(%f %f)`, position.(models.Location).Location.Long, position.(models.Location).Location.Lat)
+	var location string
+	if position != nil {
+		location = fmt.Sprintf(`POINT(%f %f)`, position.(models.Location).Location.Long, position.(models.Location).Location.Lat)
+	}
 
 	r, err := DB.Query(`SELECT r.id, user_id, name, email, phone_number, image, ST_ASTEXT(location), ST_DISTANCE_SPHERE(location, ST_GeomFromText(?))*.000621371192 as distance, comment, accepted
 								FROM request r 
-								  JOIN user u 
+								  LEFT OUTER JOIN user u 
 								    ON r.user_id=u.id 
 								WHERE merchant_id=?`, location, merchantId)
 	if err != nil {
+		panic(err)
 		return nil, err
 	}
 

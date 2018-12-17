@@ -70,13 +70,14 @@ const schemaUserNotification = `CREATE TABLE user_notification(
 
 
 const schemaRequest = `CREATE TABLE request(
+		id INT NOT NULL AUTO_INCREMENT,
 		user_id VARCHAR(64) NOT NULL,
 		merchant_id VARCHAR(64) NOT NULL,
 		location POINT NOT NULL,
 		SPATIAL INDEX(location),
 		comment VARCHAR(200) NOT NULL DEFAULT '',
-		accepted BOOLEAN DEFAULT FALSE NOT NULL,
-		PRIMARY KEY (user_id,merchant_id)
+		accepted TINYINT(1) DEFAULT -1 NOT NULL,
+		PRIMARY KEY (id)
 	);
 `
 
