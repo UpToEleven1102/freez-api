@@ -102,6 +102,28 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 		default:
 			http.NotFound(w,req)
 		}
+	case "UPDATE":
+		if claims.Role == config.Merchant {
+			b, err := ioutil.ReadAll(req.Body)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return nil
+			}
+
+			var request models.RequestEntity
+			json.Unmarshal(b, &request)
+
+			if request.Accepted != 0 && request.Accepted != 1 {
+				http.Error(w, "accepted param must be 0 or 1", http.StatusBadRequest)
+				return nil
+			}
+
+			err = services.UpdateRequestAccepted(request)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return nil
+			}
+		}
 	case "DELETE":
 		if len(objectID) > 0 {
 			http.NotFound(w, req)

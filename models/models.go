@@ -56,6 +56,7 @@ type User struct {
 }
 
 type RequestInfo struct {
+	ID          int     `json:"id"`
 	UserId      string  `json:"user_id"`
 	Name        string  `json:"name"`
 	Email       string  `json:"email"`
@@ -64,12 +65,23 @@ type RequestInfo struct {
 	PhoneNumber string  `json:"phone_number"`
 	Image       string  `json:"image"`
 	Distance    float32 `json:"distance"`
+	Accepted    int    `json:"accepted"`
 }
 
 type Request struct {
 	UserId     string  `json:"user_id"`
+	Comment string `json:"comment"`
 	MerchantID string  `json:"merchant_id"`
 	Location   LongLat `json:"location"`
+}
+
+type RequestEntity struct {
+	ID int `json:"id"`
+	UserID string `json:"user_id"`
+	MerchantID string `json:"merchant_id"`
+	Location LongLat `json:"location"`
+	Comment string `json:"comment"`
+	Accepted int `json:"accepted"`
 }
 
 type LongLat struct {

@@ -1,5 +1,6 @@
 package db
 
+//Merchant
 const schemaMerchant = `
 	CREATE TABLE merchant(
 		id VARCHAR(64) NOT NULL,
@@ -29,6 +30,15 @@ const schemaProduct = `CREATE TABLE product(
 	
 )`
 
+const schemaMerchantNotification = `CREATE TABLE merchant_notification(
+	id INT NOT NULL AUTO_INCREMENT,
+	ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP UNIQUE,
+	merchant_id VARCHAR(64) NOT NULL,
+	activity_type INT
+	source_id VARCHAR(64) NOT NULL
+);`
+
+//User
 const schemaUser = `
 	CREATE TABLE user(
 		id VARCHAR(64) NOT NULL,
@@ -49,6 +59,15 @@ const schemaFavorites = `
 		PRIMARY KEY(user_id, merchant_id)
 	);
 `
+
+const schemaUserNotification = `CREATE TABLE user_notification(
+	id INT NOT NULL AUTO_INCREMENT,
+	ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP UNIQUE,
+	user_id VARCHAR(64) NOT NULL,
+	activity_type INT
+	source_id VARCHAR(64) NOT NULL
+);`
+
 
 const schemaRequest = `CREATE TABLE request(
 		user_id VARCHAR(64) NOT NULL,

@@ -93,7 +93,7 @@ func GetRequestInfoByMerchantId(merchantId string) (interface{}, error) {
 	position, _ := GetLastPositionByMerchantID(merchantId)
 	location := fmt.Sprintf(`POINT(%f %f)`, position.(models.Location).Location.Long, position.(models.Location).Location.Lat)
 
-	r, err := DB.Query(`SELECT user_id, name, email, phone_number, image, ST_ASTEXT(location), ST_DISTANCE_SPHERE(location, ST_GeomFromText(?))*.000621371192 as distance, comment
+	r, err := DB.Query(`SELECT r.id, user_id, name, email, phone_number, image, ST_ASTEXT(location), ST_DISTANCE_SPHERE(location, ST_GeomFromText(?))*.000621371192 as distance, comment, accepted
 								FROM request r 
 								  JOIN user u 
 								    ON r.user_id=u.id 
@@ -107,7 +107,7 @@ func GetRequestInfoByMerchantId(merchantId string) (interface{}, error) {
 
 	for r.Next() {
 		var request models.RequestInfo
-		_ = r.Scan(&request.UserId, &request.Name, &request.Email, &request.PhoneNumber, &request.Image, &location, &request.Distance, &request.Comment)
+		_ = r.Scan(&request.ID, &request.UserId, &request.Name, &request.Email, &request.PhoneNumber, &request.Image, &location, &request.Distance, &request.Comment, &request.Accepted)
 		request.Location.Long, request.Location.Lat, _ = getLongLat(location)
 		requests = append(requests, request)
 	}
@@ -148,6 +148,11 @@ func GetRequestedMerchantByUserID(userId string) (interface{}, error) {
 		return merchant, nil
 	}
 	return nil, nil
+}
+
+func UpdateRequestAccepted(req models.RequestEntity) (err error) {
+	_, err = DB.Exec(`UPDATE request SET accepted=? WHERE id=?`,req.Accepted, req.ID)
+	return err
 }
 
 func GetRequests() (interface{}, error) {
