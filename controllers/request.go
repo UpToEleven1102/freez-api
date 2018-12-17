@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"git.nextgencode.io/huyen.vu/freeze-app-rest/config"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
 	"io/ioutil"
@@ -42,13 +43,26 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 	case "GET":
 		switch objectID {
 		case "" :
-			r, err := services.GetRequestedMerchantByUserID(claims.Id)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return nil
+			if claims.Role == config.User {
+				r, err := services.GetRequestedMerchantByUserID(claims.Id)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return nil
+				}
+				b, _ := json.Marshal(r)
+				_,_ = w.Write(b)
+
+			} else if claims.Role == config.Merchant {
+				r, err := services.GetRequestInfoByMerchantId(claims.Id)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return nil
+				}
+
+				b, _ := json.Marshal(r)
+				_,_ = w.Write(b)
 			}
-			b, _ := json.Marshal(r)
-			w.Write(b)
+
 			return nil
 		case "user":
 			id := claims.Id
@@ -87,6 +101,28 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 
 		default:
 			http.NotFound(w,req)
+		}
+	case "UPDATE":
+		if claims.Role == config.Merchant {
+			b, err := ioutil.ReadAll(req.Body)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return nil
+			}
+
+			var request models.RequestEntity
+			json.Unmarshal(b, &request)
+
+			if request.Accepted != 0 && request.Accepted != 1 {
+				http.Error(w, "accepted param must be 0 or 1", http.StatusBadRequest)
+				return nil
+			}
+
+			err = services.UpdateRequestAccepted(request)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return nil
+			}
 		}
 	case "DELETE":
 		if len(objectID) > 0 {
