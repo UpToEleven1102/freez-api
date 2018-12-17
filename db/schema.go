@@ -74,7 +74,7 @@ const schemaRequest = `CREATE TABLE request(
 		merchant_id VARCHAR(64) NOT NULL,
 		location POINT NOT NULL,
 		SPATIAL INDEX(location),
-		comment VARCHAR(200) NULL,
+		comment VARCHAR(200) NOT NULL DEFAULT '',
 		accepted BOOLEAN DEFAULT FALSE NOT NULL,
 		PRIMARY KEY (user_id,merchant_id)
 	);
