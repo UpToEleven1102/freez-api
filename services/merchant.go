@@ -4,18 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"git.nextgencode.io/huyen.vu/freeze-app-rest/db"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
-	"github.com/jmoiron/sqlx"
 	"github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 )
-
-var DB *sqlx.DB
-
-func init() {
-	DB, _ = db.Config()
-}
 
 func GetMerchants() (merchants []models.Merchant, err error) {
 	var merchant models.Merchant

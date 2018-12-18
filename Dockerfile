@@ -8,6 +8,7 @@ RUN go get golang.org/x/crypto/bcrypt
 RUN go get github.com/dgrijalva/jwt-go
 RUN go get github.com/go-sql-driver/mysql
 RUN go get github.com/jmoiron/sqlx
+RUN go get github.com/joho/godotenv
 
 ENV SOURCES /go/src/git.nextgencode.io/huyen.vu/freeze-app-rest/
 

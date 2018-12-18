@@ -18,6 +18,9 @@ func CreateRequest(request models.Request) error {
 	}
 
 	_, err := DB.Exec(`INSERT INTO request (user_id, merchant_id, location) VALUES (?, ?, ST_GeomFromText(?))`, request.UserId, request.MerchantID, point)
+	if err == nil {
+		//oneSignalClient.Apps.
+	}
 	return err
 }
 

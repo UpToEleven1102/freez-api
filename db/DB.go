@@ -1,10 +1,11 @@
 package db
 
 import (
-	"git.nextgencode.io/huyen.vu/freeze-app-rest/config"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
+	"github.com/joho/godotenv"
 	"github.com/satori/go.uuid"
+	"log"
 	"os"
 )
 
@@ -12,7 +13,11 @@ var DB *sqlx.DB
 var err error
 
 func init() {
-	config.SetEnv()
+	//config.SetEnv()
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func seed(DB *sqlx.DB) {
@@ -48,7 +53,7 @@ func Config() (*sqlx.DB, error) {
 		}
 	}
 
-	seed(DB)
+	//seed(DB)
 
 	return DB, err
 }
