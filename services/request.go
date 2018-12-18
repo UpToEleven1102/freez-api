@@ -8,6 +8,13 @@ import (
 	"strings"
 )
 
+const (
+	notificationRequestMessage         = "New Request From User"
+	notificationRequestTitle           = "New Request"
+	notificationRequestDeclinedMessage = "Merchant is busy. Please request a bit later."
+	notificationRequestAcceptedMessage = "Merchant is on the way"
+)
+
 func CreateRequest(request models.Request) error {
 	//use userId from claims instead
 
@@ -18,8 +25,12 @@ func CreateRequest(request models.Request) error {
 	}
 
 	_, err := DB.Exec(`INSERT INTO request (user_id, merchant_id, location) VALUES (?, ?, ST_GeomFromText(?))`, request.UserId, request.MerchantID, point)
+	data := models.RequestData{UserId: "id---", Data: "S3cr3t"}
 	if err == nil {
-		//oneSignalClient.Apps.
+		_, err := CreateNotificationByUserId(request.MerchantID, notificationRequestTitle, notificationRequestMessage, data)
+		if err != nil {
+			panic(err)
+		}
 	}
 	return err
 }
@@ -66,7 +77,7 @@ func GetRequestByUserID(userID string) (interface{}, error) {
 }
 
 func GetRequestByMerchantID(merchantID string) (interface{}, error) {
-	r, err := DB.Query(`SELECT user_id, merchant_id, ST_ASTEXT(location) FROM request WHERE merchant_id=?`, merchantID)
+	r, err := DB.Query(`SELECT id, user_id, merchant_id, ST_ASTEXT(location), comment, accepted FROM request WHERE merchant_id=?`, merchantID)
 
 	if err != nil {
 		return nil, err
@@ -75,9 +86,9 @@ func GetRequestByMerchantID(merchantID string) (interface{}, error) {
 	var point string
 
 	if r.Next() {
-		var request models.Request
+		var request models.RequestEntity
 
-		err = r.Scan(&request.UserId, &request.MerchantID, &point)
+		err = r.Scan(&request.ID, &request.UserID, &request.MerchantID, &point, &request.Comment, &request.Accepted)
 		request.Location.Long, request.Location.Lat, err = getLongLat(point)
 		if err != nil {
 			return nil, err
@@ -158,7 +169,26 @@ func GetRequestedMerchantByUserID(userId string) (interface{}, error) {
 }
 
 func UpdateRequestAccepted(req models.RequestEntity) (err error) {
-	_, err = DB.Exec(`UPDATE request SET accepted=? WHERE id=?`,req.Accepted, req.ID)
+	r, err := GetRequestByMerchantID(req.MerchantID)
+
+	request := r.(models.RequestEntity)
+
+	request.Accepted = req.Accepted
+
+	if request.Accepted == 1 {
+		data := models.RequestData{UserId:request.UserID, Data:"S3cr3t"}
+		CreateNotificationByUserId(request.UserID, "", notificationRequestAcceptedMessage, data)
+	} else {
+		data := models.RequestData{UserId:request.UserID, Data:"S3cr3t"}
+		CreateNotificationByUserId(request.UserID, "", notificationRequestDeclinedMessage, data)
+		RemoveRequestsByUserID(request.UserID)
+		return nil
+	}
+
+	if err != nil {
+		return err
+	}
+	_, err = DB.Exec(`UPDATE request SET accepted=? WHERE id=?`, req.Accepted, req.ID)
 	return err
 }
 

@@ -2,7 +2,6 @@ package services
 
 import (
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/db"
-	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"github.com/jmoiron/sqlx"
 	"github.com/tbalthazar/onesignal-go"
 	"os"
@@ -24,11 +23,4 @@ func init() {
 	oneSignalClient = onesignal.NewClient(nil)
 	oneSignalClient.AppKey = appKey
 	oneSignalClient.UserKey = userKey
-
-	var data models.RequestData
-
-	data.UserId = "User Id"
-	data.Data = "s3cr3t"
-
-	CreateNotificationByUserId("0033dfe3-29e8-4be4-b2ad-e2814fdefa2c", "title", "Hello", data)
 }
