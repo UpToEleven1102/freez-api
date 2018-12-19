@@ -7,11 +7,11 @@ import (
 
 func CreateNotificationByUserId(userID string, title string, message string, data models.RequestData) (res interface{}, err error) {
 	notificationReq := &onesignal.NotificationRequest{
-		AppID:     appID,
+		AppID:     oneSignalAppID,
 		Contents:  map[string]string{"en": message},
 		Headings:  map[string]string{"en": title},
 		IsAndroid: true,
-		Data: data,
+		Data:      data,
 		Tags: []interface{}{
 			map[string]interface{}{
 				"key":      "user_id",

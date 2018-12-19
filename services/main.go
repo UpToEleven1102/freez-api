@@ -2,25 +2,52 @@ package services
 
 import (
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/db"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/jmoiron/sqlx"
 	"github.com/tbalthazar/onesignal-go"
 	"os"
 )
 
 var (
-	DB *sqlx.DB
+	DB              *sqlx.DB
 	oneSignalClient *onesignal.Client
-	appID, appKey, userKey string
+	oneSignalAppID  string
+
+	s3Client     *s3.S3
+	s3BucketName string
 )
 
-func init() {
-	DB, _ = db.Config()
-
-	appID = os.Getenv("ONE_SIGNAL_APP_ID")
-	appKey = os.Getenv("ONE_SIGNAL_APP_KEY")
-	userKey = os.Getenv("ONE_SIGNAL_USER_KEY")
+func oneSignalConfig() {
+	oneSignalAppID = os.Getenv("ONE_SIGNAL_APP_ID")
+	appKey := os.Getenv("ONE_SIGNAL_APP_KEY")
+	userKey := os.Getenv("ONE_SIGNAL_USER_KEY")
 
 	oneSignalClient = onesignal.NewClient(nil)
 	oneSignalClient.AppKey = appKey
 	oneSignalClient.UserKey = userKey
+}
+
+func s3Config() {
+	s3BucketName = os.Getenv("AWS_BUCKET_NAME")
+
+	s3Region := os.Getenv("AWS_REGION")
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String(s3Region),
+	})
+
+	if err != nil {
+		panic(err)
+	}
+
+	s3Client = s3.New(sess)
+}
+
+func init() {
+	DB, _ = db.Config()
+	oneSignalConfig()
+	s3Config()
+
+	//GetBucketLocation()
 }
