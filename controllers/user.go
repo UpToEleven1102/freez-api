@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/config"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
@@ -17,6 +18,24 @@ func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, clai
 
 	switch req.Method {
 	case "GET":
+		switch objectID {
+		case "presign-url":
+			fileName := fmt.Sprint(claims.Id, "-profile.jpg")
+			url, err := services.GeneratePreSignedUrl(fileName)
+
+			var response models.DataResponse
+
+			if err != nil {
+				response.Success = false
+				response.Message = err.Error()
+			} else {
+				response.Success = true
+				response.Message = url
+			}
+
+			b, _ := json.Marshal(response)
+			_,_ = w.Write(b)
+		}
 	case "POST":
 		switch objectID {
 		case "location":

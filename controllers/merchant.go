@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
 	"net/http"
@@ -21,7 +22,23 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 				return err
 			}
 			b, _ := json.Marshal(merchant)
-			w.Write([]byte(b))
+			_,_ = w.Write(b)
+		case "presign-url":
+			fileName := fmt.Sprint(claims.Id, "-profile.jpg")
+			url, err := services.GeneratePreSignedUrl(fileName)
+
+			var response models.DataResponse
+
+			if err != nil {
+				response.Success = false
+				response.Message = err.Error()
+			} else {
+				response.Success = true
+				response.Message = url
+			}
+
+			b, _ := json.Marshal(response)
+			_,_ = w.Write(b)
 		}
 
 	case "POST":

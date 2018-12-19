@@ -100,3 +100,8 @@ type LocationEntity struct {
 	MerchantID string  `json:"merchant_id"`
 	Location   LongLat `json:"location"`
 }
+
+type DataResponse struct {
+	Success bool `json:"success"`
+	Message string `json:"message"`
+}

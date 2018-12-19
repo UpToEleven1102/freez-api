@@ -5,6 +5,11 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"time"
+)
+
+const (
+	expirationTime = 10 * time.Minute
 )
 
 func GetBucketLocation() {
@@ -28,4 +33,15 @@ func GetBucketLocation() {
 	}
 
 	fmt.Println(result)
+}
+
+func GeneratePreSignedUrl(fileName string) (url string , err error) {
+	req, _ := s3Client.PutObjectRequest(&s3.PutObjectInput{
+		Bucket: aws.String(s3BucketName),
+		Key: aws.String(fileName),
+	})
+
+	url, err = req.Presign(expirationTime)
+
+	return url, err
 }

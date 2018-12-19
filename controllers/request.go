@@ -102,7 +102,7 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 		default:
 			http.NotFound(w,req)
 		}
-	case "UPDATE":
+	case "PUT":
 		if claims.Role == config.Merchant {
 			b, err := ioutil.ReadAll(req.Body)
 			if err != nil {

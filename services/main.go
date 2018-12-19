@@ -17,6 +17,7 @@ var (
 
 	s3Client     *s3.S3
 	s3BucketName string
+
 )
 
 func oneSignalConfig() {
@@ -29,12 +30,12 @@ func oneSignalConfig() {
 	oneSignalClient.UserKey = userKey
 }
 
-func s3Config() {
+func awsConfig() {
 	s3BucketName = os.Getenv("AWS_BUCKET_NAME")
+	awsRegion := os.Getenv("AWS_REGION")
 
-	s3Region := os.Getenv("AWS_REGION")
 	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String(s3Region),
+		Region: aws.String(awsRegion),
 	})
 
 	if err != nil {
@@ -47,7 +48,8 @@ func s3Config() {
 func init() {
 	DB, _ = db.Config()
 	oneSignalConfig()
-	s3Config()
+
+	awsConfig()
 
 	//GetBucketLocation()
 }
