@@ -39,6 +39,8 @@ func GeneratePreSignedUrl(fileName string) (url string , err error) {
 	req, _ := s3Client.PutObjectRequest(&s3.PutObjectInput{
 		Bucket: aws.String(s3BucketName),
 		Key: aws.String(fileName),
+		//ACL: aws.String("public-read"),
+		ContentType: aws.String("image/jpeg"),
 	})
 
 	url, err = req.Presign(expirationTime)
