@@ -19,15 +19,16 @@ type RequestData struct {
 }
 
 type Merchant struct {
-	ID          string `json:"id"`
-	Online      bool   `json:"online"`
-	PhoneNumber string `json:"phone_number"`
-	Email       string `json:"email"`
-	Name        string `json:"name"`
-	Mobile      bool   `json:"mobile"`
-	Password    string `json:"password"`
-	Image       string `json:"image"`
-	Role        string `json:"role"`
+	ID           string  `json:"id"`
+	Online       bool    `json:"online"`
+	PhoneNumber  string  `json:"phone_number"`
+	Email        string  `json:"email"`
+	Name         string  `json:"name"`
+	Mobile       bool    `json:"mobile"`
+	Password     string  `json:"password"`
+	Image        string  `json:"image"`
+	Role         string  `json:"role"`
+	LastLocation LongLat `json:"last_location"`
 }
 
 type MerchantInfo struct {
@@ -102,6 +103,6 @@ type LocationEntity struct {
 }
 
 type DataResponse struct {
-	Success bool `json:"success"`
+	Success bool   `json:"success"`
 	Message string `json:"message"`
 }

@@ -19,7 +19,6 @@ var (
 	s3Client     *s3.S3
 	s3Uploader *s3manager.Uploader
 	s3BucketName string
-
 )
 
 func oneSignalConfig() {

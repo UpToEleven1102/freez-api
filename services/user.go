@@ -30,6 +30,7 @@ func UpdateUser(user models.User) (err error) {
 
 func GetUserByEmail(email string) (interface{}, error) {
 	r, err := DB.Query(`SELECT * FROM user WHERE email=?`, email)
+	defer r.Close()
 
 	if err != nil {
 		return nil, err
@@ -48,6 +49,7 @@ func GetUserByEmail(email string) (interface{}, error) {
 
 func GetUserById(id string) (interface{}, error) {
 	r, err := DB.Query(`SELECT * from user WHERE id=?`, id)
+	defer r.Close()
 
 	if err != nil {
 		return nil, err
@@ -88,6 +90,8 @@ func RemoveFavorite(data models.RequestData) (err error) {
 
 func isFavorite(data models.RequestData) (bool, error) {
 	r, err := DB.Query(`SELECT * FROM favorite WHERE user_id=? AND merchant_id=?`, data.UserId, data.Data)
+	defer r.Close()
+
 	if err != nil {
 		return false, err
 	}
@@ -97,6 +101,10 @@ func isFavorite(data models.RequestData) (bool, error) {
 	}
 	return false, nil
 }
+
+//func GetFavorites(user_id string) (err error) {
+//	_, err = DB.Query(`SELECT online, merchant_id, ST_GeomFromText(location) as location, distance, name, phone_number, email, mobile, image,  `)
+//}
 //
 //func GetFavorites(user_id string) (err error) {
 //	_, err = DB.Query(`SELECT online, email, name, mobile, phone_number, image, merchant_id

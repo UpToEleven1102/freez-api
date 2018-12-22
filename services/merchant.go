@@ -10,15 +10,20 @@ import (
 
 func GetMerchants() (merchants []models.Merchant, err error) {
 	var merchant models.Merchant
+	var location string
 
 	r, err := DB.Query(`SELECT * FROM merchant`)
+	defer r.Close()
+
 	if err != nil {
 		return nil, err
 	}
-	defer r.Close()
 
 	for r.Next() {
-		r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image)
+		r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image, &location)
+
+		merchant.LastLocation.Long, merchant.LastLocation.Lat, _ = getLongLat(location)
+
 		merchants = append(merchants, merchant)
 	}
 	return merchants, err
@@ -50,12 +55,15 @@ func GetMerchantByEmail(email string) (interface{}, error) {
 	var merchant models.Merchant
 
 	r, err := DB.Query(`SELECT * FROM merchant WHERE email=?`, email)
+	defer r.Close()
 	if err != nil {
 		return nil, err
 	}
 
+	var location string
+
 	if r.Next() {
-		r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image)
+		r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image, &location)
 		return merchant, nil
 	}
 	return nil, nil
@@ -65,12 +73,14 @@ func GetMerchantById(id string) (interface{}, error) {
 	var merchant models.Merchant
 
 	r, err := DB.Query(`SELECT * FROM merchant WHERE id=?`, id)
+	defer r.Close()
 	if err != nil {
 		return nil, err
 	}
+	var location string
 
 	if r.Next() {
-		r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image)
+		r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image, &location)
 		return merchant, nil
 	}
 	return nil, nil
@@ -106,11 +116,16 @@ func AddNewLocation(location models.Location) (error) {
 	if err != nil {
 		return err
 	}
+	_, err = DB.Exec(`UPDATE merchant SET last_location=ST_GeomFromText(?) WHERE id=?`, point, location.Id)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func GetLastPositionByMerchantID(merchantID string) (interface{}, error) {
 	r, err := DB.Query(`SELECT merchant_id, ST_AsText(location) FROM location WHERE merchant_id=? ORDER BY ts DESC LIMIT 1;`, merchantID)
+	defer r.Close()
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +155,7 @@ func GetNearMerchantsLastLocation(location models.Location) (merchants []interfa
 								  JOIN merchant m
 								    ON l.merchant_id=m.id
 									  HAVING distance < 3 AND online=true`, userLocation)
-
+	defer r.Close()
 	if err != nil {
 		return nil, err
 	}

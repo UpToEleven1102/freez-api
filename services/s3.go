@@ -96,7 +96,29 @@ func listObjects() {
 		return
 	}
 
+	//deleteObjects(result.Contents)
+
 	fmt.Println(result)
+}
+
+func deleteObjects(Contents []*s3.Object) {
+	for _, content := range Contents {
+		if *content.Key != "blank-profile-picture.jpg" {
+			deleteObject(content.Key)
+		}
+	}
+}
+
+func deleteObject(key *string) {
+	input := &s3.DeleteObjectInput{
+		Bucket: aws.String(s3BucketName),
+		Key: aws.String(*key),
+	}
+
+	_, err := s3Client.DeleteObject(input)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 

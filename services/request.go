@@ -36,6 +36,9 @@ func CreateRequest(request models.Request) error {
 }
 
 func getLongLat(point string) (long float32, lat float32, err error) {
+	if point == "" {
+		return 0, 0, nil
+	}
 	ptArr := strings.Split(strings.Replace(point, ")", "", -1), "(")
 	if len(ptArr) < 2 {
 		return 0, 0, errors.New("index out of range")
@@ -53,6 +56,7 @@ func getLongLat(point string) (long float32, lat float32, err error) {
 
 func GetRequestByUserID(userID string) (interface{}, error) {
 	r, err := DB.Query(`SELECT user_id, merchant_id, ST_AsText(location) FROM request WHERE user_id=?`, userID)
+	defer r.Close()
 
 	if err != nil {
 		return nil, err
@@ -78,6 +82,7 @@ func GetRequestByUserID(userID string) (interface{}, error) {
 
 func GetRequestByMerchantID(merchantID string) (interface{}, error) {
 	r, err := DB.Query(`SELECT id, user_id, merchant_id, ST_ASTEXT(location), comment, accepted FROM request WHERE merchant_id=?`, merchantID)
+	defer r.Close()
 
 	if err != nil {
 		return nil, err
@@ -115,6 +120,8 @@ func GetRequestInfoByMerchantId(merchantId string) (interface{}, error) {
 								  LEFT OUTER JOIN user u 
 								    ON r.user_id=u.id 
 								WHERE merchant_id=?`, location, merchantId)
+	defer r.Close()
+
 	if err != nil {
 		panic(err)
 		return nil, err
@@ -145,6 +152,8 @@ func GetRequestedMerchantByUserID(userId string) (interface{}, error) {
 											JOIN user u
 												ON u.id=r.user_id
 										WHERE r.user_id=?`, userId)
+	defer r.Close()
+
 	if err != nil {
 		return nil, err
 	}
@@ -194,6 +203,7 @@ func UpdateRequestAccepted(req models.RequestEntity) (err error) {
 
 func GetRequests() (interface{}, error) {
 	r, err := DB.Query(`SELECT user_id, merchant_id, ST_ASTEXT(location) FROM request`)
+	defer r.Close()
 
 	if err != nil {
 		return nil, err
