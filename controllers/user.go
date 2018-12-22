@@ -97,6 +97,31 @@ func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, clai
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
 		}
+	case "PUT":
+		switch objectID {
+		case "update-profile":
+			b, err := ioutil.ReadAll(req.Body)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return nil
+			}
+
+			var user models.User
+
+			err = json.Unmarshal(b, &user)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return nil
+			}
+			user.ID = claims.Id
+
+			err = services.UpdateUser(user)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return nil
+			}
+
+		}
 	}
 
 	return nil

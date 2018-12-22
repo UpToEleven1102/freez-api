@@ -23,6 +23,11 @@ func CreateUser(user models.User) (interface{}, error) {
 	return user, nil
 }
 
+func UpdateUser(user models.User) (err error) {
+	_, err = DB.Exec(`UPDATE user SET phone_number=?,email=?,name=?,image=? WHERE id=?;`,user.PhoneNumber,user.Email,user.Name,user.Image,user.ID)
+	return err
+}
+
 func GetUserByEmail(email string) (interface{}, error) {
 	r, err := DB.Query(`SELECT * FROM user WHERE email=?`, email)
 
