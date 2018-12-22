@@ -10,7 +10,7 @@ const schemaMerchant = `
 		email VARCHAR(64) NOT NULL,
 		name text NOT NULL,
 		password text NOT NULL,
-		image VARCHAR(50) NOT NULL DEFAULT './assets/profile.jpg',
+		image VARCHAR(255) NOT NULL DEFAULT './assets/profile.jpg',
 		PRIMARY KEY (email)
 	);
 `
@@ -46,7 +46,7 @@ const schemaUser = `
 		email VARCHAR(64) NOT NULL,
 		name text NOT NULL,
 		password text NOT NULL,
-		image VARCHAR(50) NOT NULL DEFAULT './assets/profile.jpg',
+		image VARCHAR(255) NOT NULL DEFAULT './assets/profile.jpg',
 		last_location POINT,
 		PRIMARY KEY (email)
 	);

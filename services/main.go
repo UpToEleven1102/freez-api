@@ -5,6 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/jmoiron/sqlx"
 	"github.com/tbalthazar/onesignal-go"
 	"os"
@@ -16,6 +17,7 @@ var (
 	oneSignalAppID  string
 
 	s3Client     *s3.S3
+	s3Uploader *s3manager.Uploader
 	s3BucketName string
 
 )
@@ -43,13 +45,16 @@ func awsConfig() {
 	}
 
 	s3Client = s3.New(sess)
+	s3Uploader = s3manager.NewUploader(sess)
 }
+
 
 func init() {
 	DB, _ = db.Config()
 	oneSignalConfig()
 
 	awsConfig()
-
+	listObjects()
+	//UploadBlankProfilePicture()
 	//GetBucketLocation()
 }

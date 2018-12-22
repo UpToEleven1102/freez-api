@@ -2,6 +2,7 @@ package identity
 
 import (
 	"encoding/json"
+	"fmt"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
 	"golang.org/x/crypto/bcrypt"
@@ -48,20 +49,31 @@ func SignInMerchant(w http.ResponseWriter, req *http.Request) {
 
 func SignUpMerchant(w http.ResponseWriter, req *http.Request) {
 	body, err := ioutil.ReadAll(req.Body)
+	var response models.DataResponse
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		response.Success = false
+		response.Message = err.Error()
+		writeResponse(w, response, http.StatusBadRequest)
+		fmt.Println(response)
+		return
 	}
 
 	var merchant models.Merchant
 
 	err = json.Unmarshal(body, &merchant)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		response.Success = false
+		response.Message = err.Error()
+		writeResponse(w, response, http.StatusBadRequest)
+		return
 	}
 
 	merchant, err = services.CreateMerchant(merchant)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		response.Success = false
+		response.Message = err.Error()
+		writeResponse(w, response, http.StatusInternalServerError)
+		fmt.Println(response)
 		return
 	}
 

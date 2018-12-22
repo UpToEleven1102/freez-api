@@ -1,7 +1,6 @@
 package services
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
@@ -78,10 +77,6 @@ func GetMerchantById(id string) (interface{}, error) {
 }
 
 func CreateMerchant(merchant models.Merchant) (models.Merchant, error) {
-	b, _ := json.Marshal(merchant)
-
-	fmt.Println(string(b))
-
 	password, err := bcrypt.GenerateFromPassword([]byte(merchant.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return merchant, err
@@ -91,13 +86,18 @@ func CreateMerchant(merchant models.Merchant) (models.Merchant, error) {
 	uid, _ := uuid.NewV4()
 	merchant.ID = uid.String()
 
-	_, err = DB.Exec(`INSERT INTO merchant (id, mobile, phone_number, email, name, password) VALUES (?, ?, ?, ?, ?, ?)`, merchant.ID, merchant.Mobile, merchant.PhoneNumber, merchant.Email, merchant.Name, merchant.Password)
+	_, err = DB.Exec(`INSERT INTO merchant (id, mobile, phone_number, email, name, password, image) VALUES (?, ?, ?, ?, ?, ?, ?)`, merchant.ID, merchant.Mobile, merchant.PhoneNumber, merchant.Email, merchant.Name, merchant.Password, merchant.Image)
 
 	if err != nil {
-		return merchant, errors.New("email exists")
+		return merchant, err
 	}
 
 	return merchant, nil
+}
+
+func UpdateMerchant(merchant models.Merchant) (err error) {
+	_, err = DB.Exec(`UPDATE merchant SET mobile=?,phone_number=?,email=?,name=?,image=? WHERE id=?;`,merchant.Mobile, merchant.PhoneNumber, merchant.Email, merchant.Name, merchant.Image, merchant.ID)
+	return err
 }
 
 func AddNewLocation(location models.Location) (error) {

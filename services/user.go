@@ -15,7 +15,7 @@ func CreateUser(user models.User) (interface{}, error) {
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	user.Password = string(hashedPassword)
 
-	_, err := DB.Exec(`INSERT INTO user (id, phone_number, email, name, password) VALUES(?,?,?,?,?)`, user.ID, user.PhoneNumber, user.Email, user.Name, user.Password);
+	_, err := DB.Exec(`INSERT INTO user (id, phone_number, email, name, password, image) VALUES(?,?,?,?,?,?)`, user.ID, user.PhoneNumber, user.Email, user.Name, user.Password, user.Image);
 	if err != nil {
 		return nil, err
 	}

@@ -30,6 +30,11 @@ type Credentials struct {
 	Password string `json:"password"`
 }
 
+func writeResponse(w http.ResponseWriter, res models.DataResponse, statusCode int) {
+	b, _ := json.Marshal(res)
+	w.WriteHeader(statusCode)
+	w.Write(b)
+}
 
 func getToken(w http.ResponseWriter, req *http.Request) (string, error) {
 	authToken := req.Header.Get("Authorization")

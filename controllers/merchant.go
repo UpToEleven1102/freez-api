@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -53,6 +54,29 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 		} else {
 			http.NotFound(w, req)
 			return nil
+		}
+
+	case "PUT":
+		if objectID == "update-profile" {
+			b, err := ioutil.ReadAll(req.Body)
+
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return nil
+			}
+
+			var merchant models.Merchant
+			err = json.Unmarshal(b, &merchant)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return nil
+			}
+			merchant.ID = claims.Id
+
+			err = services.UpdateMerchant(merchant)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
 		}
 
 	default:
