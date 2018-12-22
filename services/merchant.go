@@ -26,6 +26,7 @@ func GetMerchants() (merchants []models.Merchant, err error) {
 
 		merchants = append(merchants, merchant)
 	}
+
 	return merchants, err
 }
 
@@ -64,6 +65,7 @@ func GetMerchantByEmail(email string) (interface{}, error) {
 
 	if r.Next() {
 		r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image, &location)
+		merchant.LastLocation.Long, merchant.LastLocation.Lat, _ = getLongLat(location)
 		return merchant, nil
 	}
 	return nil, nil
@@ -74,6 +76,7 @@ func GetMerchantById(id string) (interface{}, error) {
 
 	r, err := DB.Query(`SELECT * FROM merchant WHERE id=?`, id)
 	defer r.Close()
+
 	if err != nil {
 		return nil, err
 	}
@@ -81,6 +84,7 @@ func GetMerchantById(id string) (interface{}, error) {
 
 	if r.Next() {
 		r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image, &location)
+		merchant.LastLocation.Long, merchant.LastLocation.Lat, _ = getLongLat(location)
 		return merchant, nil
 	}
 	return nil, nil
@@ -156,6 +160,7 @@ func GetNearMerchantsLastLocation(location models.Location) (merchants []interfa
 								    ON l.merchant_id=m.id
 									  HAVING distance < 3 AND online=true`, userLocation)
 	defer r.Close()
+
 	if err != nil {
 		return nil, err
 	}
