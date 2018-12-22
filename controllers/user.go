@@ -11,10 +11,18 @@ import (
 	"net/http"
 )
 
+func sendResponse(w http.ResponseWriter, response models.DataResponse, status int) {
+	w.WriteHeader(status)
+	b, _ := json.Marshal(response)
+	w.Write(b)
+}
+
 func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, claims models.JwtClaims) error {
 	if claims.Role != config.User {
 		return errors.New("Unauthenticated")
 	}
+
+	var response models.DataResponse
 
 	switch req.Method {
 	case "GET":
@@ -23,11 +31,11 @@ func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, clai
 			fileName := fmt.Sprint(claims.Id, "-profile.jpg")
 			url, err := services.GeneratePreSignedUrl(fileName)
 
-			var response models.DataResponse
-
 			if err != nil {
 				response.Success = false
 				response.Message = err.Error()
+				sendResponse(w, response, http.StatusInternalServerError)
+				return nil
 			} else {
 				response.Success = true
 				response.Message = url
@@ -35,7 +43,20 @@ func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, clai
 
 			b, _ := json.Marshal(response)
 			_,_ = w.Write(b)
+		case "favorite":
+			r, err := services.GetFavorites(claims.Id)
+
+			if err != nil {
+				response.Success = false
+				response.Message = err.Error()
+				sendResponse(w, response, http.StatusInternalServerError)
+				return nil
+			}
+
+			b, _ := json.Marshal(r)
+			w.Write(b)
 		}
+
 	case "POST":
 		switch objectID {
 		case "location":
@@ -77,6 +98,7 @@ func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, clai
 		default:
 			http.NotFound(w, req)
 		}
+
 	case "DELETE":
 		switch objectID {
 		case "favorite":
@@ -97,6 +119,7 @@ func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, clai
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
 		}
+
 	case "PUT":
 		switch objectID {
 		case "update-profile":

@@ -102,10 +102,33 @@ func isFavorite(data models.RequestData) (bool, error) {
 	return false, nil
 }
 
-//func GetFavorites(user_id string) (err error) {
-//	_, err = DB.Query(`SELECT online, merchant_id, ST_GeomFromText(location) as location, distance, name, phone_number, email, mobile, image,  `)
-//}
-//
+func GetFavorites(userID string) (merchants []interface{}, err error) {
+	r, err := DB.Query(`SELECT online, merchant_id, ST_AsText(m.last_location) as location, ST_Distance_Sphere(u.last_location, m.last_location) as distance, m.name, m.phone_number, m.email, mobile, m.image
+								FROM favorite f
+								  INNER JOIN user u
+								  	ON f.user_id=u.id
+									INNER JOIN merchant m
+									  ON f.merchant_id=m.id
+										WHERE f.user_id=?`, userID)
+	defer r.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	var merchant models.MerchantInfo
+	var location string
+	for r.Next() {
+		err = r.Scan(&merchant.Online, &merchant.MerchantID, &location, &merchant.Distance, &merchant.Name, &merchant.PhoneNumber, &merchant.Email, &merchant.Mobile, &merchant.Image)
+		if err != nil {
+			return nil, err
+		}
+		merchant.Location.Long, merchant.Location.Lat, _ = getLongLat(location)
+		merchants = append(merchants, merchant)
+	}
+
+	return merchants, nil
+}
+
 //func GetFavorites(user_id string) (err error) {
 //	_, err = DB.Query(`SELECT online, email, name, mobile, phone_number, image, merchant_id
 //								FROM favorite f
