@@ -14,8 +14,8 @@ func CreateUser(user models.User) (interface{}, error) {
 
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	user.Password = string(hashedPassword)
-
-	_, err := DB.Exec(`INSERT INTO user (id, phone_number, email, name, password, image) VALUES(?,?,?,?,?,?)`, user.ID, user.PhoneNumber, user.Email, user.Name, user.Password, user.Image);
+	location := fmt.Sprintf("POINT(%f %f)", user.LastLocation.Long, user.LastLocation.Lat)
+	_, err := DB.Exec(`INSERT INTO user (id, phone_number, email, name, password, last_location, image) VALUES(?,?,?,?,?,ST_GeomFromText(?),?)`, user.ID, user.PhoneNumber, user.Email, user.Name, user.Password, location, user.Image);
 	if err != nil {
 		return nil, err
 	}
@@ -25,11 +25,12 @@ func CreateUser(user models.User) (interface{}, error) {
 
 func UpdateUser(user models.User) (err error) {
 	_, err = DB.Exec(`UPDATE user SET phone_number=?,email=?,name=?,image=? WHERE id=?;`,user.PhoneNumber,user.Email,user.Name,user.Image,user.ID)
+	_, err = DB.Exec(`UPDATE m_option SET notif_fav_nearby=? WHERE user_id=?;`, user.Option.NotifFavNearby, user.ID)
 	return err
 }
 
 func GetUserByEmail(email string) (interface{}, error) {
-	r, err := DB.Query(`SELECT * FROM user WHERE email=?`, email)
+	r, err := DB.Query(`SELECT id, phone_number, email, name, password, image, ST_AsText(last_location) FROM user WHERE email=?`, email)
 	defer r.Close()
 
 	if err != nil {
@@ -48,7 +49,10 @@ func GetUserByEmail(email string) (interface{}, error) {
 }
 
 func GetUserById(id string) (interface{}, error) {
-	r, err := DB.Query(`SELECT * from user WHERE id=?`, id)
+	r, err := DB.Query(`SELECT u.id, phone_number, email, name, password, image, ST_AsText(last_location), notif_fav_nearby 
+								  FROM user u 
+								    INNER JOIN m_option o 
+								      ON u.id=o.user_id WHERE u.id=?`, id)
 	defer r.Close()
 
 	if err != nil {
@@ -58,7 +62,7 @@ func GetUserById(id string) (interface{}, error) {
 	var location string
 	var user models.User
 	if r.Next() {
-		r.Scan(&user.ID, &user.PhoneNumber, &user.Email, &user.Name, &user.Password, &user.Image, &location)
+		r.Scan(&user.ID, &user.PhoneNumber, &user.Email, &user.Name, &user.Password, &user.Image, &location, &user.Option.NotifFavNearby)
 		return user, nil
 	}
 

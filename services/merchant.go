@@ -8,26 +8,48 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func GetMerchants() (merchants []models.Merchant, err error) {
-	var merchant models.Merchant
-	var location string
+//func GetMerchants() (merchants []models.Merchant, err error) {
+//	var merchant models.Merchant
+//	var location string
+//
+//	r, err := DB.Query(`SELECT * FROM merchant`)
+//	defer r.Close()
+//
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	for r.Next() {
+//		r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image, &location)
+//
+//		merchant.LastLocation.Long, merchant.LastLocation.Lat, _ = getLongLat(location)
+//
+//		merchants = append(merchants, merchant)
+//	}
+//
+//	return merchants, err
+//}
 
-	r, err := DB.Query(`SELECT * FROM merchant`)
-	defer r.Close()
+
+func CreateMerchant(merchant models.Merchant) (models.Merchant, error) {
+	password, err := bcrypt.GenerateFromPassword([]byte(merchant.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return merchant, err
+	}
+
+	merchant.Password = string(password)
+	uid, _ := uuid.NewV4()
+	merchant.ID = uid.String()
+
+	location := fmt.Sprintf("POINT(%f %f)", merchant.LastLocation.Long, merchant.LastLocation.Lat)
+
+	_, err = DB.Exec(`INSERT INTO merchant (id, mobile, phone_number, email, name, password, last_location, image) VALUES (?, ?, ?, ?, ?, ?, ST_GeomFromText(?), ?)`, merchant.ID, merchant.Mobile, merchant.PhoneNumber, merchant.Email, merchant.Name, merchant.Password, location, merchant.Image)
 
 	if err != nil {
-		return nil, err
+		return merchant, err
 	}
 
-	for r.Next() {
-		r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image, &location)
-
-		merchant.LastLocation.Long, merchant.LastLocation.Lat, _ = getLongLat(location)
-
-		merchants = append(merchants, merchant)
-	}
-
-	return merchants, err
+	return merchant, nil
 }
 
 func ChangeOnlineStatus(merchantId string) error {
@@ -55,7 +77,7 @@ func ChangeOnlineStatus(merchantId string) error {
 func GetMerchantByEmail(email string) (interface{}, error) {
 	var merchant models.Merchant
 
-	r, err := DB.Query(`SELECT * FROM merchant WHERE email=?`, email)
+	r, err := DB.Query(`SELECT id, online, mobile, phone_number, email, name, password, image, ST_AsText(last_location) FROM merchant WHERE email=?`, email)
 	defer r.Close()
 	if err != nil {
 		return nil, err
@@ -74,7 +96,7 @@ func GetMerchantByEmail(email string) (interface{}, error) {
 func GetMerchantById(id string) (interface{}, error) {
 	var merchant models.Merchant
 
-	r, err := DB.Query(`SELECT * FROM merchant WHERE id=?`, id)
+	r, err := DB.Query(`SELECT id, online, mobile, phone_number, email, name, password, image, ST_AsText(last_location) FROM merchant WHERE id=?`, id)
 	defer r.Close()
 
 	if err != nil {
@@ -88,25 +110,6 @@ func GetMerchantById(id string) (interface{}, error) {
 		return merchant, nil
 	}
 	return nil, nil
-}
-
-func CreateMerchant(merchant models.Merchant) (models.Merchant, error) {
-	password, err := bcrypt.GenerateFromPassword([]byte(merchant.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return merchant, err
-	}
-
-	merchant.Password = string(password)
-	uid, _ := uuid.NewV4()
-	merchant.ID = uid.String()
-
-	_, err = DB.Exec(`INSERT INTO merchant (id, mobile, phone_number, email, name, password, image) VALUES (?, ?, ?, ?, ?, ?, ?)`, merchant.ID, merchant.Mobile, merchant.PhoneNumber, merchant.Email, merchant.Name, merchant.Password, merchant.Image)
-
-	if err != nil {
-		return merchant, err
-	}
-
-	return merchant, nil
 }
 
 func UpdateMerchant(merchant models.Merchant) (err error) {

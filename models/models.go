@@ -54,7 +54,12 @@ type User struct {
 	Password     string  `json:"password"`
 	LastLocation LongLat `json:"last_location"`
 	Image        string  `json:"image"`
+	Option       mOption `json:"option"`
 	Role         string  `json:"role"`
+}
+
+type mOption struct {
+	NotifFavNearby bool `json:"notif_fav_nearby"`
 }
 
 type RequestInfo struct {
