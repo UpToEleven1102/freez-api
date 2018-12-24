@@ -28,3 +28,7 @@ func CreateNotificationByUserId(userID string, title string, message string, dat
 
 	return createRes, nil
 }
+
+//func GetNotificationByUserId(userID string) (res interface{}, err error) {
+//
+//}
