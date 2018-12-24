@@ -8,9 +8,12 @@ import (
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
 	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, claims models.JwtClaims) error {
+	var response models.DataResponse
+
 	switch req.Method {
 	case "GET":
 		switch objectID {
@@ -74,8 +77,16 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 			merchant.ID = claims.Id
 
 			err = services.UpdateMerchant(merchant)
+
 			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				response.Success = false
+				if strings.Contains(err.Error(), "Error 1062") {
+					response.Message = "Email is currently in use!"
+				} else {
+					response.Message = err.Error()
+				}
+
+				sendResponse(w, response, http.StatusBadRequest)
 			}
 		}
 

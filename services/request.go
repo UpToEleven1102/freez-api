@@ -190,8 +190,8 @@ func UpdateRequestAccepted(req models.RequestEntity) (err error) {
 	} else {
 		data := models.RequestData{UserId:request.UserID, Data:"S3cr3t"}
 		CreateNotificationByUserId(request.UserID, "", notificationRequestDeclinedMessage, data)
-		RemoveRequestsByUserID(request.UserID)
-		return nil
+		//RemoveRequestsByUserID(request.UserID)
+		//return nil
 	}
 
 	if err != nil {

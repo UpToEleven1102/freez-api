@@ -9,6 +9,7 @@ import (
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
 	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 func sendResponse(w http.ResponseWriter, response models.DataResponse, status int) {
@@ -139,11 +140,18 @@ func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, clai
 			user.ID = claims.Id
 
 			err = services.UpdateUser(user)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return nil
-			}
 
+			fmt.Println(err)
+			if err != nil {
+				response.Success = false
+				if strings.Contains(err.Error(), "Error 1062") {
+					response.Message = "Email is currently in use!"
+				} else {
+					response.Message = err.Error()
+				}
+
+				sendResponse(w, response, http.StatusBadRequest)
+			}
 		}
 	}
 
