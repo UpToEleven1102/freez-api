@@ -54,6 +54,9 @@ func init() {
 
 	awsConfig()
 	listObjects()
+
+	//CreateEmailNotification("quyhuyen.vu@gmail.com", "", "hello")
+
 	//UploadBlankProfilePicture()
 	//GetBucketLocation()
 }

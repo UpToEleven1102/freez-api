@@ -8,5 +8,6 @@ all:
 	go get github.com/dgrijalva/jwt-go
 	go get github.com/joho/godotenv
 	go get github.com/aws/aws-sdk-go
+	go get github.com/go-redis/redis
 	go build -o freeze-app
 	./freeze-app

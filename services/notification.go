@@ -3,6 +3,8 @@ package services
 import (
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"github.com/tbalthazar/onesignal-go"
+	"log"
+	"net/smtp"
 )
 
 func CreateNotificationByUserId(userID string, title string, message string, data models.RequestData) (res interface{}, err error) {
@@ -29,6 +31,20 @@ func CreateNotificationByUserId(userID string, title string, message string, dat
 	return createRes, nil
 }
 
-//func GetNotificationByUserId(userID string) (res interface{}, err error) {
-//
-//}
+func CreateEmailNotification(playerID string, emailSubject string, emailBody string) (res interface{}, err error) {
+	from := "freeze.app.nextgen@gmail.com"
+	password := "s3cr3tpassword"
+
+	msg := "From: " + from + "\n" +
+		"To: " + playerID + "\n" +
+		"Subject: Your pin verification number\n\n" + emailBody
+
+	err = smtp.SendMail("smtp.gmail.com:587", smtp.PlainAuth("", from, password, "smtp.gmail.com"), from, []string{playerID}, []byte(msg))
+
+	if err != nil {
+		log.Printf("smtp error : %s", err)
+	}
+
+	return nil, nil
+
+}

@@ -10,6 +10,7 @@ RUN go get github.com/go-sql-driver/mysql
 RUN go get github.com/jmoiron/sqlx
 RUN go get github.com/joho/godotenv
 RUN go get github.com/aws/aws-sdk-go
+RUN go get github.com/go-redis/redis
 
 ENV SOURCES /go/src/git.nextgencode.io/huyen.vu/freeze-app-rest/
 
