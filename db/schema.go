@@ -30,10 +30,10 @@ const schemaLocation = `
 const schemaProduct = `CREATE TABLE product(
 	id INT NOT NULL AUTO_INCREMENT,
 	name VARCHAR(64) NOT NULL,
-	PRICE DECIMAL(10,2) NOT NULL,
+	price DECIMAL(10,2) NOT NULL,
 	merchant_id VARCHAR(64) NOT NULL,
 	PRIMARY KEY (id),
-	FOREIGN KEY fk_merchant_id(merchant_id)
+	FOREIGN KEY fk_product_merchant_id(merchant_id)
 		REFERENCES merchant(id)
 		ON UPDATE CASCADE
 		ON DELETE CASCADE
@@ -45,14 +45,14 @@ const schemaMerchantMOption = `
 		merchant_id VARCHAR(64) NOT NULL,
 		add_convenience_fee BOOL NOT NULL DEFAULT false,
 		PRIMARY KEY (id),
-		FOREIGN KEY fk_merchant_id(merchant_id)
+		FOREIGN KEY fk_option_merchant_id(merchant_id)
 			REFERENCES merchant(id)
 			ON UPDATE CASCADE
 			ON DELETE CASCADE
 	);
 `
 
-const triggerInserMerchantMOption = `
+const triggerInsertMerchantMOption = `
 	CREATE TRIGGER merchant_m_option AFTER INSERT ON merchant
 	FOR EACH ROW INSERT INTO merchant_m_option (merchant_id) VALUES(NEW.id);
 `

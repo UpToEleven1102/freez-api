@@ -38,6 +38,7 @@ type merchantMOption struct {
 }
 
 type Product struct {
+	ID         int     `json:"id"`
 	MerchantId string  `json:"merchant_id"`
 	Name       string  `json:"name"`
 	Price      float64 `json:"price"`

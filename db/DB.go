@@ -31,7 +31,7 @@ func seed(DB *sqlx.DB) {
 	DB.MustExec(schemaMerchant)
 	DB.MustExec(schemaProduct)
 	DB.MustExec(schemaMerchantMOption)
-	DB.MustExec(triggerInserMerchantMOption)
+	DB.MustExec(triggerInsertMerchantMOption)
 	DB.MustExec(schemaUser)
 	DB.MustExec(schemaMOption)
 	DB.MustExec(triggerInsertUserMOption)
@@ -60,7 +60,7 @@ func Config() (*sqlx.DB, error) {
 		}
 	}
 
-	seed(DB)
+	//seed(DB)
 
 	return DB, err
 }

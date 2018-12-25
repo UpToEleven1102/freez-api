@@ -43,10 +43,20 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 
 			b, _ := json.Marshal(response)
 			_,_ = w.Write(b)
+		case "product":
+			products, err := services.GetProducts(claims.Id)
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
+				return nil
+			}
+
+			_ = json.NewEncoder(w).Encode(products)
 		}
 
 	case "POST":
-		if objectID == "update-status" {
+		switch objectID {
+		case "update-status":
 			id := claims.Id
 			err := services.ChangeOnlineStatus(id)
 
@@ -54,24 +64,44 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return nil
 			}
-		} else {
-			http.NotFound(w, req)
-			return nil
-		}
+		case "product":
+			var product models.Product
 
+			err := json.NewDecoder(req.Body).Decode(&product)
+
+
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
+				return nil
+			}
+			product.MerchantId = claims.Id
+			err = services.CreateProduct(product)
+
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
+				return nil
+			}
+
+		default:
+			http.NotFound(w, req)
+		}
 	case "PUT":
-		if objectID == "update-profile" {
+		switch objectID {
+		case "update-profile":
+
 			b, err := ioutil.ReadAll(req.Body)
 
 			if err != nil {
-				http.Error(w, err.Error(), http.StatusBadRequest)
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
 				return nil
 			}
 
 			var merchant models.Merchant
 			err = json.Unmarshal(b, &merchant)
 			if err != nil {
-				http.Error(w, err.Error(), http.StatusBadRequest)
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
 				return nil
 			}
 			merchant.ID = claims.Id
@@ -87,6 +117,39 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 				}
 
 				sendResponse(w, response, http.StatusBadRequest)
+			}
+
+		case "product":
+			var product models.Product
+
+			err := json.NewDecoder(req.Body).Decode(&product)
+
+			if err != nil {
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
+				return nil
+			}
+			product.MerchantId = claims.Id
+			err = services.UpdateProduct(product)
+			if err != nil {
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message: err.Error()})
+				return nil
+			}
+
+		default:
+			http.NotFound(w, req)
+		}
+
+	case "DELETE":
+		switch objectID {
+		case "product":
+			var data models.Product
+
+			_ = json.NewDecoder(req.Body).Decode(&data)
+
+			err := services.DeleteProduct(data)
+
+			if err != nil {
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message: err.Error()})
 			}
 		}
 
