@@ -39,6 +39,25 @@ const schemaProduct = `CREATE TABLE product(
 		ON DELETE CASCADE
 )`
 
+const schemaMerchantMOption = `
+	CREATE TABLE merchant_m_option(
+		id INT NOT NULL AUTO_INCREMENT,
+		merchant_id VARCHAR(64) NOT NULL,
+		add_convenience_fee BOOL NOT NULL DEFAULT false,
+		PRIMARY KEY (id),
+		FOREIGN KEY fk_merchant_id(merchant_id)
+			REFERENCES merchant(id)
+			ON UPDATE CASCADE
+			ON DELETE CASCADE
+	);
+`
+
+const triggerInserMerchantMOption = `
+	CREATE TRIGGER merchant_m_option AFTER INSERT ON merchant
+	FOR EACH ROW INSERT INTO merchant_m_option (merchant_id) VALUES(NEW.id);
+`
+
+
 const schemaMerchantNotification = `CREATE TABLE merchant_notification(
 	id INT NOT NULL AUTO_INCREMENT,
 	ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP UNIQUE,

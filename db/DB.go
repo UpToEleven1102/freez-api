@@ -21,6 +21,7 @@ func init() {
 
 func seed(DB *sqlx.DB) {
 	DB.MustExec("DROP TABLE IF EXISTS product")
+	DB.MustExec("DROP TABLE IF EXISTS merchant_m_option")
 	DB.MustExec("DROP TABLE IF EXISTS merchant")
 	DB.MustExec("DROP TABLE IF EXISTS m_option")
 	DB.MustExec("DROP TABLE IF EXISTS user")
@@ -29,6 +30,8 @@ func seed(DB *sqlx.DB) {
 	DB.MustExec("DROP TABLE IF EXISTS favorite")
 	DB.MustExec(schemaMerchant)
 	DB.MustExec(schemaProduct)
+	DB.MustExec(schemaMerchantMOption)
+	DB.MustExec(triggerInserMerchantMOption)
 	DB.MustExec(schemaUser)
 	DB.MustExec(schemaMOption)
 	DB.MustExec(triggerInsertUserMOption)
@@ -57,7 +60,7 @@ func Config() (*sqlx.DB, error) {
 		}
 	}
 
-	//seed(DB)
+	seed(DB)
 
 	return DB, err
 }
