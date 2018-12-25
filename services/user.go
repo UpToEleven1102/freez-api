@@ -71,6 +71,25 @@ func GetUserById(id string) (interface{}, error) {
 	return nil, nil
 }
 
+func GetUserByPhoneNumber(phoneNumber string) (interface{}, error) {
+	r, err := DB.Query(`SELECT id, phone_number, email, name, password, image, ST_AsText(last_location) FROM user WHERE phone_number=?`, phoneNumber)
+	defer r.Close()
+
+	if err != nil {
+		return nil, err
+	}
+	var location string
+	var user models.User
+	if r.Next() {
+		r.Scan(&user.ID, &user.PhoneNumber, &user.Email, &user.Name, &user.Password, &user.Image, &location)
+		return user, nil
+	}
+
+	user.LastLocation.Long, user.LastLocation.Lat, _ = getLongLat(location)
+
+	return nil, nil
+}
+
 func UpdateUserLocation(user models.User) (interface{}, error) {
 	point:= fmt.Sprintf(`POINT(%f %f)`,user.LastLocation.Long, user.LastLocation.Lat)
 

@@ -49,9 +49,11 @@ func AuthHandler(w http.ResponseWriter, req *http.Request, route string, userTyp
 			http.NotFound(w, req)
 		}
 		auth.GetUserInfo(w, req)
-	case c.Verify:
-		if len(userType) == 0 {
-			auth.AccountExists(w, req)
+	case c.Exist:
+		if userType == c.Email {
+			auth.EmailExists(w, req)
+		} else if userType == c.PhoneNumber {
+			auth.PhoneNumberExists(w, req)
 		} else {
 			http.NotFound(w, req)
 		}

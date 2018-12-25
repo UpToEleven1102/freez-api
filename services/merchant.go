@@ -112,6 +112,28 @@ func GetMerchantById(id string) (interface{}, error) {
 	return nil, nil
 }
 
+func GetMerchantByPhoneNumber(phoneNumber string) (interface{}, error) {
+	var merchant models.Merchant
+
+	r, err := DB.Query(`SELECT id, online, mobile, phone_number, email, name, password, image, ST_AsText(last_location) FROM merchant WHERE phone_number=?`, phoneNumber)
+	defer r.Close()
+
+	if err != nil {
+		return nil, err
+	}
+	var location string
+
+	if r.Next() {
+		r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image, &location)
+		merchant.LastLocation.Long, merchant.LastLocation.Lat, _ = getLongLat(location)
+		return merchant, nil
+	}
+	return nil, nil
+}
+
+
+
+
 func UpdateMerchant(merchant models.Merchant) (err error) {
 	_, err = DB.Exec(`UPDATE merchant SET mobile=?,phone_number=?,email=?,name=?,image=? WHERE id=?;`,merchant.Mobile, merchant.PhoneNumber, merchant.Email, merchant.Name, merchant.Image, merchant.ID)
 	return err
