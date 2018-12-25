@@ -16,7 +16,15 @@ func AuthHandler(w http.ResponseWriter, req *http.Request, route string, userTyp
 		if userType == c.Verify {
 			auth.VerifyEmailPin(w, req)
 		} else if len(userType) == 0 {
-			auth.GenerateRandomPin(w, req)
+			auth.SendRandomPinEmail(w, req)
+		} else {
+			http.NotFound(w, req)
+		}
+	case c.PhoneNumber:
+		if userType == c.Verify {
+			auth.VerifySMSPin(w, req)
+		} else if len(userType) == 0 {
+			auth.SendRandomPinSMS(w, req)
 		} else {
 			http.NotFound(w, req)
 		}

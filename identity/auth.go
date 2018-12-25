@@ -201,7 +201,49 @@ type emailReq struct {
 	Pin string `json:"pin"`
 }
 
-func GenerateRandomPin(w http.ResponseWriter, req *http.Request) {
+type phoneReq struct {
+	PhoneNumber string `json:"phone_number"`
+	Pin string `json:"pin"`
+}
+
+func SendRandomPinSMS(w http.ResponseWriter, req *http.Request) {
+	var data phoneReq
+	err := json.NewDecoder(req.Body).Decode(&data)
+	if err != nil {
+		panic(err)
+	}
+
+	r1 := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	pin:= strconv.Itoa(r1.Intn(10)) + strconv.Itoa(r1.Intn(10)) + strconv.Itoa(r1.Intn(10)) + strconv.Itoa(r1.Intn(10))
+
+	fmt.Println(pin)
+	services.RedisClient.Set(data.PhoneNumber, pin, 5 * time.Minute)
+	services.SendSMSMessage(data.PhoneNumber, pin)
+}
+
+func VerifySMSPin(w http.ResponseWriter, req *http.Request) {
+	var data phoneReq
+	err := json.NewDecoder(req.Body).Decode(&data)
+	if err != nil {
+		panic(err)
+	}
+
+	if dbPin, err := services.RedisClient.Get(data.PhoneNumber).Result(); dbPin != data.Pin {
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
+			return
+		}
+		json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:"Invalid pin number"})
+		return
+	}
+
+	services.RedisClient.Del(data.PhoneNumber)
+	json.NewEncoder(w).Encode(models.DataResponse{Success:true})
+}
+
+func SendRandomPinEmail(w http.ResponseWriter, req *http.Request) {
 	b, _ := ioutil.ReadAll(req.Body)
 
 	var data emailReq
@@ -241,13 +283,12 @@ func VerifyEmailPin(w http.ResponseWriter, req *http.Request) {
 			res.Message = "invalid pin number"
 		}
 
-
+		w.WriteHeader(http.StatusBadRequest)
 	} else {
 		services.RedisClient.Del(data.Email)
 		res.Success = true
 	}
 
 	b, _ = json.Marshal(res)
-	w.WriteHeader(http.StatusBadRequest)
 	w.Write(b)
 }

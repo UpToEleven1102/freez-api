@@ -10,5 +10,6 @@ const (
 	Request = "request"
 	Location = "location"
 	Email = "email"
+	PhoneNumber="phone-number"
 	SRID = 3857
 )
