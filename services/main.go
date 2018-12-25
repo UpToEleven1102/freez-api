@@ -6,8 +6,10 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/go-redis/redis"
 	"github.com/jmoiron/sqlx"
 	"github.com/tbalthazar/onesignal-go"
+	"log"
 	"os"
 )
 
@@ -19,6 +21,8 @@ var (
 	s3Client     *s3.S3
 	s3Uploader *s3manager.Uploader
 	s3BucketName string
+
+	RedisClient *redis.Client
 )
 
 func oneSignalConfig() {
@@ -47,13 +51,31 @@ func awsConfig() {
 	s3Uploader = s3manager.NewUploader(sess)
 }
 
+func redisConfig() {
+	redisServer := os.Getenv("REDIS_ADDRESS")
+
+	RedisClient = redis.NewClient(&redis.Options{
+		Addr: redisServer,
+		Password: "",
+		DB: 0,
+	})
+
+	_, err := RedisClient.Ping().Result()
+	if err != nil {
+		log.Printf("%s\n", err)
+	}
+}
+
 
 func init() {
 	DB, _ = db.Config()
 	oneSignalConfig()
 
 	awsConfig()
-	listObjects()
+
+	redisConfig()
+
+	//listObjects()
 
 	//CreateEmailNotification("quyhuyen.vu@gmail.com", "", "hello")
 

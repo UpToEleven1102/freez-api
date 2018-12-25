@@ -9,5 +9,6 @@ const (
 	Verify = "verify"
 	Request = "request"
 	Location = "location"
+	Email = "email"
 	SRID = 3857
 )

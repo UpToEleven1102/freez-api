@@ -7,7 +7,19 @@ import (
 )
 
 func AuthHandler(w http.ResponseWriter, req *http.Request, route string, userType string) {
+	if req.Method != "POST" {
+		http.NotFound(w, req)
+		return
+	}
 	switch route {
+	case c.Email:
+		if userType == c.Verify {
+			auth.VerifyEmailPin(w, req)
+		} else if len(userType) == 0 {
+			auth.GenerateRandomPin(w, req)
+		} else {
+			http.NotFound(w, req)
+		}
 	case c.SignUp:
 		if userType == c.Merchant {
 			auth.SignUpMerchant(w, req)

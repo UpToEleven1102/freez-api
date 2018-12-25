@@ -31,7 +31,7 @@ func CreateNotificationByUserId(userID string, title string, message string, dat
 	return createRes, nil
 }
 
-func CreateEmailNotification(playerID string, emailSubject string, emailBody string) (res interface{}, err error) {
+func CreateEmailNotification(playerID string, emailSubject string, emailBody string) (err error) {
 	from := "freeze.app.nextgen@gmail.com"
 	password := "s3cr3tpassword"
 
@@ -45,6 +45,6 @@ func CreateEmailNotification(playerID string, emailSubject string, emailBody str
 		log.Printf("smtp error : %s", err)
 	}
 
-	return nil, nil
+	return err
 
 }

@@ -9,8 +9,10 @@ import (
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
 	"github.com/dgrijalva/jwt-go"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -192,4 +194,60 @@ func GetUserInfo(w http.ResponseWriter, req *http.Request) {
 		b, _ := json.Marshal(res)
 		w.Write(b)
 	}
+}
+
+type emailReq struct {
+	Email string `json:"email"`
+	Pin string `json:"pin"`
+}
+
+func GenerateRandomPin(w http.ResponseWriter, req *http.Request) {
+	b, _ := ioutil.ReadAll(req.Body)
+
+	var data emailReq
+	err := json.Unmarshal(b, &data)
+
+	if err != nil {
+		panic(err)
+	}
+
+	r1 := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	pin:= strconv.Itoa(r1.Intn(10)) + strconv.Itoa(r1.Intn(10)) + strconv.Itoa(r1.Intn(10)) + strconv.Itoa(r1.Intn(10))
+
+	fmt.Println(pin)
+
+	services.RedisClient.Set(data.Email, pin, 5 * time.Minute)
+	_ = services.CreateEmailNotification(data.Email, "", pin)
+}
+
+func VerifyEmailPin(w http.ResponseWriter, req *http.Request) {
+	b, _ := ioutil.ReadAll(req.Body)
+
+	var data emailReq
+	err := json.Unmarshal(b, &data)
+
+	if err != nil {
+		panic(err)
+	}
+
+	var res models.DataResponse
+	if dbPin, err := services.RedisClient.Get(data.Email).Result(); dbPin != data.Pin {
+		res.Success = false
+
+		if err != nil {
+			res.Message = err.Error()
+		} else {
+			res.Message = "invalid pin number"
+		}
+
+
+	} else {
+		services.RedisClient.Del(data.Email)
+		res.Success = true
+	}
+
+	b, _ = json.Marshal(res)
+	w.WriteHeader(http.StatusBadRequest)
+	w.Write(b)
 }
