@@ -19,16 +19,30 @@ type RequestData struct {
 }
 
 type Merchant struct {
-	ID           string  `json:"id"`
-	Online       bool    `json:"online"`
-	PhoneNumber  string  `json:"phone_number"`
-	Email        string  `json:"email"`
-	Name         string  `json:"name"`
-	Mobile       bool    `json:"mobile"`
-	Password     string  `json:"password"`
-	Image        string  `json:"image"`
-	Role         string  `json:"role"`
-	LastLocation LongLat `json:"last_location"`
+	ID           string          `json:"id"`
+	Online       bool            `json:"online"`
+	PhoneNumber  string          `json:"phone_number"`
+	Email        string          `json:"email"`
+	Name         string          `json:"name"`
+	Mobile       bool            `json:"mobile"`
+	Password     string          `json:"password"`
+	Image        string          `json:"image"`
+	Role         string          `json:"role"`
+	LastLocation LongLat         `json:"last_location"`
+	Option       merchantMOption `json:"option"`
+	Product      []Product       `json:"product"`
+}
+
+type merchantMOption struct {
+	AddConvenienceFee bool `json:"add_convenience_fee"`
+}
+
+type Product struct {
+	ID         int     `json:"id"`
+	MerchantId string  `json:"merchant_id"`
+	Name       string  `json:"name"`
+	Price      float64 `json:"price"`
+	Image      string  `json:"image"`
 }
 
 type MerchantInfo struct {
