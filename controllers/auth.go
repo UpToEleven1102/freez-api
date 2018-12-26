@@ -7,7 +7,27 @@ import (
 )
 
 func AuthHandler(w http.ResponseWriter, req *http.Request, route string, userType string) {
+	if req.Method != "POST" {
+		http.NotFound(w, req)
+		return
+	}
 	switch route {
+	case c.Email:
+		if userType == c.Verify {
+			auth.VerifyEmailPin(w, req)
+		} else if len(userType) == 0 {
+			auth.SendRandomPinEmail(w, req)
+		} else {
+			http.NotFound(w, req)
+		}
+	case c.PhoneNumber:
+		if userType == c.Verify {
+			auth.VerifySMSPin(w, req)
+		} else if len(userType) == 0 {
+			auth.SendRandomPinSMS(w, req)
+		} else {
+			http.NotFound(w, req)
+		}
 	case c.SignUp:
 		if userType == c.Merchant {
 			auth.SignUpMerchant(w, req)
@@ -29,9 +49,11 @@ func AuthHandler(w http.ResponseWriter, req *http.Request, route string, userTyp
 			http.NotFound(w, req)
 		}
 		auth.GetUserInfo(w, req)
-	case c.Verify:
-		if len(userType) == 0 {
-			auth.AccountExists(w, req)
+	case c.Exist:
+		if userType == c.Email {
+			auth.EmailExists(w, req)
+		} else if userType == c.PhoneNumber {
+			auth.PhoneNumberExists(w, req)
 		} else {
 			http.NotFound(w, req)
 		}

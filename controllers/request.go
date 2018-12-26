@@ -102,7 +102,7 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 		default:
 			http.NotFound(w,req)
 		}
-	case "UPDATE":
+	case "PUT":
 		if claims.Role == config.Merchant {
 			b, err := ioutil.ReadAll(req.Body)
 			if err != nil {
@@ -117,7 +117,7 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 				http.Error(w, "accepted param must be 0 or 1", http.StatusBadRequest)
 				return nil
 			}
-
+			request.MerchantID = claims.Id
 			err = services.UpdateRequestAccepted(request)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)

@@ -9,8 +9,10 @@ import (
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
 	"github.com/dgrijalva/jwt-go"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -18,6 +20,12 @@ import (
 type JWTData struct {
 	jwt.StandardClaims
 	//CustomClaims map[string]string `json:"custom,omitempty"`
+}
+
+type request struct {
+	Email       string `json:"email"`
+	PhoneNumber string `json:"phone_number"`
+	Role        string `json:"role"`
 }
 
 type response struct {
@@ -30,6 +38,11 @@ type Credentials struct {
 	Password string `json:"password"`
 }
 
+func writeResponse(w http.ResponseWriter, res models.DataResponse, statusCode int) {
+	b, _ := json.Marshal(res)
+	w.WriteHeader(statusCode)
+	w.Write(b)
+}
 
 func getToken(w http.ResponseWriter, req *http.Request) (string, error) {
 	authToken := req.Header.Get("Authorization")
@@ -43,7 +56,7 @@ func getToken(w http.ResponseWriter, req *http.Request) (string, error) {
 
 func AuthorizeMiddleware(w http.ResponseWriter, req *http.Request, objectID string, handler models.FuncHandler) error {
 	token, err := getToken(w, req)
-	if err != nil{
+	if err != nil {
 		return err
 	}
 	claims, err := AuthenticateToken(token)
@@ -54,7 +67,6 @@ func AuthorizeMiddleware(w http.ResponseWriter, req *http.Request, objectID stri
 	err = handler(w, req, objectID, claims)
 	return err
 }
-
 
 func AuthenticateToken(jwtToken string) (models.JwtClaims, error) {
 	token, err := jwt.ParseWithClaims(jwtToken, &JWTData{}, func(token *jwt.Token) (interface{}, error) {
@@ -121,7 +133,7 @@ func createToken(acc interface{}) (string, error) {
 	return tokenString, nil
 }
 
-func AccountExists(w http.ResponseWriter, req *http.Request) {
+func EmailExists(w http.ResponseWriter, req *http.Request) {
 	body, _ := ioutil.ReadAll(req.Body)
 	var r response
 	err := json.Unmarshal(body, &r)
@@ -145,6 +157,21 @@ func AccountExists(w http.ResponseWriter, req *http.Request) {
 
 	b, _ := json.Marshal(r)
 	w.Write(b)
+}
+
+func PhoneNumberExists(w http.ResponseWriter, req *http.Request) {
+	var r request
+	_ = json.NewDecoder(req.Body).Decode(&r)
+
+	if merchant, _ := services.GetMerchantByPhoneNumber(r.PhoneNumber); merchant != nil {
+		json.NewEncoder(w).Encode(response{Message: "true", Role:c.Merchant})
+	} else {
+		if merchant, _ = services.GetUserByPhoneNumber(r.PhoneNumber); merchant != nil {
+			json.NewEncoder(w).Encode(response{Message:"true", Role: c.User})
+		} else {
+			json.NewEncoder(w).Encode(response{Message:"false"})
+		}
+	}
 }
 
 func GetUserInfo(w http.ResponseWriter, req *http.Request) {
@@ -187,4 +214,101 @@ func GetUserInfo(w http.ResponseWriter, req *http.Request) {
 		b, _ := json.Marshal(res)
 		w.Write(b)
 	}
+}
+
+type emailReq struct {
+	Email string `json:"email"`
+	Pin   string `json:"pin"`
+}
+
+type phoneReq struct {
+	PhoneNumber string `json:"phone_number"`
+	Pin         string `json:"pin"`
+}
+
+func SendRandomPinSMS(w http.ResponseWriter, req *http.Request) {
+	var data phoneReq
+	err := json.NewDecoder(req.Body).Decode(&data)
+	if err != nil {
+		panic(err)
+	}
+
+	r1 := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	pin := strconv.Itoa(r1.Intn(10)) + strconv.Itoa(r1.Intn(10)) + strconv.Itoa(r1.Intn(10)) + strconv.Itoa(r1.Intn(10))
+
+	fmt.Println(pin)
+	services.RedisClient.Set(data.PhoneNumber, pin, 5*time.Minute)
+	services.SendSMSMessage(data.PhoneNumber, pin)
+}
+
+func VerifySMSPin(w http.ResponseWriter, req *http.Request) {
+	var data phoneReq
+	err := json.NewDecoder(req.Body).Decode(&data)
+	if err != nil {
+		panic(err)
+	}
+
+	if dbPin, err := services.RedisClient.Get(data.PhoneNumber).Result(); dbPin != data.Pin {
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
+			return
+		}
+		json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: "Invalid pin number"})
+		return
+	}
+
+	services.RedisClient.Del(data.PhoneNumber)
+	json.NewEncoder(w).Encode(models.DataResponse{Success: true})
+}
+
+func SendRandomPinEmail(w http.ResponseWriter, req *http.Request) {
+	b, _ := ioutil.ReadAll(req.Body)
+
+	var data emailReq
+	err := json.Unmarshal(b, &data)
+
+	if err != nil {
+		panic(err)
+	}
+
+	r1 := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	pin := strconv.Itoa(r1.Intn(10)) + strconv.Itoa(r1.Intn(10)) + strconv.Itoa(r1.Intn(10)) + strconv.Itoa(r1.Intn(10))
+
+	fmt.Println(pin)
+
+	services.RedisClient.Set(data.Email, pin, 5*time.Minute)
+	_ = services.CreateEmailNotification(data.Email, "", pin)
+}
+
+func VerifyEmailPin(w http.ResponseWriter, req *http.Request) {
+	b, _ := ioutil.ReadAll(req.Body)
+
+	var data emailReq
+	err := json.Unmarshal(b, &data)
+
+	if err != nil {
+		panic(err)
+	}
+
+	var res models.DataResponse
+	if dbPin, err := services.RedisClient.Get(data.Email).Result(); dbPin != data.Pin {
+		res.Success = false
+
+		if err != nil {
+			res.Message = err.Error()
+		} else {
+			res.Message = "invalid pin number"
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+	} else {
+		services.RedisClient.Del(data.Email)
+		res.Success = true
+	}
+
+	b, _ = json.Marshal(res)
+	w.Write(b)
 }

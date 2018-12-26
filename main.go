@@ -5,14 +5,19 @@ import (
 	c "git.nextgencode.io/huyen.vu/freeze-app-rest/config"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/controllers"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/identity"
+	"github.com/joho/godotenv"
 	"github.com/tbalthazar/onesignal-go"
+	"log"
 	"net/http"
 	"os"
 	"strings"
 )
 
 func init() {
-	c.SetEnv()
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func urlMatch(url string) (repository string, objectID string) {

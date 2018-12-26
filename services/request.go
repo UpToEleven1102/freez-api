@@ -8,6 +8,13 @@ import (
 	"strings"
 )
 
+const (
+	notificationRequestMessage         = "New Request From User"
+	notificationRequestTitle           = "New Request"
+	notificationRequestDeclinedMessage = "Merchant is busy. Please request a bit later."
+	notificationRequestAcceptedMessage = "Merchant is on the way"
+)
+
 func CreateRequest(request models.Request) error {
 	//use userId from claims instead
 
@@ -18,10 +25,20 @@ func CreateRequest(request models.Request) error {
 	}
 
 	_, err := DB.Exec(`INSERT INTO request (user_id, merchant_id, location) VALUES (?, ?, ST_GeomFromText(?))`, request.UserId, request.MerchantID, point)
+	data := models.RequestData{UserId: "id---", Data: "S3cr3t"}
+	if err == nil {
+		_, err := CreateNotificationByUserId(request.MerchantID, notificationRequestTitle, notificationRequestMessage, data)
+		if err != nil {
+			panic(err)
+		}
+	}
 	return err
 }
 
 func getLongLat(point string) (long float32, lat float32, err error) {
+	if point == "" {
+		return 0, 0, nil
+	}
 	ptArr := strings.Split(strings.Replace(point, ")", "", -1), "(")
 	if len(ptArr) < 2 {
 		return 0, 0, errors.New("index out of range")
@@ -39,6 +56,7 @@ func getLongLat(point string) (long float32, lat float32, err error) {
 
 func GetRequestByUserID(userID string) (interface{}, error) {
 	r, err := DB.Query(`SELECT user_id, merchant_id, ST_AsText(location) FROM request WHERE user_id=?`, userID)
+	defer r.Close()
 
 	if err != nil {
 		return nil, err
@@ -63,7 +81,8 @@ func GetRequestByUserID(userID string) (interface{}, error) {
 }
 
 func GetRequestByMerchantID(merchantID string) (interface{}, error) {
-	r, err := DB.Query(`SELECT user_id, merchant_id, ST_ASTEXT(location) FROM request WHERE merchant_id=?`, merchantID)
+	r, err := DB.Query(`SELECT id, user_id, merchant_id, ST_ASTEXT(location), comment, accepted FROM request WHERE merchant_id=?`, merchantID)
+	defer r.Close()
 
 	if err != nil {
 		return nil, err
@@ -72,9 +91,9 @@ func GetRequestByMerchantID(merchantID string) (interface{}, error) {
 	var point string
 
 	if r.Next() {
-		var request models.Request
+		var request models.RequestEntity
 
-		err = r.Scan(&request.UserId, &request.MerchantID, &point)
+		err = r.Scan(&request.ID, &request.UserID, &request.MerchantID, &point, &request.Comment, &request.Accepted)
 		request.Location.Long, request.Location.Lat, err = getLongLat(point)
 		if err != nil {
 			return nil, err
@@ -91,14 +110,20 @@ func GetRequestByMerchantID(merchantID string) (interface{}, error) {
 
 func GetRequestInfoByMerchantId(merchantId string) (interface{}, error) {
 	position, _ := GetLastPositionByMerchantID(merchantId)
-	location := fmt.Sprintf(`POINT(%f %f)`, position.(models.Location).Location.Long, position.(models.Location).Location.Lat)
+	var location string
+	if position != nil {
+		location = fmt.Sprintf(`POINT(%f %f)`, position.(models.Location).Location.Long, position.(models.Location).Location.Lat)
+	}
 
 	r, err := DB.Query(`SELECT r.id, user_id, name, email, phone_number, image, ST_ASTEXT(location), ST_DISTANCE_SPHERE(location, ST_GeomFromText(?))*.000621371192 as distance, comment, accepted
 								FROM request r 
-								  JOIN user u 
+								  LEFT OUTER JOIN user u 
 								    ON r.user_id=u.id 
 								WHERE merchant_id=?`, location, merchantId)
+	defer r.Close()
+
 	if err != nil {
+		panic(err)
 		return nil, err
 	}
 
@@ -127,6 +152,8 @@ func GetRequestedMerchantByUserID(userId string) (interface{}, error) {
 											JOIN user u
 												ON u.id=r.user_id
 										WHERE r.user_id=?`, userId)
+	defer r.Close()
+
 	if err != nil {
 		return nil, err
 	}
@@ -151,12 +178,32 @@ func GetRequestedMerchantByUserID(userId string) (interface{}, error) {
 }
 
 func UpdateRequestAccepted(req models.RequestEntity) (err error) {
-	_, err = DB.Exec(`UPDATE request SET accepted=? WHERE id=?`,req.Accepted, req.ID)
+	r, err := GetRequestByMerchantID(req.MerchantID)
+
+	request := r.(models.RequestEntity)
+
+	request.Accepted = req.Accepted
+
+	if request.Accepted == 1 {
+		data := models.RequestData{UserId:request.UserID, Data:"S3cr3t"}
+		CreateNotificationByUserId(request.UserID, "", notificationRequestAcceptedMessage, data)
+	} else {
+		data := models.RequestData{UserId:request.UserID, Data:"S3cr3t"}
+		CreateNotificationByUserId(request.UserID, "", notificationRequestDeclinedMessage, data)
+		//RemoveRequestsByUserID(request.UserID)
+		//return nil
+	}
+
+	if err != nil {
+		return err
+	}
+	_, err = DB.Exec(`UPDATE request SET accepted=? WHERE id=?`, req.Accepted, req.ID)
 	return err
 }
 
 func GetRequests() (interface{}, error) {
 	r, err := DB.Query(`SELECT user_id, merchant_id, ST_ASTEXT(location) FROM request`)
+	defer r.Close()
 
 	if err != nil {
 		return nil, err

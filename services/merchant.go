@@ -1,36 +1,55 @@
 package services
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
-	"git.nextgencode.io/huyen.vu/freeze-app-rest/db"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
-	"github.com/jmoiron/sqlx"
 	"github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
-var DB *sqlx.DB
+//func GetMerchants() (merchants []models.Merchant, err error) {
+//	var merchant models.Merchant
+//	var location string
+//
+//	r, err := DB.Query(`SELECT * FROM merchant`)
+//	defer r.Close()
+//
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	for r.Next() {
+//		r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image, &location)
+//
+//		merchant.LastLocation.Long, merchant.LastLocation.Lat, _ = getLongLat(location)
+//
+//		merchants = append(merchants, merchant)
+//	}
+//
+//	return merchants, err
+//}
 
-func init() {
-	DB, _ = db.Config()
-}
 
-func GetMerchants() (merchants []models.Merchant, err error) {
-	var merchant models.Merchant
-
-	r, err := DB.Query(`SELECT * FROM merchant`)
+func CreateMerchant(merchant models.Merchant) (models.Merchant, error) {
+	password, err := bcrypt.GenerateFromPassword([]byte(merchant.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return nil, err
+		return merchant, err
 	}
-	defer r.Close()
 
-	for r.Next() {
-		r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image)
-		merchants = append(merchants, merchant)
+	merchant.Password = string(password)
+	uid, _ := uuid.NewV4()
+	merchant.ID = uid.String()
+
+	location := fmt.Sprintf("POINT(%f %f)", merchant.LastLocation.Long, merchant.LastLocation.Lat)
+
+	_, err = DB.Exec(`INSERT INTO merchant (id, mobile, phone_number, email, name, password, last_location) VALUES (?, ?, ?, ?, ?, ?, ST_GeomFromText(?))`, merchant.ID, merchant.Mobile, merchant.PhoneNumber, merchant.Email, merchant.Name, merchant.Password, location)
+
+	if err != nil {
+		return merchant, err
 	}
-	return merchants, err
+
+	return merchant, nil
 }
 
 func ChangeOnlineStatus(merchantId string) error {
@@ -58,13 +77,17 @@ func ChangeOnlineStatus(merchantId string) error {
 func GetMerchantByEmail(email string) (interface{}, error) {
 	var merchant models.Merchant
 
-	r, err := DB.Query(`SELECT * FROM merchant WHERE email=?`, email)
+	r, err := DB.Query(`SELECT id, online, mobile, phone_number, email, name, password, image, ST_AsText(last_location) FROM merchant WHERE email=?`, email)
+	defer r.Close()
 	if err != nil {
 		return nil, err
 	}
 
+	var location string
+
 	if r.Next() {
-		r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image)
+		r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image, &location)
+		merchant.LastLocation.Long, merchant.LastLocation.Lat, _ = getLongLat(location)
 		return merchant, nil
 	}
 	return nil, nil
@@ -73,39 +96,47 @@ func GetMerchantByEmail(email string) (interface{}, error) {
 func GetMerchantById(id string) (interface{}, error) {
 	var merchant models.Merchant
 
-	r, err := DB.Query(`SELECT * FROM merchant WHERE id=?`, id)
+	r, err := DB.Query(`SELECT id, online, mobile, phone_number, email, name, password, image, ST_AsText(last_location) FROM merchant WHERE id=?`, id)
+	defer r.Close()
+
 	if err != nil {
 		return nil, err
 	}
+	var location string
 
 	if r.Next() {
-		r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image)
+		r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image, &location)
+		merchant.LastLocation.Long, merchant.LastLocation.Lat, _ = getLongLat(location)
 		return merchant, nil
 	}
 	return nil, nil
 }
 
-func CreateMerchant(merchant models.Merchant) (models.Merchant, error) {
-	b, _ := json.Marshal(merchant)
+func GetMerchantByPhoneNumber(phoneNumber string) (interface{}, error) {
+	var merchant models.Merchant
 
-	fmt.Println(string(b))
-
-	password, err := bcrypt.GenerateFromPassword([]byte(merchant.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return merchant, err
-	}
-
-	merchant.Password = string(password)
-	uid, _ := uuid.NewV4()
-	merchant.ID = uid.String()
-
-	_, err = DB.Exec(`INSERT INTO merchant (id, mobile, phone_number, email, name, password) VALUES (?, ?, ?, ?, ?, ?)`, merchant.ID, merchant.Mobile, merchant.PhoneNumber, merchant.Email, merchant.Name, merchant.Password)
+	r, err := DB.Query(`SELECT id, online, mobile, phone_number, email, name, password, image, ST_AsText(last_location) FROM merchant WHERE phone_number=?`, phoneNumber)
+	defer r.Close()
 
 	if err != nil {
-		return merchant, errors.New("email exists")
+		return nil, err
 	}
+	var location string
 
-	return merchant, nil
+	if r.Next() {
+		r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image, &location)
+		merchant.LastLocation.Long, merchant.LastLocation.Lat, _ = getLongLat(location)
+		return merchant, nil
+	}
+	return nil, nil
+}
+
+
+
+
+func UpdateMerchant(merchant models.Merchant) (err error) {
+	_, err = DB.Exec(`UPDATE merchant SET mobile=?,phone_number=?,email=?,name=?,image=? WHERE id=?;`,merchant.Mobile, merchant.PhoneNumber, merchant.Email, merchant.Name, merchant.Image, merchant.ID)
+	return err
 }
 
 func AddNewLocation(location models.Location) (error) {
@@ -114,11 +145,16 @@ func AddNewLocation(location models.Location) (error) {
 	if err != nil {
 		return err
 	}
+	_, err = DB.Exec(`UPDATE merchant SET last_location=ST_GeomFromText(?) WHERE id=?`, point, location.Id)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func GetLastPositionByMerchantID(merchantID string) (interface{}, error) {
 	r, err := DB.Query(`SELECT merchant_id, ST_AsText(location) FROM location WHERE merchant_id=? ORDER BY ts DESC LIMIT 1;`, merchantID)
+	defer r.Close()
 	if err != nil {
 		return nil, err
 	}
@@ -148,6 +184,7 @@ func GetNearMerchantsLastLocation(location models.Location) (merchants []interfa
 								  JOIN merchant m
 								    ON l.merchant_id=m.id
 									  HAVING distance < 3 AND online=true`, userLocation)
+	defer r.Close()
 
 	if err != nil {
 		return nil, err
