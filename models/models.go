@@ -42,6 +42,7 @@ type Product struct {
 	MerchantId string  `json:"merchant_id"`
 	Name       string  `json:"name"`
 	Price      float64 `json:"price"`
+	Image      string  `json:"image"`
 }
 
 type MerchantInfo struct {

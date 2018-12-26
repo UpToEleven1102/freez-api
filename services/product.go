@@ -17,7 +17,7 @@ func CreateProduct(product models.Product) error {
 }
 
 func GetProducts(merchantID string) (products []interface{}, err error) {
-	r, err := DB.Query(`SELECT id, name, price, merchant_id FROM product WHERE merchant_id=?`, merchantID)
+	r, err := DB.Query(`SELECT id, name, price, merchant_id, image FROM product WHERE merchant_id=?`, merchantID)
 	defer r.Close()
 
 	if err != nil {
@@ -27,7 +27,7 @@ func GetProducts(merchantID string) (products []interface{}, err error) {
 
 	var product models.Product
 	for r.Next() {
-		err = r.Scan(&product.ID, &product.Name, &product.Price, &product.MerchantId)
+		err = r.Scan(&product.ID, &product.Name, &product.Price, &product.MerchantId, &product.Image)
 		if err != nil {
 			log.Println(err)
 			return nil, err

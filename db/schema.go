@@ -32,6 +32,7 @@ const schemaProduct = `CREATE TABLE product(
 	name VARCHAR(64) NOT NULL,
 	price DECIMAL(10,2) NOT NULL,
 	merchant_id VARCHAR(64) NOT NULL,
+	image TEXT NULL,
 	PRIMARY KEY (id),
 	FOREIGN KEY fk_product_merchant_id(merchant_id)
 		REFERENCES merchant(id)
