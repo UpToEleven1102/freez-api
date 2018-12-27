@@ -6,7 +6,7 @@ import (
 )
 
 func CreateProduct(product models.Product) error {
-	_, err := DB.Exec(`INSERT INTO product (name, price, merchant_id) VALUES(?, ?, ?)`, product.Name, product.Price, product.MerchantId)
+	_, err := DB.Exec(`INSERT INTO product (name, price, merchant_id, image) VALUES(?, ?, ?, ?)`, product.Name, product.Price, product.MerchantId, product.Image)
 
 	if err != nil {
 		log.Println(err)
@@ -40,7 +40,7 @@ func GetProducts(merchantID string) (products []interface{}, err error) {
 }
 
 func UpdateProduct(product models.Product) error {
-	_, err := DB.Exec(`UPDATE product SET name=?, price=? WHERE id=?`, product.Name, product.Price, product.ID)
+	_, err := DB.Exec(`UPDATE product SET name=?, price=?, image=? WHERE id=?`, product.Name, product.Price, product.Image, product.ID)
 
 	if err != nil {
 		log.Println(err)
