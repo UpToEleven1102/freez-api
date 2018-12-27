@@ -7,8 +7,10 @@ import (
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
+	"time"
 )
 
 func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, claims models.JwtClaims) error {
@@ -83,6 +85,36 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
 				return nil
 			}
+		case "product-presign-url":
+			var product	models.Product
+
+			err := json.NewDecoder(req.Body).Decode(&product)
+
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message: err.Error()})
+				return nil
+			}
+			var fileName string
+			if product.Image != "" {
+				arr := strings.Split(product.Image, "/")
+				if arr[0] == "https:" {
+					fileName = strings.Split(arr[len(arr)-1], "?")[0]
+				}
+			} else {
+				fileName = fmt.Sprintf("%s-%d.jpg",claims.Id,time.Now().UnixNano())
+			}
+
+			url, err := services.GeneratePreSignedUrl(fileName)
+
+			if err != nil {
+				log.Println(err)
+				w.WriteHeader(http.StatusBadRequest)
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message: err.Error()})
+				return nil
+			}
+
+			_ = json.NewEncoder(w).Encode(models.DataResponse{Success:true, Message: url})
 
 		default:
 			http.NotFound(w, req)
