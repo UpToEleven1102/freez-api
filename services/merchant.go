@@ -206,6 +206,7 @@ func GetNearMerchantsLastLocation(location models.Location) (merchants []interfa
 		data.Data = merchant.MerchantID
 
 		merchant.IsFavorite, _ = isFavorite(data)
+		merchant.Products, _ = GetProducts(merchant.MerchantID)
 
 		merchants = append(merchants, merchant)
 	}

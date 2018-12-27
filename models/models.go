@@ -46,18 +46,18 @@ type Product struct {
 }
 
 type MerchantInfo struct {
-	Online      bool    `json:"online"`
-	MerchantID  string  `json:"merchant_id"`
-	Location    LongLat `json:"location"`
-	Distance    float32 `json:"distance"`
-	Name        string  `json:"name"`
-	PhoneNumber string  `json:"phone_number"`
-	Email       string  `json:"email"`
-	Mobile      bool    `json:"mobile"`
-	Image       string  `json:"image"`
-	IsFavorite  bool    `json:"is_favorite"`
-	Accepted    int     `json:"accepted"`
-	//Product string `json:"product"`
+	Online      bool          `json:"online"`
+	MerchantID  string        `json:"merchant_id"`
+	Location    LongLat       `json:"location"`
+	Distance    float32       `json:"distance"`
+	Name        string        `json:"name"`
+	PhoneNumber string        `json:"phone_number"`
+	Email       string        `json:"email"`
+	Mobile      bool          `json:"mobile"`
+	Image       string        `json:"image"`
+	IsFavorite  bool          `json:"is_favorite"`
+	Accepted    int           `json:"accepted"`
+	Products     []interface{} `json:"products"`
 }
 
 type User struct {

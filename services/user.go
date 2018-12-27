@@ -151,10 +151,3 @@ func GetFavorites(userID string) (merchants []interface{}, err error) {
 
 	return merchants, nil
 }
-
-//func GetFavorites(user_id string) (err error) {
-//	_, err = DB.Query(`SELECT online, email, name, mobile, phone_number, image, merchant_id
-//								FROM favorite f
-//								  JOIN merchant m
-//								    ON f.merchant_id=m.id GROUP BY merchant_id`)
-//}
