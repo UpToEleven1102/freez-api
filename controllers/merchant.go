@@ -91,6 +91,7 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 			err := json.NewDecoder(req.Body).Decode(&product)
 
 			if err != nil {
+				log.Println(err)
 				w.WriteHeader(http.StatusBadRequest)
 				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message: err.Error()})
 				return nil
