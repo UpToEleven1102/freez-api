@@ -28,6 +28,9 @@ func seed(DB *sqlx.DB) {
 	DB.MustExec("DROP TABLE IF EXISTS request")
 	DB.MustExec("DROP TABLE IF EXISTS location")
 	DB.MustExec("DROP TABLE IF EXISTS favorite")
+	DB.MustExec("DROP TABLE IF EXISTS activity_type")
+	DB.MustExec("DROP TABLE IF EXISTS user_notification")
+	DB.MustExec("DROP TABLE IF EXISTS merchant_notification")
 	DB.MustExec(schemaMerchant)
 	DB.MustExec(schemaProduct)
 	DB.MustExec(schemaMerchantMOption)
@@ -38,6 +41,9 @@ func seed(DB *sqlx.DB) {
 	DB.MustExec(schemaRequest)
 	DB.MustExec(schemaLocation)
 	DB.MustExec(schemaFavorites)
+	DB.MustExec(schemaActivityType)
+	DB.MustExec(schemaMerchantNotification)
+	DB.MustExec(schemaUserNotification)
 
 	//tx := DB.MustBegin()
 	//
@@ -60,7 +66,7 @@ func Config() (*sqlx.DB, error) {
 		}
 	}
 
-	//seed(DB)
+	seed(DB)
 
 	return DB, err
 }
