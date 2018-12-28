@@ -12,7 +12,72 @@ import (
 	"strings"
 )
 
-func CreateNotificationByUserId(userID string, title string, message string, data models.RequestData) (res interface{}, err error) {
+
+func InsertMerchantNotification(merchantID string, activityType int, sourceID string, message string) error {
+	_, err := DB.Exec(`INSERT INTO merchant_notification (merchant_id, activity_type, source_id, message) VALUES (?, ?, ?, ?)`, merchantID, activityType, sourceID, message)
+	if err != nil {
+		log.Println(err)
+	}
+	return err
+}
+
+func InsertUserNotification(userID string, activityType int, sourceID string, message string) error {
+	_, err := DB.Exec(`INSERT INTO user_notification (user_id, activity_type, source_id, message) VALUES (?, ?, ?, ?)`, userID, activityType, sourceID, message)
+	if err != nil {
+		log.Println(err)
+	}
+	return err
+}
+
+func GetMerchantNotification(merchantID string) (notifications []interface{}, err error) {
+	notifications = []interface{}{}
+	r, err := DB.Query(`SELECT m.id, ts, merchant_id, type, source_id, unread, message 
+								FROM merchant_notification m
+								LEFT JOIN activity_type a on m.activity_type = a.id
+								WHERE merchant_id=?`, merchantID)
+
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+
+	defer r.Close()
+	var notification models.MerchantNotification
+	for r.Next()  {
+		err = r.Scan(&notification.ID, &notification.TimeStamp, &notification.MerchantID, &notification.ActivityType, &notification.SourceID, &notification.UnRead, &notification.Message)
+		if err != nil {
+			log.Println(err)
+		}
+		notifications = append(notifications, notification)
+	}
+	return notifications, err
+}
+
+func GetUserNotification(userID string) (notifications []interface{}, err error) {
+	notifications = []interface{}{}
+	r, err := DB.Query(`SELECT u.id, ts, user_id, type, source_id, unread, message 
+								FROM user_notification u
+								LEFT JOIN activity_type a on u.activity_type = a.id
+								WHERE user_id=?`, userID)
+
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+
+	defer r.Close()
+	var notification models.UserNotification
+	for r.Next()  {
+		err = r.Scan(&notification.ID, &notification.TimeStamp, &notification.UserID, &notification.ActivityType, &notification.SourceID, &notification.UnRead, &notification.Message)
+		if err != nil {
+			log.Println(err)
+		}
+		notifications = append(notifications, notification)
+	}
+	return notifications, err
+}
+
+func CreateNotificationByUserId(userID string, title string, message string, claims models.JwtClaims, data models.RequestData) (res interface{}, err error) {
 	notificationReq := &onesignal.NotificationRequest{
 		AppID:     oneSignalAppID,
 		Contents:  map[string]string{"en": message},

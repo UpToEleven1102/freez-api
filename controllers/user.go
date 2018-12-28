@@ -56,6 +56,14 @@ func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, clai
 
 			b, _ := json.Marshal(r)
 			w.Write(b)
+		case "notification":
+			notifications, err := services.GetUserNotification(claims.Id)
+			if err != nil {
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
+				return nil
+			}
+
+			_ = json.NewEncoder(w).Encode(notifications)
 		}
 
 	case "POST":

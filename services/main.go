@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/db"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -11,6 +12,7 @@ import (
 	"github.com/tbalthazar/onesignal-go"
 	"log"
 	"os"
+	"time"
 )
 
 var (
@@ -63,6 +65,29 @@ func redisConfig() {
 	_, err := RedisClient.Ping().Result()
 	if err != nil {
 		log.Printf("%s\n", err)
+	}
+}
+
+func loadNotifTypeToRedis() {
+	type ActivityType struct {
+		ID int `json:"id"`
+		Type string `json:"type"`
+	}
+
+	r, err := DB.Query(`SELECT id, type FROM activity_type`)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	//var activityTypes []ActivityType
+	var activityType ActivityType
+	defer r.Close()
+
+	for r.Next() {
+		_ = r.Scan(&activityType.ID, &activityType.ID)
+		//activityTypes = append(activityTypes, activityType)
+		RedisClient.Set(fmt.Sprintf("%d", activityType.ID), activityType, 3600 * time.Minute)
 	}
 }
 

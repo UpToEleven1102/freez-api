@@ -37,6 +37,26 @@ type merchantMOption struct {
 	AddConvenienceFee bool `json:"add_convenience_fee"`
 }
 
+type MerchantNotification struct {
+	ID int `json:"id"`
+	TimeStamp string `json:"ts"`
+	MerchantID string `json:"merchant_id"`
+	ActivityType string `json:"activity_type"`
+	SourceID string `json:"source_id"`
+	UnRead bool `json:"unread"`
+	Message string `json:"message"`
+}
+
+type UserNotification struct {
+	ID int `json:"id"`
+	TimeStamp string `json:"ts"`
+	UserID string `json:"user_id"`
+	ActivityType string `json:"activity_type"`
+	SourceID string `json:"source_id"`
+	UnRead bool `json:"unread"`
+	Message string `json:"message"`
+}
+
 type Product struct {
 	ID         int     `json:"id"`
 	MerchantId string  `json:"merchant_id"`

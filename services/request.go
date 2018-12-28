@@ -13,9 +13,10 @@ const (
 	notificationRequestTitle           = "New Request"
 	notificationRequestDeclinedMessage = "Merchant is busy. Please request a bit later."
 	notificationRequestAcceptedMessage = "Merchant is on the way"
+	NOTIF_TYPE_FLAG_REQUEST = 1
 )
 
-func CreateRequest(request models.Request) error {
+func CreateRequest(request models.Request, claims models.JwtClaims) error {
 	//use userId from claims instead
 
 	point := fmt.Sprintf(`POINT(%f %f)`, request.Location.Long, request.Location.Lat)
@@ -27,7 +28,11 @@ func CreateRequest(request models.Request) error {
 	_, err := DB.Exec(`INSERT INTO request (user_id, merchant_id, location) VALUES (?, ?, ST_GeomFromText(?))`, request.UserId, request.MerchantID, point)
 	data := models.RequestData{UserId: "id---", Data: "S3cr3t"}
 	if err == nil {
-		_, err := CreateNotificationByUserId(request.MerchantID, notificationRequestTitle, notificationRequestMessage, data)
+		_, err := CreateNotificationByUserId(request.MerchantID, notificationRequestTitle, notificationRequestMessage, claims, data)
+		if err != nil {
+			panic(err)
+		}
+		err = InsertMerchantNotification(request.MerchantID, NOTIF_TYPE_FLAG_REQUEST, claims.Id, notificationRequestMessage)
 		if err != nil {
 			panic(err)
 		}
@@ -177,7 +182,7 @@ func GetRequestedMerchantByUserID(userId string) (interface{}, error) {
 	return nil, nil
 }
 
-func UpdateRequestAccepted(req models.RequestEntity) (err error) {
+func UpdateRequestAccepted(req models.RequestEntity, claims models.JwtClaims) (err error) {
 	r, err := GetRequestByMerchantID(req.MerchantID)
 
 	request := r.(models.RequestEntity)
@@ -186,10 +191,26 @@ func UpdateRequestAccepted(req models.RequestEntity) (err error) {
 
 	if request.Accepted == 1 {
 		data := models.RequestData{UserId:request.UserID, Data:"S3cr3t"}
-		CreateNotificationByUserId(request.UserID, "", notificationRequestAcceptedMessage, data)
+		_, err := CreateNotificationByUserId(request.UserID, "",  notificationRequestAcceptedMessage, claims,data)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		err = InsertUserNotification(req.UserID, NOTIF_TYPE_FLAG_REQUEST, claims.Id, notificationRequestAcceptedMessage)
+
+		if err != nil {
+			fmt.Println(err)
+		}
 	} else {
 		data := models.RequestData{UserId:request.UserID, Data:"S3cr3t"}
-		CreateNotificationByUserId(request.UserID, "", notificationRequestDeclinedMessage, data)
+		_, err := CreateNotificationByUserId(request.UserID, "",  notificationRequestDeclinedMessage,claims, data)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		err = InsertUserNotification(req.UserID, NOTIF_TYPE_FLAG_REQUEST, claims.Id, notificationRequestDeclinedMessage)
+
+
 		//RemoveRequestsByUserID(request.UserID)
 		//return nil
 	}

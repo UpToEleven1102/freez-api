@@ -71,6 +71,8 @@ const schemaMerchantNotification = `CREATE TABLE merchant_notification(
 	merchant_id VARCHAR(64) NOT NULL,
 	activity_type INT,
 	source_id VARCHAR(64) NOT NULL DEFAULT '',
+	unread BOOL NOT NULL DEFAULT true,
+	message VARCHAR(225) NOT NULL DEFAULT '',
 	PRIMARY KEY (id),
 	FOREIGN KEY fk_merchant_notification_type(activity_type)
 		REFERENCES activity_type(id)
@@ -84,6 +86,8 @@ const schemaUserNotification = `CREATE TABLE user_notification(
 	user_id VARCHAR(64) NOT NULL,
 	activity_type INT,
 	source_id VARCHAR(64) NOT NULL DEFAULT '',
+	unread BOOL NOT NULL DEFAULT true,
+	message VARCHAR(225) NOT NULL DEFAULT '',
 	PRIMARY KEY (id),
 	FOREIGN KEY fk_user_notification_type(activity_type)
 		REFERENCES activity_type(id)
@@ -109,7 +113,7 @@ const schemaMOption = `
 	CREATE TABLE m_option(
 		id INT AUTO_INCREMENT,
 		user_id VARCHAR(64) NOT NULL,
-		notif_fav_nearby BOOL NOT NULL DEFAULT TRUE,
+		notif_fav_nearby BOOLEAN NOT NULL DEFAULT TRUE,
 		PRIMARY KEY (id),
 		FOREIGN KEY fk_user (user_id)
 			REFERENCES user(id)

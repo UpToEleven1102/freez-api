@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/config"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
@@ -33,7 +34,7 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 
 		request.UserId = claims.Id
 
-		err = services.CreateRequest(request)
+		err = services.CreateRequest(request, claims)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return nil
@@ -113,12 +114,14 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 			var request models.RequestEntity
 			json.Unmarshal(b, &request)
 
+			fmt.Printf("%+v",request)
+
 			if request.Accepted != 0 && request.Accepted != 1 {
 				http.Error(w, "accepted param must be 0 or 1", http.StatusBadRequest)
 				return nil
 			}
 			request.MerchantID = claims.Id
-			err = services.UpdateRequestAccepted(request)
+			err = services.UpdateRequestAccepted(request, claims)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return nil

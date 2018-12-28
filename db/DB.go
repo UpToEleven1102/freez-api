@@ -20,27 +20,28 @@ func init() {
 }
 
 func seed(DB *sqlx.DB) {
-	DB.MustExec("DROP TABLE IF EXISTS product")
-	DB.MustExec("DROP TABLE IF EXISTS merchant_m_option")
-	DB.MustExec("DROP TABLE IF EXISTS merchant")
-	DB.MustExec("DROP TABLE IF EXISTS m_option")
-	DB.MustExec("DROP TABLE IF EXISTS user")
-	DB.MustExec("DROP TABLE IF EXISTS request")
-	DB.MustExec("DROP TABLE IF EXISTS location")
-	DB.MustExec("DROP TABLE IF EXISTS favorite")
-	DB.MustExec("DROP TABLE IF EXISTS activity_type")
+	//DB.MustExec("DROP TABLE IF EXISTS product")
+	//DB.MustExec("DROP TABLE IF EXISTS merchant_m_option")
+	//DB.MustExec("DROP TABLE IF EXISTS merchant")
+	//DB.MustExec("DROP TABLE IF EXISTS m_option")
+	//DB.MustExec("DROP TABLE IF EXISTS user")
+	//DB.MustExec("DROP TABLE IF EXISTS request")
+	//DB.MustExec("DROP TABLE IF EXISTS location")
+	//DB.MustExec("DROP TABLE IF EXISTS favorite")
+	DB.MustExec("DROP TABLE IF EXISTS  merchant_notification")
 	DB.MustExec("DROP TABLE IF EXISTS user_notification")
-	DB.MustExec("DROP TABLE IF EXISTS merchant_notification")
-	DB.MustExec(schemaMerchant)
-	DB.MustExec(schemaProduct)
-	DB.MustExec(schemaMerchantMOption)
-	DB.MustExec(triggerInsertMerchantMOption)
-	DB.MustExec(schemaUser)
-	DB.MustExec(schemaMOption)
-	DB.MustExec(triggerInsertUserMOption)
-	DB.MustExec(schemaRequest)
-	DB.MustExec(schemaLocation)
-	DB.MustExec(schemaFavorites)
+	DB.MustExec("DROP TABLE IF EXISTS activity_type")
+
+	//DB.MustExec(schemaMerchant)
+	//DB.MustExec(schemaProduct)
+	//DB.MustExec(schemaMerchantMOption)
+	//DB.MustExec(triggerInsertMerchantMOption)
+	//DB.MustExec(schemaUser)
+	//DB.MustExec(schemaMOption)
+	//DB.MustExec(triggerInsertUserMOption)
+	//DB.MustExec(schemaRequest)
+	//DB.MustExec(schemaLocation)
+	//DB.MustExec(schemaFavorites)
 	DB.MustExec(schemaActivityType)
 	DB.MustExec(schemaMerchantNotification)
 	DB.MustExec(schemaUserNotification)
@@ -66,7 +67,7 @@ func Config() (*sqlx.DB, error) {
 		}
 	}
 
-	seed(DB)
+	//seed(DB)
 
 	return DB, err
 }

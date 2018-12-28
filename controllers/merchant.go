@@ -54,6 +54,16 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 			}
 
 			_ = json.NewEncoder(w).Encode(products)
+		case "notification":
+			notifications, err := services.GetMerchantNotification(claims.Id)
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
+				return nil
+			}
+
+			_ = json.NewEncoder(w).Encode(notifications)
+
 		}
 
 	case "POST":
