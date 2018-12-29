@@ -8,6 +8,7 @@ import (
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -159,6 +160,25 @@ func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, clai
 				}
 
 				sendResponse(w, response, http.StatusBadRequest)
+			}
+		case "notification":
+			var notification models.UserNotification
+
+			err := json.NewDecoder(req.Body).Decode(&notification)
+
+			fmt.Printf("%+v\n", notification)
+
+			if err != nil {
+				log.Println(err)
+				json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message: err.Error()})
+				return nil
+			}
+
+			err = services.UpdateUserNotification(notification)
+			if err != nil {
+				log.Println(err)
+				json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message: err.Error()})
+				return nil
 			}
 		}
 	}

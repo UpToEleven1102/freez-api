@@ -128,6 +128,7 @@ func GetRequestNotificationById(id int) (interface{}, error) {
 		log.Println(err)
 		return nil, err
 	}
+
 	defer r.Close()
 
 	for r.Next() {
