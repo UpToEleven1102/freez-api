@@ -93,7 +93,7 @@ func GetUserNotification(userID string) (notifications []interface{}, err error)
 	return notifications, err
 }
 
-func CreateNotificationByUserId(userID string, title string, message string, claims models.JwtClaims, data models.RequestData) (res interface{}, err error) {
+func CreateNotificationByUserId(userID string, title string, message string, claims models.JwtClaims, data interface{}) (res interface{}, err error) {
 	notificationReq := &onesignal.NotificationRequest{
 		AppID:     oneSignalAppID,
 		Contents:  map[string]string{"en": message},

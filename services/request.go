@@ -218,43 +218,31 @@ func UpdateRequest(req models.RequestEntity) (err error) {
 	return err
 }
 
-func UpdateRequestAccepted(req models.RequestEntity, claims models.JwtClaims) (err error) {
-	r, err := GetRequestByMerchantID(req.MerchantID)
-
-	request := r.(models.RequestEntity)
-
-	request.Accepted = req.Accepted
-
+func UpdateRequestAccepted(request models.RequestEntity, claims models.JwtClaims) (err error) {
 	if request.Accepted == 1 {
-		data := models.RequestData{UserId:request.UserID, Data:"S3cr3t"}
-		_, err := CreateNotificationByUserId(request.UserID, "",  notificationRequestAcceptedMessage, claims,data)
+		_, err := CreateNotificationByUserId(request.UserID, "",  notificationRequestAcceptedMessage, claims, request)
 		if err != nil {
 			fmt.Println(err)
 		}
 
-		err = InsertUserNotification(req.UserID, 1, int64(request.ID), notificationRequestAcceptedMessage)
+		err = InsertUserNotification(request.UserID, 1, int64(request.ID), notificationRequestAcceptedMessage)
 
 		if err != nil {
 			fmt.Println(err)
 		}
 	} else {
-		data := models.RequestData{UserId:request.UserID, Data:"S3cr3t"}
-		_, err := CreateNotificationByUserId(request.UserID, "",  notificationRequestDeclinedMessage,claims, data)
+		_, err := CreateNotificationByUserId(request.UserID, "",  notificationRequestDeclinedMessage,claims, request)
 		if err != nil {
 			fmt.Println(err)
 		}
 
-		err = InsertUserNotification(req.UserID, 1, int64(request.ID), notificationRequestDeclinedMessage)
-
+		err = InsertUserNotification(request.UserID, 1, int64(request.ID), notificationRequestDeclinedMessage)
 
 		//RemoveRequestsByUserID(request.UserID)
 		//return nil
 	}
 
-	if err != nil {
-		return err
-	}
-	_, err = DB.Exec(`UPDATE request SET accepted=? WHERE id=?`, req.Accepted, req.ID)
+	_, err = DB.Exec(`UPDATE request SET accepted=? WHERE id=?`, request.Accepted, request.ID)
 	return err
 }
 

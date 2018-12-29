@@ -131,9 +131,6 @@ func GetMerchantByPhoneNumber(phoneNumber string) (interface{}, error) {
 	return nil, nil
 }
 
-
-
-
 func UpdateMerchant(merchant models.Merchant) (err error) {
 	_, err = DB.Exec(`UPDATE merchant SET mobile=?,phone_number=?,email=?,name=?,image=? WHERE id=?;`,merchant.Mobile, merchant.PhoneNumber, merchant.Email, merchant.Name, merchant.Image, merchant.ID)
 	return err

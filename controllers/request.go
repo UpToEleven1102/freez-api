@@ -122,7 +122,7 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 			}
 
 			request.MerchantID = claims.Id
-			err = services.UpdateRequest(request)
+			err = services.UpdateRequestAccepted(request, claims)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return nil
