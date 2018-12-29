@@ -14,5 +14,5 @@ const (
 	PhoneNumber="phone-number"
 	SRID = 3857
 
-	NOTIF_TYPE_FLAG_REQUEST = "flag_request"
+	NOTIF_TYPE_FLAG_REQUEST = "request"
 )

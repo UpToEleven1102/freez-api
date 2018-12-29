@@ -64,7 +64,14 @@ func GetMerchantNotification(merchantID string) (notifications []interface{}, er
 		if err != nil {
 			log.Println(err)
 		}
-		notifications = append(notifications, notification)
+
+		notificationInfo := models.MerchantNotificationInfo{ID: notification.ID, TimeStamp:notification.TimeStamp, MerchantID:notification.MerchantID, ActivityType:notification.ActivityType, UnRead:notification.UnRead, Message:notification.Message}
+		switch notification.ActivityType {
+		case "request":
+			notificationInfo.Source, _ = GetRequestById(notification.SourceID)
+		}
+
+		notifications = append(notifications, notificationInfo)
 	}
 	return notifications, err
 }
@@ -88,7 +95,14 @@ func GetUserNotification(userID string) (notifications []interface{}, err error)
 		if err != nil {
 			log.Println(err)
 		}
-		notifications = append(notifications, notification)
+
+		notificationInfo := models.UserNotificationInfo{ID: notification.ID, TimeStamp:notification.TimeStamp, UserID:notification.UserID, ActivityType:notification.ActivityType, UnRead:notification.UnRead, Message:notification.Message}
+		switch notification.ActivityType {
+		case "request":
+			notificationInfo.Source, _ = GetRequestById(notification.SourceID)
+		}
+
+		notifications = append(notifications, notificationInfo)
 	}
 	return notifications, err
 }
