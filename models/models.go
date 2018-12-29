@@ -131,6 +131,16 @@ type RequestInfo struct {
 	Active      bool    `json:"active"`
 }
 
+type RequestNotification struct {
+	ID int `json:"id"`
+	User User `json:"user"`
+	Merchant Merchant `json:"merchant"`
+	Location LongLat `json:"location"`
+	Comment string `json:"comment"`
+	Active bool `json:"active"`
+	Accepted int `json:"accepted"`
+}
+
 type Request struct {
 	UserId     string  `json:"user_id"`
 	Comment    string  `json:"comment"`

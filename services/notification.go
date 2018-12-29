@@ -99,7 +99,7 @@ func GetUserNotification(userID string) (notifications []interface{}, err error)
 		notificationInfo := models.UserNotificationInfo{ID: notification.ID, TimeStamp:notification.TimeStamp, UserID:notification.UserID, ActivityType:notification.ActivityType, UnRead:notification.UnRead, Message:notification.Message}
 		switch notification.ActivityType {
 		case "request":
-			notificationInfo.Source, _ = GetRequestById(notification.SourceID)
+			notificationInfo.Source, _ = GetRequestNotificationById(notification.SourceID)
 		}
 
 		notifications = append(notifications, notificationInfo)

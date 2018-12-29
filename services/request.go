@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
+	"log"
 	"strconv"
 	"strings"
 )
@@ -109,6 +110,40 @@ func GetRequestById(id int) (interface{}, error) {
 		}
 		return request, nil
 	}
+	return nil, nil
+}
+
+func GetRequestNotificationById(id int) (interface{}, error) {
+	r, err := DB.Query(`SELECT r.id, r.comment, r.active, r.accepted, 
+       								user_id, u.name, u.image, u.phone_number, u.email,
+       								merchant_id, m.name, m.image, m.phone_number, m.email, m.online, m.mobile       								
+								FROM request r 
+								JOIN user u 
+									ON r.user_id=u.id
+								JOIN merchant m
+									ON r.merchant_id=m.id
+								WHERE r.id=?`, id)
+
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	defer r.Close()
+
+	for r.Next() {
+		var reqNotif models.RequestNotification
+		err = r.Scan(&reqNotif.ID, &reqNotif.Comment, &reqNotif.Active, &reqNotif.Accepted,
+			&reqNotif.User.ID, &reqNotif.User.Name, &reqNotif.User.Image, &reqNotif.User.PhoneNumber, &reqNotif.User.Email,
+			&reqNotif.Merchant.ID, &reqNotif.Merchant.Name, &reqNotif.Merchant.Image, &reqNotif.Merchant.PhoneNumber, &reqNotif.Merchant.Email, &reqNotif.Merchant.Online, &reqNotif.Merchant.Mobile)
+
+		if err != nil {
+			log.Println(err)
+			return nil, err
+		}
+
+		return reqNotif, nil
+	}
+
 	return nil, nil
 }
 
