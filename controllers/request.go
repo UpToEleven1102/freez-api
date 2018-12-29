@@ -43,7 +43,7 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 		w.WriteHeader(http.StatusOK)
 	case "GET":
 		switch objectID {
-		case "" :
+		case "":
 			if claims.Role == config.User {
 				r, err := services.GetRequestedMerchantByUserID(claims.Id)
 				if err != nil {
@@ -51,7 +51,7 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 					return nil
 				}
 				b, _ := json.Marshal(r)
-				_,_ = w.Write(b)
+				_, _ = w.Write(b)
 
 			} else if claims.Role == config.Merchant {
 				r, err := services.GetRequestInfoByMerchantId(claims.Id)
@@ -61,7 +61,7 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 				}
 
 				b, _ := json.Marshal(r)
-				_,_ = w.Write(b)
+				_, _ = w.Write(b)
 			}
 
 			return nil
@@ -101,7 +101,7 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 			w.Write(b)
 
 		default:
-			http.NotFound(w,req)
+			http.NotFound(w, req)
 		}
 	case "PUT":
 		if claims.Role == config.Merchant {
@@ -114,14 +114,15 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 			var request models.RequestEntity
 			json.Unmarshal(b, &request)
 
-			fmt.Printf("%+v",request)
+			fmt.Printf("%+v", request)
 
 			if request.Accepted != 0 && request.Accepted != 1 {
 				http.Error(w, "accepted param must be 0 or 1", http.StatusBadRequest)
 				return nil
 			}
+
 			request.MerchantID = claims.Id
-			err = services.UpdateRequestAccepted(request, claims)
+			err = services.UpdateRequest(request)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return nil
@@ -134,7 +135,7 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 		}
 
 		err := services.RemoveRequestsByUserID(claims.Id)
-		if	err!=nil {
+		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return nil
 		}

@@ -178,6 +178,24 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 				return nil
 			}
 
+		case "notification":
+			var notification models.MerchantNotification
+			err := json.NewDecoder(req.Body).Decode(&notification)
+
+			if err != nil {
+				log.Println(err.Error())
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
+				return nil
+			}
+
+			err = services.UpdateMerchantNotification(notification)
+
+			if err != nil {
+				log.Println(err.Error())
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
+				return nil
+			}
+
 		default:
 			http.NotFound(w, req)
 		}

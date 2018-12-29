@@ -70,7 +70,7 @@ const schemaMerchantNotification = `CREATE TABLE merchant_notification(
 	ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP UNIQUE,
 	merchant_id VARCHAR(64) NOT NULL,
 	activity_type INT,
-	source_id VARCHAR(64) NOT NULL DEFAULT '',
+	source_id INT NOT NULL,
 	unread BOOL NOT NULL DEFAULT true,
 	message VARCHAR(225) NOT NULL DEFAULT '',
 	PRIMARY KEY (id),
@@ -85,7 +85,7 @@ const schemaUserNotification = `CREATE TABLE user_notification(
 	ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP UNIQUE,
 	user_id VARCHAR(64) NOT NULL,
 	activity_type INT,
-	source_id VARCHAR(64) NOT NULL DEFAULT '',
+	source_id int NOT NULL,
 	unread BOOL NOT NULL DEFAULT true,
 	message VARCHAR(225) NOT NULL DEFAULT '',
 	PRIMARY KEY (id),
@@ -141,6 +141,7 @@ const schemaRequest = `CREATE TABLE request(
 		location POINT NOT NULL,
 		SPATIAL INDEX(location),
 		comment VARCHAR(200) NOT NULL DEFAULT '',
+		active BOOL NOT NULL DEFAULT TRUE,
 		accepted TINYINT(1) DEFAULT -1 NOT NULL,
 		PRIMARY KEY (id)
 	);

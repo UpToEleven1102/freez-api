@@ -13,7 +13,7 @@ import (
 )
 
 
-func InsertMerchantNotification(merchantID string, activityType int, sourceID string, message string) error {
+func InsertMerchantNotification(merchantID string, activityType int, sourceID int64, message string) error {
 	_, err := DB.Exec(`INSERT INTO merchant_notification (merchant_id, activity_type, source_id, message) VALUES (?, ?, ?, ?)`, merchantID, activityType, sourceID, message)
 	if err != nil {
 		log.Println(err)
@@ -21,10 +21,26 @@ func InsertMerchantNotification(merchantID string, activityType int, sourceID st
 	return err
 }
 
-func InsertUserNotification(userID string, activityType int, sourceID string, message string) error {
+func InsertUserNotification(userID string, activityType int, sourceID int64, message string) error {
 	_, err := DB.Exec(`INSERT INTO user_notification (user_id, activity_type, source_id, message) VALUES (?, ?, ?, ?)`, userID, activityType, sourceID, message)
 	if err != nil {
 		log.Println(err)
+	}
+	return err
+}
+
+func UpdateUserNotification(notification models.UserNotification) error {
+	_, err := DB.Exec(`UPDATE user_notification SET unread=? WHERE id=?`, notification.UnRead, notification.ID)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return err
+}
+
+func UpdateMerchantNotification(notification models.MerchantNotification) error {
+	_, err := DB.Exec(`UPDATE merchant_notification SET unread=? WHERE id=?`, notification.UnRead, notification.ID)
+	if err != nil {
+		fmt.Println(err)
 	}
 	return err
 }

@@ -13,4 +13,6 @@ const (
 	Email = "email"
 	PhoneNumber="phone-number"
 	SRID = 3857
+
+	NOTIF_TYPE_FLAG_REQUEST = "flag_request"
 )

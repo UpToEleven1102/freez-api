@@ -38,23 +38,23 @@ type merchantMOption struct {
 }
 
 type MerchantNotification struct {
-	ID int `json:"id"`
-	TimeStamp string `json:"ts"`
-	MerchantID string `json:"merchant_id"`
+	ID           int    `json:"id"`
+	TimeStamp    string `json:"ts"`
+	MerchantID   string `json:"merchant_id"`
 	ActivityType string `json:"activity_type"`
-	SourceID string `json:"source_id"`
-	UnRead bool `json:"unread"`
-	Message string `json:"message"`
+	SourceID     int    `json:"source_id"`
+	UnRead       bool   `json:"unread"`
+	Message      string `json:"message"`
 }
 
 type UserNotification struct {
-	ID int `json:"id"`
-	TimeStamp string `json:"ts"`
-	UserID string `json:"user_id"`
+	ID           int    `json:"id"`
+	TimeStamp    string `json:"ts"`
+	UserID       string `json:"user_id"`
 	ActivityType string `json:"activity_type"`
-	SourceID string `json:"source_id"`
-	UnRead bool `json:"unread"`
-	Message string `json:"message"`
+	SourceID     int    `json:"source_id"`
+	UnRead       bool   `json:"unread"`
+	Message      string `json:"message"`
 }
 
 type Product struct {
@@ -77,7 +77,7 @@ type MerchantInfo struct {
 	Image       string        `json:"image"`
 	IsFavorite  bool          `json:"is_favorite"`
 	Accepted    int           `json:"accepted"`
-	Products     []interface{} `json:"products"`
+	Products    []interface{} `json:"products"`
 }
 
 type User struct {
@@ -99,6 +99,7 @@ type mOption struct {
 type RequestInfo struct {
 	ID          int     `json:"id"`
 	UserId      string  `json:"user_id"`
+	MerchantId  string  `json:"merchant_id"`
 	Name        string  `json:"name"`
 	Email       string  `json:"email"`
 	Location    LongLat `json:"location"`
@@ -107,6 +108,7 @@ type RequestInfo struct {
 	Image       string  `json:"image"`
 	Distance    float32 `json:"distance"`
 	Accepted    int     `json:"accepted"`
+	Active      bool    `json:"active"`
 }
 
 type Request struct {
@@ -122,6 +124,7 @@ type RequestEntity struct {
 	MerchantID string  `json:"merchant_id"`
 	Location   LongLat `json:"location"`
 	Comment    string  `json:"comment"`
+	Active     bool    `json:"active"`
 	Accepted   int     `json:"accepted"`
 }
 
