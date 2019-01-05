@@ -185,6 +185,41 @@ func GetRequestByMerchantID(merchantID string) (interface{}, error) {
 	return nil, nil
 }
 
+func GetRequestInfoById(id int, merchantId string) (interface{}, error) {
+	position, _ := GetLastPositionByMerchantID(merchantId)
+	var location string
+	if position != nil {
+		location = fmt.Sprintf(`POINT(%f %f)`, position.(models.Location).Location.Long, position.(models.Location).Location.Lat)
+	}
+
+	r, err := DB.Query(`SELECT r.id, user_id, merchant_id, name, email, phone_number, image, ST_ASTEXT(location), ST_DISTANCE_SPHERE(location, ST_GeomFromText(?)) as distance, comment, accepted, active
+								FROM request r 
+								  LEFT OUTER JOIN user u 
+								    ON r.user_id=u.id 
+								WHERE r.id=?`, location, id)
+	defer r.Close()
+
+	if err != nil {
+		panic(err)
+		return nil, err
+	}
+
+	location = ""
+
+	if r.Next() {
+		var request models.RequestInfo
+		err = r.Scan(&request.ID, &request.UserId,&request.MerchantId, &request.Name, &request.Email, &request.PhoneNumber, &request.Image, &location, &request.Distance, &request.Comment, &request.Accepted, &request.Active)
+		request.Location.Long, request.Location.Lat, _ = getLongLat(location)
+
+		if err != nil {
+			log.Println(err)
+			return nil, err
+		}
+		return request, nil
+	}
+	return nil, nil
+}
+
 func GetRequestInfoByMerchantId(merchantId string) (interface{}, error) {
 	position, _ := GetLastPositionByMerchantID(merchantId)
 	var location string
