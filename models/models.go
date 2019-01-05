@@ -134,7 +134,7 @@ type RequestInfo struct {
 type RequestNotification struct {
 	ID int `json:"id"`
 	User User `json:"user"`
-	Merchant Merchant `json:"merchant"`
+	Merchant MerchantInfo `json:"merchant"`
 	Location LongLat `json:"location"`
 	Comment string `json:"comment"`
 	Active bool `json:"active"`

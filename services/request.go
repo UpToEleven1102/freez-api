@@ -116,7 +116,7 @@ func GetRequestById(id int) (interface{}, error) {
 func GetRequestNotificationById(id int) (interface{}, error) {
 	r, err := DB.Query(`SELECT r.id, r.comment, r.active, r.accepted, 
        								user_id, u.name, u.image, u.phone_number, u.email,
-       								merchant_id, m.name, m.image, m.phone_number, m.email, m.online, m.mobile       								
+       								merchant_id, m.name, m.image, m.phone_number, m.email, m.online, m.mobile , ST_AsText(m.last_location), ST_DISTANCE_SPHERE(m.last_location, u.last_location) as distance   								
 								FROM request r 
 								JOIN user u 
 									ON r.user_id=u.id
@@ -131,15 +131,24 @@ func GetRequestNotificationById(id int) (interface{}, error) {
 
 	defer r.Close()
 
+	var reqNotif models.RequestNotification
+	var location string
+
 	for r.Next() {
-		var reqNotif models.RequestNotification
 		err = r.Scan(&reqNotif.ID, &reqNotif.Comment, &reqNotif.Active, &reqNotif.Accepted,
 			&reqNotif.User.ID, &reqNotif.User.Name, &reqNotif.User.Image, &reqNotif.User.PhoneNumber, &reqNotif.User.Email,
-			&reqNotif.Merchant.ID, &reqNotif.Merchant.Name, &reqNotif.Merchant.Image, &reqNotif.Merchant.PhoneNumber, &reqNotif.Merchant.Email, &reqNotif.Merchant.Online, &reqNotif.Merchant.Mobile)
+			&reqNotif.Merchant.MerchantID, &reqNotif.Merchant.Name, &reqNotif.Merchant.Image, &reqNotif.Merchant.PhoneNumber, &reqNotif.Merchant.Email, &reqNotif.Merchant.Online, &reqNotif.Merchant.Mobile, &location, &reqNotif.Merchant.Distance)
 
 		if err != nil {
 			log.Println(err)
 			return nil, err
+		}
+
+		reqNotif.Merchant.Accepted = reqNotif.Accepted
+		reqNotif.Merchant.IsFavorite, err = isFavorite(models.RequestData{UserId:reqNotif.User.ID, Data: reqNotif.Merchant.MerchantID})
+
+		if err != nil {
+			log.Println(err)
 		}
 
 		return reqNotif, nil

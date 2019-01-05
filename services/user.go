@@ -63,10 +63,9 @@ func GetUserById(id string) (interface{}, error) {
 	var user models.User
 	if r.Next() {
 		r.Scan(&user.ID, &user.PhoneNumber, &user.Email, &user.Name, &user.Password, &user.Image, &location, &user.Option.NotifFavNearby)
+		user.LastLocation.Long, user.LastLocation.Lat, _ = getLongLat(location)
 		return user, nil
 	}
-
-	user.LastLocation.Long, user.LastLocation.Lat, _ = getLongLat(location)
 
 	return nil, nil
 }

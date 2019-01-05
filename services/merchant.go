@@ -74,6 +74,7 @@ func ChangeOnlineStatus(merchantId string) error {
 
 	return nil
 }
+
 func GetMerchantByEmail(email string) (interface{}, error) {
 	var merchant models.Merchant
 

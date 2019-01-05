@@ -45,7 +45,7 @@ func UpdateMerchantNotification(notification models.MerchantNotification) error 
 	return err
 }
 
-func GetMerchantNotification(merchantID string) (notifications []interface{}, err error) {
+func GetMerchantNotifications(merchantID string) (notifications []interface{}, err error) {
 	notifications = []interface{}{}
 	r, err := DB.Query(`SELECT m.id, ts, merchant_id, type, source_id, unread, message 
 								FROM merchant_notification m
@@ -76,7 +76,37 @@ func GetMerchantNotification(merchantID string) (notifications []interface{}, er
 	return notifications, err
 }
 
-func GetUserNotification(userID string) (notifications []interface{}, err error) {
+func GetUserNotificationById(id int64) (interface{}, error){
+	r, err := DB.Query(`SELECT u.id, ts, user_id, type, source_id, unread, message 
+								FROM user_notification u
+								LEFT JOIN activity_type a on u.activity_type = a.id
+								WHERE u.id=?`, id)
+
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+
+	defer r.Close()
+	var notification models.UserNotification
+	if r.Next()  {
+		err = r.Scan(&notification.ID, &notification.TimeStamp, &notification.UserID, &notification.ActivityType, &notification.SourceID, &notification.UnRead, &notification.Message)
+		if err != nil {
+			log.Println(err)
+			return nil, err
+		}
+
+		notificationInfo := models.UserNotificationInfo{ID: notification.ID, TimeStamp:notification.TimeStamp, UserID:notification.UserID, ActivityType:notification.ActivityType, UnRead:notification.UnRead, Message:notification.Message}
+		switch notification.ActivityType {
+		case "request":
+			notificationInfo.Source, _ = GetRequestNotificationById(notification.SourceID)
+		}
+		return notificationInfo, nil
+	}
+	return nil, nil
+}
+
+func GetUserNotifications(userID string) (notifications []interface{}, err error) {
 	notifications = []interface{}{}
 	r, err := DB.Query(`SELECT u.id, ts, user_id, type, source_id, unread, message 
 								FROM user_notification u

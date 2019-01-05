@@ -24,8 +24,13 @@ func urlMatch(url string) (repository string, objectID string) {
 	fragments := strings.SplitN(url, "/", -1)
 	repository = fragments[2]
 	objectID = ""
-	if len(fragments) > 3 {
+	if len(fragments) == 4 {
 		objectID = fragments[3]
+	} else if len(fragments) > 4 {
+		objectID = fragments[3]
+		for i := 4; i < len(fragments); i++ {
+			objectID += "/" + fragments[i]
+		}
 	}
 
 	return repository, objectID

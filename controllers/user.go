@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -17,6 +18,14 @@ func sendResponse(w http.ResponseWriter, response models.DataResponse, status in
 	w.WriteHeader(status)
 	b, _ := json.Marshal(response)
 	w.Write(b)
+}
+
+func getUrlParam(objectID string) (objectId string, param string) {
+	arr := strings.Split(objectID, "/")
+	if len(arr) > 1 {
+		return arr[0], arr[1]
+	}
+	return objectID, ""
 }
 
 func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, claims models.JwtClaims) error {
@@ -58,13 +67,39 @@ func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, clai
 			b, _ := json.Marshal(r)
 			w.Write(b)
 		case "notification":
-			notifications, err := services.GetUserNotification(claims.Id)
+			notifications, err := services.GetUserNotifications(claims.Id)
 			if err != nil {
 				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
 				return nil
 			}
 
 			_ = json.NewEncoder(w).Encode(notifications)
+		default:
+			objectID, param := getUrlParam(objectID)
+			if param == "" {
+				http.NotFound(w, req)
+				return nil
+			}
+
+			switch objectID {
+			case "notification":
+				id, err := strconv.ParseInt(param, 0, 64)
+
+				if err != nil {
+					log.Println(err)
+					http.NotFound(w, req)
+					return nil
+				}
+				notification, err := services.GetUserNotificationById(id)
+
+				if err != nil {
+					log.Println(err)
+					w.WriteHeader(http.StatusInternalServerError)
+					_  = json.NewEncoder(w).Encode(models.DataResponse{Success:false})
+				}
+
+				_ = json.NewEncoder(w).Encode(notification)
+			}
 		}
 
 	case "POST":
