@@ -46,6 +46,7 @@ const schemaOrder = `CREATE TABLE m_order(
 	merchant_id VARCHAR(64) NOT NULL,
 	stripe_id VARCHAR(64) NOT NULL,
 	refund BOOL NOT NULL DEFAULT FALSE,
+	amount FLOAT NOT NULL,
 	PRIMARY KEY (id)
 	);
 	`

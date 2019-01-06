@@ -77,6 +77,16 @@ func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, clai
 			}
 
 			_ = json.NewEncoder(w).Encode(notifications)
+
+		case "order":
+			orders , err := services.GetOrderHistoryByUserId(claims.Id)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
+			}
+
+			_ = json.NewEncoder(w).Encode(orders)
+
 		default:
 			objectID, param := getUrlParam(objectID)
 			if param == "" {
