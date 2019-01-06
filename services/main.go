@@ -10,7 +10,6 @@ import (
 	"github.com/go-redis/redis"
 	"github.com/jmoiron/sqlx"
 	"github.com/stripe/stripe-go"
-	"github.com/stripe/stripe-go/client"
 	"github.com/tbalthazar/onesignal-go"
 	"log"
 	"os"
@@ -27,8 +26,6 @@ var (
 	s3BucketName string
 
 	RedisClient *redis.Client
-
-	Stripe *client.API
 )
 
 func oneSignalConfig() {
@@ -104,8 +101,6 @@ func init() {
 	redisConfig()
 
 	stripe.Key = os.Getenv("STRIPE_KEY")
-
-	Stripe = &client.API{}
 
 	//listObjects()
 
