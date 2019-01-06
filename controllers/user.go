@@ -152,11 +152,12 @@ func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, clai
 			res, err := services.StripeCharge(data.StripeToken, "Testing", data.Amount)
 
 			if err != nil {
+				log.Println(err)
 				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
 				return nil
 			}
 
-			fmt.Println(res)
+			fmt.Printf("%+v", res)
 			_ = json.NewEncoder(w).Encode(models.DataResponse{Success:true})
 
 		default:
