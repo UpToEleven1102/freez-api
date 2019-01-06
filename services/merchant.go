@@ -183,7 +183,7 @@ func GetMerchantInfoById(id string, location models.Location) (interface{}, erro
 								  ON l.ts=latest.ts
 								  JOIN merchant m
 								    ON l.merchant_id=m.id
-									  HAVING distance < 1000 AND l.merchant_id=?`, userLocation, id)
+									  WHERE l.merchant_id=?`, userLocation, id)
 	defer r.Close()
 	if err != nil {
 		log.Println(err)
