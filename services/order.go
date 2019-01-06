@@ -53,7 +53,7 @@ func getItemOrder(orderId int) (items []interface{}, err error) {
 }
 
 func GetOrderHistoryByUserId(userID string) (orders []interface{}, err error) {
-	r, err := DB.Query(`SELECT id, user_id, merchant_id, stripe_id, refund, amount FROM m_order WHERE user_id=?`, userID)
+	r, err := DB.Query(`SELECT id, user_id, merchant_id, stripe_id, refund, amount, date FROM m_order WHERE user_id=?`, userID)
 
 	defer r.Close()
 
@@ -64,7 +64,7 @@ func GetOrderHistoryByUserId(userID string) (orders []interface{}, err error) {
 
 	for r.Next() {
 		var order models.OrderEntity
-		_ = r.Scan(&order.ID, &order.UserId, &order.MerchantId, &order.StripeId, &order.Refund, &order.Amount)
+		_ = r.Scan(&order.ID, &order.UserId, &order.MerchantId, &order.StripeId, &order.Refund, &order.Amount, &order.Date)
 		order.Items, _ = getItemOrder(order.ID)
 		orders = append(orders, order)
 	}

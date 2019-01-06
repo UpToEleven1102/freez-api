@@ -112,6 +112,7 @@ type OrderEntity struct {
 	StripeId   string      `json:"stripe_id"`
 	Refund     bool        `json:"refund"`
 	Amount     float64     `json:"amount"`
+	Date       string      `json:"date"`
 	Items      interface{} `json:"items"`
 }
 
