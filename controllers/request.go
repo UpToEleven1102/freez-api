@@ -7,7 +7,9 @@ import (
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"strconv"
 )
 
 func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, claims models.JwtClaims) error {
@@ -101,7 +103,24 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 			w.Write(b)
 
 		default:
-			http.NotFound(w, req)
+			param, err := strconv.ParseInt(objectID, 0, 64)
+
+			if err != nil {
+				log.Println(err)
+				http.NotFound(w, req)
+				return nil
+			}
+
+			if	claims.Role == config.Merchant {
+				request, err := services.GetRequestInfoById(int(param), claims.Id)
+				if err != nil {
+					w.WriteHeader(http.StatusInternalServerError)
+					_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false})
+					return nil
+				}
+
+				_ = json.NewEncoder(w).Encode(request)
+			}
 		}
 	case "PUT":
 		if claims.Role == config.Merchant {

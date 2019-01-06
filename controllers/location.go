@@ -7,6 +7,7 @@ import (
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
 	"io/ioutil"
+	"log"
 	"net/http"
 )
 
@@ -66,7 +67,35 @@ func LocationHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 			}
 			w.WriteHeader(http.StatusCreated)
 		} else {
-			http.NotFound(w, req)
+			objectID, param := getUrlParam(objectID)
+
+			if len(param) == 0 {
+				http.NotFound(w, req)
+				return nil
+			}
+
+			switch objectID {
+			case "nearby":
+				var location models.Location
+				err := json.NewDecoder(req.Body).Decode(&location)
+
+				if err != nil {
+					log.Println(err)
+					w.WriteHeader(http.StatusBadRequest)
+					return nil
+				}
+
+				merchant, err := services.GetMerchantInfoById(param, location)
+
+				if err != nil {
+					log.Println(err)
+					w.WriteHeader(http.StatusInternalServerError)
+					return nil
+				}
+
+				_ = json.NewEncoder(w).Encode(merchant)
+				break
+			}
 		}
 
 	case "GET":
