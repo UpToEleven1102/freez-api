@@ -6,7 +6,7 @@ import (
 )
 
 func CreateOrder(data models.OrderRequestData) error {
-	r, err := DB.Exec(`INSERT INTO m_order (user_id, merchant_id, stripe_id) VALUES (?,?,?)`, data.UserID, data.MerchantID, data.StripeID)
+	r, err := DB.Exec(`INSERT INTO m_order (user_id, merchant_id, stripe_id, amount) VALUES (?,?,?,?)`, data.UserID, data.MerchantID, data.StripeID, data.Amount)
 
 	if err != nil {
 		log.Println(err)
