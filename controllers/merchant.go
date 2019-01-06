@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -28,7 +29,7 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 				return err
 			}
 			b, _ := json.Marshal(merchant)
-			_,_ = w.Write(b)
+			_, _ = w.Write(b)
 		case "presign-url":
 			fileName := fmt.Sprint(claims.Id, "-profile.jpg")
 			url, err := services.GeneratePreSignedUrl(fileName)
@@ -44,16 +45,51 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 			}
 
 			b, _ := json.Marshal(response)
-			_,_ = w.Write(b)
+			_, _ = w.Write(b)
 		case "product":
 			products, err := services.GetProducts(claims.Id)
 			if err != nil {
 				w.WriteHeader(http.StatusBadRequest)
-				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
 				return nil
 			}
 
 			_ = json.NewEncoder(w).Encode(products)
+		case "notification":
+			notifications, err := services.GetMerchantNotifications(claims.Id)
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
+				return nil
+			}
+
+			_ = json.NewEncoder(w).Encode(notifications)
+		default:
+			objectID, param := getUrlParam(objectID)
+			if param == "" {
+				http.NotFound(w, req)
+				return nil
+			}
+
+			switch objectID {
+			case "notification":
+				id, err := strconv.ParseInt(param, 0, 64)
+				if err != nil {
+					log.Println(err)
+					http.NotFound(w, req)
+					return nil
+				}
+
+				notification, err := services.GetMerchantNotificationById(id)
+
+				if err != nil {
+					w.WriteHeader(http.StatusBadRequest)
+					_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
+					return nil
+				}
+
+				_ = json.NewEncoder(w).Encode(notification)
+			}
 		}
 
 	case "POST":
@@ -71,10 +107,9 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 
 			err := json.NewDecoder(req.Body).Decode(&product)
 
-
 			if err != nil {
 				w.WriteHeader(http.StatusBadRequest)
-				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
 				return nil
 			}
 			product.MerchantId = claims.Id
@@ -82,17 +117,18 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 
 			if err != nil {
 				w.WriteHeader(http.StatusBadRequest)
-				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
 				return nil
 			}
 		case "product-presign-url":
-			var product	models.Product
+			var product models.Product
 
 			err := json.NewDecoder(req.Body).Decode(&product)
 
 			if err != nil {
+				log.Println(err)
 				w.WriteHeader(http.StatusBadRequest)
-				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message: err.Error()})
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
 				return nil
 			}
 			var fileName string
@@ -102,7 +138,7 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 					fileName = strings.Split(arr[len(arr)-1], "?")[0]
 				}
 			} else {
-				fileName = fmt.Sprintf("%s-%d.jpg",claims.Id,time.Now().UnixNano())
+				fileName = fmt.Sprintf("%s-%d.jpg", claims.Id, time.Now().UnixNano())
 			}
 
 			url, err := services.GeneratePreSignedUrl(fileName)
@@ -110,11 +146,11 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 			if err != nil {
 				log.Println(err)
 				w.WriteHeader(http.StatusBadRequest)
-				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message: err.Error()})
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
 				return nil
 			}
 
-			_ = json.NewEncoder(w).Encode(models.DataResponse{Success:true, Message: url})
+			_ = json.NewEncoder(w).Encode(models.DataResponse{Success: true, Message: url})
 
 		default:
 			http.NotFound(w, req)
@@ -126,14 +162,14 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 			b, err := ioutil.ReadAll(req.Body)
 
 			if err != nil {
-				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
 				return nil
 			}
 
 			var merchant models.Merchant
 			err = json.Unmarshal(b, &merchant)
 			if err != nil {
-				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
 				return nil
 			}
 			merchant.ID = claims.Id
@@ -157,13 +193,31 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 			err := json.NewDecoder(req.Body).Decode(&product)
 
 			if err != nil {
-				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
 				return nil
 			}
 			product.MerchantId = claims.Id
 			err = services.UpdateProduct(product)
 			if err != nil {
-				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message: err.Error()})
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
+				return nil
+			}
+
+		case "notification":
+			var notification models.MerchantNotification
+			err := json.NewDecoder(req.Body).Decode(&notification)
+
+			if err != nil {
+				log.Println(err.Error())
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
+				return nil
+			}
+
+			err = services.UpdateMerchantNotification(notification)
+
+			if err != nil {
+				log.Println(err.Error())
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
 				return nil
 			}
 
@@ -181,7 +235,7 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 			err := services.DeleteProduct(data)
 
 			if err != nil {
-				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message: err.Error()})
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
 			}
 		}
 

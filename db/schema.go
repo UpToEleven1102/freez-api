@@ -58,13 +58,41 @@ const triggerInsertMerchantMOption = `
 	FOR EACH ROW INSERT INTO merchant_m_option (merchant_id) VALUES(NEW.id);
 `
 
+const schemaActivityType = `
+	CREATE TABLE activity_type(
+	id INT NOT NULL AUTO_INCREMENT,
+	type VARCHAR(64) NOT NULL,
+	PRIMARY KEY (id))
+`
 
 const schemaMerchantNotification = `CREATE TABLE merchant_notification(
 	id INT NOT NULL AUTO_INCREMENT,
 	ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP UNIQUE,
 	merchant_id VARCHAR(64) NOT NULL,
-	activity_type INT
-	source_id VARCHAR(64) NOT NULL
+	activity_type INT,
+	source_id INT NOT NULL,
+	unread BOOL NOT NULL DEFAULT true,
+	message VARCHAR(225) NOT NULL DEFAULT '',
+	PRIMARY KEY (id),
+	FOREIGN KEY fk_merchant_notification_type(activity_type)
+		REFERENCES activity_type(id)
+		ON UPDATE CASCADE
+		ON DELETE CASCADE
+);`
+
+const schemaUserNotification = `CREATE TABLE user_notification(
+	id INT NOT NULL AUTO_INCREMENT,
+	ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP UNIQUE,
+	user_id VARCHAR(64) NOT NULL,
+	activity_type INT,
+	source_id int NOT NULL,
+	unread BOOL NOT NULL DEFAULT true,
+	message VARCHAR(225) NOT NULL DEFAULT '',
+	PRIMARY KEY (id),
+	FOREIGN KEY fk_user_notification_type(activity_type)
+		REFERENCES activity_type(id)
+		ON UPDATE CASCADE
+		ON DELETE CASCADE
 );`
 
 //User
@@ -85,7 +113,7 @@ const schemaMOption = `
 	CREATE TABLE m_option(
 		id INT AUTO_INCREMENT,
 		user_id VARCHAR(64) NOT NULL,
-		notif_fav_nearby BOOL NOT NULL DEFAULT TRUE,
+		notif_fav_nearby BOOLEAN NOT NULL DEFAULT TRUE,
 		PRIMARY KEY (id),
 		FOREIGN KEY fk_user (user_id)
 			REFERENCES user(id)
@@ -99,7 +127,6 @@ const triggerInsertUserMOption = `
 	FOR EACH ROW INSERT INTO m_option (user_id) VALUES(NEW.id);
 `
 
-
 const schemaFavorites = `
 	CREATE TABLE favorite(
 		user_id VARCHAR(64) NOT NULL,
@@ -107,15 +134,6 @@ const schemaFavorites = `
 		PRIMARY KEY(user_id, merchant_id)
 	);
 `
-
-const schemaUserNotification = `CREATE TABLE user_notification(
-	id INT NOT NULL AUTO_INCREMENT,
-	ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP UNIQUE,
-	user_id VARCHAR(64) NOT NULL,
-	activity_type INT
-	source_id VARCHAR(64) NOT NULL
-);`
-
 const schemaRequest = `CREATE TABLE request(
 		id INT NOT NULL AUTO_INCREMENT,
 		user_id VARCHAR(64) NOT NULL,
@@ -123,6 +141,7 @@ const schemaRequest = `CREATE TABLE request(
 		location POINT NOT NULL,
 		SPATIAL INDEX(location),
 		comment VARCHAR(200) NOT NULL DEFAULT '',
+		active BOOL NOT NULL DEFAULT TRUE,
 		accepted TINYINT(1) DEFAULT -1 NOT NULL,
 		PRIMARY KEY (id)
 	);

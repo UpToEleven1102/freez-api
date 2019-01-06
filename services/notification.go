@@ -12,7 +12,8 @@ import (
 	"strings"
 )
 
-func CreateNotificationByUserId(userID string, title string, message string, data models.RequestData) (res interface{}, err error) {
+
+func CreateNotificationByUserId(userID string, title string, message string, claims models.JwtClaims, data interface{}) (res interface{}, err error) {
 	notificationReq := &onesignal.NotificationRequest{
 		AppID:     oneSignalAppID,
 		Contents:  map[string]string{"en": message},
@@ -51,7 +52,6 @@ func CreateEmailNotification(playerID string, emailSubject string, emailBody str
 	}
 
 	return err
-
 }
 
 func SendSMSMessage(receiver string, pin string) {

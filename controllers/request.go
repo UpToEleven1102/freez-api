@@ -2,11 +2,14 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/config"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"strconv"
 )
 
 func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, claims models.JwtClaims) error {
@@ -33,7 +36,7 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 
 		request.UserId = claims.Id
 
-		err = services.CreateRequest(request)
+		err = services.CreateRequest(request, claims)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return nil
@@ -42,7 +45,7 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 		w.WriteHeader(http.StatusOK)
 	case "GET":
 		switch objectID {
-		case "" :
+		case "":
 			if claims.Role == config.User {
 				r, err := services.GetRequestedMerchantByUserID(claims.Id)
 				if err != nil {
@@ -50,7 +53,7 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 					return nil
 				}
 				b, _ := json.Marshal(r)
-				_,_ = w.Write(b)
+				_, _ = w.Write(b)
 
 			} else if claims.Role == config.Merchant {
 				r, err := services.GetRequestInfoByMerchantId(claims.Id)
@@ -60,7 +63,7 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 				}
 
 				b, _ := json.Marshal(r)
-				_,_ = w.Write(b)
+				_, _ = w.Write(b)
 			}
 
 			return nil
@@ -100,7 +103,24 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 			w.Write(b)
 
 		default:
-			http.NotFound(w,req)
+			param, err := strconv.ParseInt(objectID, 0, 64)
+
+			if err != nil {
+				log.Println(err)
+				http.NotFound(w, req)
+				return nil
+			}
+
+			if	claims.Role == config.Merchant {
+				request, err := services.GetRequestInfoById(int(param), claims.Id)
+				if err != nil {
+					w.WriteHeader(http.StatusInternalServerError)
+					_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false})
+					return nil
+				}
+
+				_ = json.NewEncoder(w).Encode(request)
+			}
 		}
 	case "PUT":
 		if claims.Role == config.Merchant {
@@ -113,12 +133,15 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 			var request models.RequestEntity
 			json.Unmarshal(b, &request)
 
+			fmt.Printf("%+v", request)
+
 			if request.Accepted != 0 && request.Accepted != 1 {
 				http.Error(w, "accepted param must be 0 or 1", http.StatusBadRequest)
 				return nil
 			}
+
 			request.MerchantID = claims.Id
-			err = services.UpdateRequestAccepted(request)
+			err = services.UpdateRequestAccepted(request, claims)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return nil
@@ -131,7 +154,7 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 		}
 
 		err := services.RemoveRequestsByUserID(claims.Id)
-		if	err!=nil {
+		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return nil
 		}

@@ -44,7 +44,8 @@ func SignInMerchant(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 	}
-	http.Error(w, "Credentials Invalid", http.StatusBadRequest)
+	w.WriteHeader(http.StatusBadRequest)
+	_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:"Credentials Invalid"})
 }
 
 func SignUpMerchant(w http.ResponseWriter, req *http.Request) {

@@ -6,6 +6,7 @@ import (
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
+	"log"
 )
 
 //func GetMerchants() (merchants []models.Merchant, err error) {
@@ -74,6 +75,7 @@ func ChangeOnlineStatus(merchantId string) error {
 
 	return nil
 }
+
 func GetMerchantByEmail(email string) (interface{}, error) {
 	var merchant models.Merchant
 
@@ -131,9 +133,6 @@ func GetMerchantByPhoneNumber(phoneNumber string) (interface{}, error) {
 	return nil, nil
 }
 
-
-
-
 func UpdateMerchant(merchant models.Merchant) (err error) {
 	_, err = DB.Exec(`UPDATE merchant SET mobile=?,phone_number=?,email=?,name=?,image=? WHERE id=?;`,merchant.Mobile, merchant.PhoneNumber, merchant.Email, merchant.Name, merchant.Image, merchant.ID)
 	return err
@@ -173,17 +172,58 @@ func GetLastPositionByMerchantID(merchantID string) (interface{}, error) {
 	return nil, nil
 }
 
-func GetNearMerchantsLastLocation(location models.Location) (merchants []interface{}, err error){
+func GetMerchantInfoById(id string, location models.Location) (interface{}, error) {
+	fmt.Println(id)
+	fmt.Println(location)
 	userLocation := fmt.Sprintf(`POINT(%f %f)`, location.Location.Long, location.Location.Lat)
-
-	r, err := DB.Query(`SELECT online, email, name, mobile, phone_number, image, l.merchant_id, ST_AsText(location) as location, ST_Distance_Sphere(location, ST_GeomFromText(?))*.000621371192 as distance
+	r, err := DB.Query(`SELECT online, email, name, mobile, phone_number, image, l.merchant_id, ST_AsText(location) as location, ST_Distance_Sphere(location, ST_GeomFromText(?)) as distance
 								FROM location l INNER JOIN (
 								    SELECT merchant_id, MAX(ts) AS ts FROM location GROUP BY merchant_id
 								  ) latest
 								  ON l.ts=latest.ts
 								  JOIN merchant m
 								    ON l.merchant_id=m.id
-									  HAVING distance < 3 AND online=true`, userLocation)
+									  WHERE l.merchant_id=?`, userLocation, id)
+	defer r.Close()
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	var loc string
+
+	if r.Next()  {
+		var merchant models.MerchantInfo
+		_ = r.Scan(&merchant.Online ,&merchant.Email, &merchant.Name, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Image, &merchant.MerchantID, &loc, &merchant.Distance)
+
+		merchant.Location.Long, merchant.Location.Lat, err = getLongLat(loc)
+		if err != nil {
+			return nil, err
+		}
+
+		var data models.RequestData
+		data.UserId = location.Id
+		data.Data = merchant.MerchantID
+
+		merchant.IsFavorite, _ = isFavorite(data)
+		merchant.Products, _ = GetProducts(merchant.MerchantID)
+		return merchant, nil
+	}
+
+	return nil, nil
+}
+
+func GetNearMerchantsLastLocation(location models.Location) (merchants []interface{}, err error){
+	userLocation := fmt.Sprintf(`POINT(%f %f)`, location.Location.Long, location.Location.Lat)
+
+	r, err := DB.Query(`SELECT online, email, name, mobile, phone_number, image, l.merchant_id, ST_AsText(location) as location, ST_Distance_Sphere(location, ST_GeomFromText(?)) as distance
+								FROM location l INNER JOIN (
+								    SELECT merchant_id, MAX(ts) AS ts FROM location GROUP BY merchant_id
+								  ) latest
+								  ON l.ts=latest.ts
+								  JOIN merchant m
+								    ON l.merchant_id=m.id
+									  HAVING distance < 1000 AND online=true`, userLocation)
 	defer r.Close()
 
 	if err != nil {

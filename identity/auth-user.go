@@ -36,14 +36,16 @@ func SignInUser(w http.ResponseWriter, req *http.Request) {
 	r, err := services.GetUserByEmail(credentials.Email)
 
 	if err != nil || r == nil {
-		http.Error(w, "Credentials invalid", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:"Credentials Invalid"})
 		return
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(r.(models.User).Password), []byte(credentials.Password))
 
 	if err != nil {
-		http.Error(w, "Credentials invalid", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:"Credentials Invalid"})
 		return
 	}
 
