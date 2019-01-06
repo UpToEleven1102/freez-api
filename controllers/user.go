@@ -53,7 +53,7 @@ func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, clai
 			}
 
 			b, _ := json.Marshal(response)
-			_,_ = w.Write(b)
+			_, _ = w.Write(b)
 		case "favorite":
 			r, err := services.GetFavorites(claims.Id)
 
@@ -69,7 +69,7 @@ func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, clai
 		case "notification":
 			notifications, err := services.GetUserNotifications(claims.Id)
 			if err != nil {
-				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
 				return nil
 			}
 
@@ -95,7 +95,7 @@ func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, clai
 				if err != nil {
 					log.Println(err)
 					w.WriteHeader(http.StatusInternalServerError)
-					_  = json.NewEncoder(w).Encode(models.DataResponse{Success:false})
+					_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false})
 				}
 
 				_ = json.NewEncoder(w).Encode(notification)
@@ -139,6 +139,25 @@ func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, clai
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
+
+		case "charge":
+			type chargeData struct {
+				StripeToken string  `json:"stripeToken"`
+				Amount      float64 `json:"amount"`
+			}
+			var data chargeData
+
+			_ = json.NewDecoder(req.Body).Decode(&data)
+
+			res, err := services.StripeCharge(data.StripeToken, "Testing", data.Amount)
+
+			if err != nil {
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
+				return nil
+			}
+
+			fmt.Println(res)
+			_ = json.NewEncoder(w).Encode(models.DataResponse{Success:true})
 
 		default:
 			http.NotFound(w, req)
@@ -205,14 +224,14 @@ func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, clai
 
 			if err != nil {
 				log.Println(err)
-				json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message: err.Error()})
+				json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
 				return nil
 			}
 
 			err = services.UpdateUserNotification(notification)
 			if err != nil {
 				log.Println(err)
-				json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message: err.Error()})
+				json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
 				return nil
 			}
 		}
