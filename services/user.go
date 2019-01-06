@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"github.com/satori/go.uuid"
+	"github.com/stripe/stripe-go"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -149,4 +150,21 @@ func GetFavorites(userID string) (merchants []interface{}, err error) {
 	}
 
 	return merchants, nil
+}
+
+func ChargeUser(data models.OrderRequestData) (err error) {
+
+	var res *stripe.Charge
+	res, err = StripeCharge(data.StripeToken, "Testing", data.Amount)
+
+	if err != nil {
+		return err
+	}
+
+	data.StripeID = res.ID
+	fmt.Printf("%+v \n", data)
+
+	err = CreateOrder(data)
+
+	return err
 }

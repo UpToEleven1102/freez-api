@@ -85,6 +85,36 @@ type Product struct {
 	Image      string  `json:"image"`
 }
 
+type ItemHistory struct {
+	ID int `json:"id"`
+	Product Product `json:"product"`
+	Quantity int `json:"quantity"`
+	Price float64 `json:"price"`
+}
+
+type OrderRequestData struct {
+	StripeToken string  `json:"stripe_token"`
+	Amount      float64 `json:"amount"`
+	UserID string `json:"user_id"`
+	MerchantID string `json:"merchant_id"`
+	StripeID string `json:"stripe_id"`
+	Items []struct {
+		Product Product `json:"product"`
+		Quantity int `json:"quantity"`
+		Price float64 `json:"price"`
+	} `json:"items"`
+}
+
+type OrderEntity struct {
+	ID int `json:"id"`
+	UserId string `json:"user_id"`
+	MerchantId string `json:"merchant_id"`
+	StripeId string `json:"stripe_id"`
+	Refund bool `json:"refund"`
+	Amount float64 `json:"amount"`
+	Items interface{} `json:"items"`
+}
+
 type MerchantInfo struct {
 	Online      bool          `json:"online"`
 	MerchantID  string        `json:"merchant_id"`

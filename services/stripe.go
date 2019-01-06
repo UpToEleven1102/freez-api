@@ -7,7 +7,7 @@ import (
 	"math"
 )
 
-func StripeCharge(token string, des string, amount float64) (interface{}, error) {
+func StripeCharge(token string, des string, amount float64) (*stripe.Charge, error) {
 	total := int64(math.Round(amount* 100))
 
 	chargeParams := &stripe.ChargeParams{
@@ -15,7 +15,11 @@ func StripeCharge(token string, des string, amount float64) (interface{}, error)
 		Currency: stripe.String(string(stripe.CurrencyUSD)),
 		Description: stripe.String(des),
 	}
-	chargeParams.SetSource(token)
+	err := chargeParams.SetSource(token)
+
+	if err != nil {
+		return nil, err
+	}
 
 	ch, err := charge.New(chargeParams)
 

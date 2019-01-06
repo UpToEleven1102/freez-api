@@ -14,6 +14,9 @@ import (
 	"strings"
 )
 
+
+
+
 func sendResponse(w http.ResponseWriter, response models.DataResponse, status int) {
 	w.WriteHeader(status)
 	b, _ := json.Marshal(response)
@@ -141,23 +144,24 @@ func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, clai
 			}
 
 		case "charge":
-			type chargeData struct {
-				StripeToken string  `json:"stripeToken"`
-				Amount      float64 `json:"amount"`
-			}
-			var data chargeData
+			var data models.OrderRequestData
 
-			_ = json.NewDecoder(req.Body).Decode(&data)
-
-			res, err := services.StripeCharge(data.StripeToken, "Testing", data.Amount)
+			err := json.NewDecoder(req.Body).Decode(&data)
 
 			if err != nil {
 				log.Println(err)
 				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
 				return nil
 			}
+			data.UserID = claims.Id
 
-			fmt.Printf("%+v", res)
+			err = services.ChargeUser(data)
+
+			if err != nil {
+				log.Println(err)
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
+				return nil
+			}
 			_ = json.NewEncoder(w).Encode(models.DataResponse{Success:true})
 
 		default:
