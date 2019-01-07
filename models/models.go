@@ -29,6 +29,7 @@ type Merchant struct {
 	Image        string          `json:"image"`
 	Role         string          `json:"role"`
 	LastLocation LongLat         `json:"last_location"`
+	StripeID     string          `json:"stripe_id"`
 	Option       merchantMOption `json:"option"`
 	Product      []Product       `json:"product"`
 }

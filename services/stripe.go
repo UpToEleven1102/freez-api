@@ -1,7 +1,9 @@
 package services
 
 import (
+	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"github.com/stripe/stripe-go"
+	"github.com/stripe/stripe-go/account"
 	"github.com/stripe/stripe-go/charge"
 	"github.com/stripe/stripe-go/refund"
 	"math"
@@ -45,4 +47,37 @@ func StripePartialRefund(token string, amount float64) (interface{}, error) {
 
 	ref, err := refund.New(refundParams)
 	return ref, err
+}
+
+func StripeCreateAccount(merchant models.Merchant) (*stripe.Account, error) {
+	params := &stripe.AccountParams{
+		Country: stripe.String("US"),
+		Type: stripe.String(string(stripe.AccountTypeCustom)),
+	}
+
+	acc, err := account.New(params)
+
+	if err != nil {
+		panic(err)
+		return nil, err
+	}
+
+	return acc, err
+}
+
+func StripeUpdateAccount(merchant models.Merchant) (*stripe.Account, error) {
+	params := &stripe.AccountParams{
+		SupportPhone: stripe.String(merchant.PhoneNumber),
+		Email: stripe.String(merchant.Email),
+		SupportEmail: stripe.String(merchant.Email),
+	}
+
+	acc, err := account.Update(merchant.StripeID, params)
+
+	if err != nil {
+		panic(err)
+		return nil, err
+	}
+
+	return acc, err
 }

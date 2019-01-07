@@ -12,6 +12,7 @@ const schemaMerchant = `
 		password text NOT NULL,
 		last_location POINT,
 		image VARCHAR(255) NOT NULL DEFAULT 'https://freeze-app.s3.us-west-2.amazonaws.com/blank-profile-picture.jpg',
+		stripe_id VARCHAR(64) NOT NULL UNIQUE,
 		PRIMARY KEY (id)
 	);
 `
