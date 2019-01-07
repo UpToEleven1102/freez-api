@@ -164,9 +164,9 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 			_ = json.NewEncoder(w).Encode(models.DataResponse{Success: true, Message: url})
 		case "refund":
 			type refundData struct {
-				StripeToken string `json:"stripe_token"`
-				Amount float64 `json:"amount"`
-				Reason	string `json:"reason"`
+				StripeID string  `json:"stripe_id"`
+				Amount   float64 `json:"amount"`
+				Reason   string  `json:"reason"`
 			}
 
 			var data refundData
@@ -182,9 +182,9 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 			var res interface{}
 
 			if data.Amount <= 0 {
-				res, err = services.StripeRefund(data.StripeToken)
+				res, err = services.StripeRefund(data.StripeID)
 			} else {
-				res, err = services.StripePartialRefund(data.StripeToken, data.Amount)
+				res, err = services.StripePartialRefund(data.StripeID, data.Amount)
 			}
 
 
@@ -234,6 +234,17 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 				}
 
 				sendResponse(w, response, http.StatusBadRequest)
+			}
+		case "order":
+			var order models.OrderEntity
+			err := json.NewDecoder(req.Body).Decode(&order)
+			if err != nil {
+				panic(err)
+			}
+
+			err = services.UpdateOrder(order)
+			if err != nil {
+				panic(err)
 			}
 
 		case "product":

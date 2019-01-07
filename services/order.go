@@ -112,3 +112,8 @@ func GetOrderPaymentByMerchantId(merchantID string) (orders []interface{}, err e
 
 	return orders, err
 }
+
+func UpdateOrder(order models.OrderEntity) error {
+	_, err := DB.Exec(`UPDATE m_order SET refund=? WHERE id=?`, order.Refund, order.ID)
+	return err
+}
