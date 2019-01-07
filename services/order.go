@@ -71,3 +71,44 @@ func GetOrderHistoryByUserId(userID string) (orders []interface{}, err error) {
 
 	return orders, nil
 }
+
+func GetOrderPaymentByMerchantId(merchantID string) (orders []interface{}, err error) {
+	type OrderPayment struct {
+		ID int `json:"id"`
+		User models.User `json:"user"`
+		MerchantID string `json:"merchant_id"`
+		StripeID string `json:"stripe_id"`
+		Refund bool `json:"refund"`
+		Amount float64 `json:"amount"`
+		Date string `json:"date"`
+	}
+
+	r, err := DB.Query(`SELECT o.id, user_id, merchant_id, stripe_id, refund, amount, date, phone_number, email, name, image, ST_AsText(last_location)
+								FROM m_order o
+								LEFT JOIN user u ON o.user_id=u.id
+								WHERE merchant_id=?`, merchantID)
+
+	defer r.Close()
+
+	if err != nil {
+		panic(err)
+		return nil, err
+	}
+
+	for r.Next() {
+		var order OrderPayment
+		var location string
+		err = r.Scan(&order.ID, &order.User.ID, &order.MerchantID, &order.StripeID, &order.Refund, &order.Amount, &order.Date,
+			&order.User.PhoneNumber, &order.User.Email, &order.User.Name, &order.User.Image, &location)
+		if err != nil {
+			panic(err)
+			return nil, err
+		}
+
+		order.User.LastLocation.Long, order.User.LastLocation.Lat, _ = getLongLat(location)
+
+		orders = append(orders, order)
+	}
+
+	return orders, err
+}
