@@ -53,6 +53,21 @@ func CreateMerchant(merchant models.Merchant) (models.Merchant, error) {
 	return merchant, nil
 }
 
+func getMerchantStripeIdByMerchantId(merchantId string) (id string, err error) {
+	r, err := DB.Query(`SELECT stripe_id FROM merchant WHERE id=?`, merchantId)
+
+	if err != nil {
+		panic(err)
+		return "", nil
+	}
+
+	if r.Next() {
+		err = r.Scan(&id)
+	}
+
+	return id, err
+}
+
 func ChangeOnlineStatus(merchantId string) error {
 	m, err := GetMerchantById(merchantId)
 	if err != nil {

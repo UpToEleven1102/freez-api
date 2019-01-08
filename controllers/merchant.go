@@ -203,9 +203,6 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 
 			_ = json.NewEncoder(w).Encode(models.DataResponse{Success: refundRes.Status == "succeeded", Message:"Successfully refunded"})
 
-		case "charge":
-
-
 		default:
 			http.NotFound(w, req)
 		}
@@ -240,6 +237,7 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 
 				sendResponse(w, response, http.StatusBadRequest)
 			}
+
 		case "order":
 			var order models.OrderEntity
 			err := json.NewDecoder(req.Body).Decode(&order)

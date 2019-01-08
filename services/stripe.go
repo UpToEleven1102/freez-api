@@ -11,6 +11,30 @@ import (
 	"strconv"
 )
 
+func StripeConnectDestinationCharge(token string, accId string, desc string, amount float64) (*stripe.Charge, error) {
+	platformFeePercent, _ := strconv.ParseFloat(os.Getenv("PLATFORM_FEE_PERCENTAGE"), 64)
+	total := int64(amount*100)
+	desAmount := int64(math.Round(amount * (100 - platformFeePercent)))
+	params := &stripe.ChargeParams{
+		Amount: stripe.Int64(total),
+		Currency: stripe.String(string(stripe.CurrencyUSD)),
+		Description: stripe.String(desc),
+		Destination: &stripe.DestinationParams{
+			Amount: stripe.Int64(desAmount),
+			Account: stripe.String(accId),
+		},
+	}
+
+	err := params.SetSource(token)
+
+	if err != nil {
+		panic(err)
+		return nil , err
+	}
+
+	return charge.New(params)
+}
+
 func StripeCharge(token string, des string, amount float64) (*stripe.Charge, error) {
 	total := int64(math.Round(amount* 100))
 
