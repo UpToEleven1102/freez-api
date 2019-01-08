@@ -75,6 +75,8 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 			}
 			_ = json.NewEncoder(w).Encode(orders)
 
+
+
 		default:
 			objectID, param := getUrlParam(objectID)
 			if param == "" {
@@ -200,6 +202,9 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 			//_ = json.NewEncoder(w).Encode(res)
 
 			_ = json.NewEncoder(w).Encode(models.DataResponse{Success: refundRes.Status == "succeeded", Message:"Successfully refunded"})
+
+		case "charge":
+
 
 		default:
 			http.NotFound(w, req)

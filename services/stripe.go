@@ -7,6 +7,8 @@ import (
 	"github.com/stripe/stripe-go/charge"
 	"github.com/stripe/stripe-go/refund"
 	"math"
+	"os"
+	"strconv"
 )
 
 func StripeCharge(token string, des string, amount float64) (*stripe.Charge, error) {
@@ -63,6 +65,26 @@ func StripeCreateAccount(merchant models.Merchant) (*stripe.Account, error) {
 	}
 
 	return acc, err
+}
+
+func StripeApplicationFee(token string, accID string, amount float64) (interface{}, error) {
+	total := int64(math.Round(amount * 100))
+	applicationFee, _ := strconv.ParseInt(os.Getenv("APPLICATION_FEE"), 0, 64	)
+
+	params := &stripe.ChargeParams{
+		Amount: stripe.Int64(total),
+		Currency: stripe.String(string(stripe.CurrencyUSD)),
+		ApplicationFee: stripe.Int64(applicationFee*100),
+	}
+
+	params.SetStripeAccount(accID)
+	_ = params.SetSource(token)
+
+	return charge.New(params)
+}
+
+func StripeGetAccountById(id string) (*stripe.Account, error) {
+	return account.GetByID(id, nil)
 }
 
 func StripeUpdateAccount(merchant models.Merchant) (*stripe.Account, error) {
