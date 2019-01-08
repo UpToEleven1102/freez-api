@@ -73,7 +73,7 @@ func SignUpMerchant(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	acc, err := services.StripeCreateAccount(merchant)
+	acc, err := services.StripeConnectCreateAccount(merchant)
 
 	if err != nil {
 		log.Println(err)

@@ -1,9 +1,11 @@
 package services
 
 import (
+	"fmt"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/account"
+	"github.com/stripe/stripe-go/card"
 	"github.com/stripe/stripe-go/charge"
 	"github.com/stripe/stripe-go/refund"
 	"math"
@@ -33,6 +35,17 @@ func StripeConnectDestinationCharge(token string, accId string, desc string, amo
 	}
 
 	return charge.New(params)
+}
+
+func StripeGetCardInfo(cardId string) (_card *stripe.Card, err error) {
+	params := &stripe.CardParams{
+		ID:"acct_1DqOySFjMtj1y2al",
+	}
+	_card, err = card.Get("card_1DqOyOLrM1lYHJvjTW1a4tiy", params)
+
+	fmt.Printf("%+v", _card)
+
+	return _card, err
 }
 
 func StripeCharge(token string, des string, amount float64) (*stripe.Charge, error) {
@@ -75,9 +88,16 @@ func StripePartialRefund(token string, amount float64) (interface{}, error) {
 	return ref, err
 }
 
-func StripeCreateAccount(merchant models.Merchant) (*stripe.Account, error) {
+func StripeConnectCreateAccount(merchant models.Merchant) (*stripe.Account, error) {
 	params := &stripe.AccountParams{
 		Country: stripe.String("US"),
+		Email: stripe.String(merchant.Email),
+		SupportEmail: stripe.String(merchant.Email),
+		DefaultCurrency: stripe.String(string(stripe.CurrencyUSD)),
+		ExternalAccount: &stripe.AccountExternalAccountParams{
+			Token: stripe.String(merchant.StripeID),
+			Currency: stripe.String(string(stripe.CurrencyUSD)),
+		},
 		Type: stripe.String(string(stripe.AccountTypeCustom)),
 	}
 
@@ -89,22 +109,6 @@ func StripeCreateAccount(merchant models.Merchant) (*stripe.Account, error) {
 	}
 
 	return acc, err
-}
-
-func StripeApplicationFee(token string, accID string, amount float64) (interface{}, error) {
-	total := int64(math.Round(amount * 100))
-	applicationFee, _ := strconv.ParseInt(os.Getenv("APPLICATION_FEE"), 0, 64	)
-
-	params := &stripe.ChargeParams{
-		Amount: stripe.Int64(total),
-		Currency: stripe.String(string(stripe.CurrencyUSD)),
-		ApplicationFee: stripe.Int64(applicationFee*100),
-	}
-
-	params.SetStripeAccount(accID)
-	_ = params.SetSource(token)
-
-	return charge.New(params)
 }
 
 func StripeGetAccountById(id string) (*stripe.Account, error) {

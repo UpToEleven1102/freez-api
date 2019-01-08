@@ -102,6 +102,8 @@ func init() {
 
 	stripe.Key = os.Getenv("STRIPE_KEY")
 
+	StripeGetCardInfo("")
+
 	//listObjects()
 
 	//CreateEmailNotification("quyhuyen.vu@gmail.com", "", "hello")
