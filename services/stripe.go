@@ -1,10 +1,10 @@
 package services
 
 import (
-	"fmt"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/account"
+	"github.com/stripe/stripe-go/balance"
 	"github.com/stripe/stripe-go/card"
 	"github.com/stripe/stripe-go/charge"
 	"github.com/stripe/stripe-go/refund"
@@ -13,40 +13,6 @@ import (
 	"strconv"
 )
 
-func StripeConnectDestinationCharge(token string, accId string, desc string, amount float64) (*stripe.Charge, error) {
-	platformFeePercent, _ := strconv.ParseFloat(os.Getenv("PLATFORM_FEE_PERCENTAGE"), 64)
-	total := int64(amount*100)
-	desAmount := int64(math.Round(amount * (100 - platformFeePercent)))
-	params := &stripe.ChargeParams{
-		Amount: stripe.Int64(total),
-		Currency: stripe.String(string(stripe.CurrencyUSD)),
-		Description: stripe.String(desc),
-		Destination: &stripe.DestinationParams{
-			Amount: stripe.Int64(desAmount),
-			Account: stripe.String(accId),
-		},
-	}
-
-	err := params.SetSource(token)
-
-	if err != nil {
-		panic(err)
-		return nil , err
-	}
-
-	return charge.New(params)
-}
-
-func StripeGetCardInfo(cardId string) (_card *stripe.Card, err error) {
-	params := &stripe.CardParams{
-		ID:"acct_1DqOySFjMtj1y2al",
-	}
-	_card, err = card.Get("card_1DqOyOLrM1lYHJvjTW1a4tiy", params)
-
-	fmt.Printf("%+v", _card)
-
-	return _card, err
-}
 
 func StripeCharge(token string, des string, amount float64) (*stripe.Charge, error) {
 	total := int64(math.Round(amount* 100))
@@ -88,6 +54,41 @@ func StripePartialRefund(token string, amount float64) (interface{}, error) {
 	return ref, err
 }
 
+func StripeGetAccountBalance(accId string) (*stripe.Balance, error) {
+	params := &stripe.BalanceParams{
+		Params: stripe.Params{StripeAccount:stripe.String(accId)},
+	}
+
+	 return balance.Get(params)
+}
+
+//stripe connect
+
+func StripeConnectDestinationCharge(token string, accId string, desc string, amount float64) (*stripe.Charge, error) {
+	platformFeePercent, _ := strconv.ParseFloat(os.Getenv("PLATFORM_FEE_PERCENTAGE"), 64)
+	total := int64(amount*100)
+	desAmount := int64(math.Round(amount * (100 - platformFeePercent)))
+	params := &stripe.ChargeParams{
+		Amount: stripe.Int64(total),
+		Currency: stripe.String(string(stripe.CurrencyUSD)),
+		Description: stripe.String(desc),
+		Destination: &stripe.DestinationParams{
+			Amount: stripe.Int64(desAmount),
+			Account: stripe.String(accId),
+		},
+	}
+
+	err := params.SetSource(token)
+
+	if err != nil {
+		panic(err)
+		return nil , err
+	}
+
+	return charge.New(params)
+}
+
+
 func StripeConnectCreateAccount(merchant models.Merchant) (*stripe.Account, error) {
 	params := &stripe.AccountParams{
 		Country: stripe.String("US"),
@@ -125,7 +126,7 @@ func StripeConnectAddDebitCardToAccount(accId string, token string) (*stripe.Acc
 	return account.Update(accId, params)
 }
 
-func StripeGetCardListByStripeId(stripeId string) (cards []*stripe.Card, err error){
+func StripeConnectGetCardListByStripeId(stripeId string) (cards []*stripe.Card, err error){
 	params := &stripe.CardListParams{
 		Account: stripe.String(stripeId),
 	}
@@ -140,19 +141,3 @@ func StripeGetCardListByStripeId(stripeId string) (cards []*stripe.Card, err err
 	return cards, err
 }
 
-func StripeUpdateAccount(merchant models.Merchant) (*stripe.Account, error) {
-	params := &stripe.AccountParams{
-		SupportPhone: stripe.String(merchant.PhoneNumber),
-		Email: stripe.String(merchant.Email),
-		SupportEmail: stripe.String(merchant.Email),
-	}
-
-	acc, err := account.Update(merchant.StripeID, params)
-
-	if err != nil {
-		panic(err)
-		return nil, err
-	}
-
-	return acc, err
-}

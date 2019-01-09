@@ -153,7 +153,7 @@ func GetFavorites(userID string) (merchants []interface{}, err error) {
 }
 
 func ChargeUser(data models.OrderRequestData) (err error) {
-	stripeAccId, err := getMerchantStripeIdByMerchantId(data.MerchantID)
+	stripeAccId, err := GetMerchantStripeIdByMerchantId(data.MerchantID)
 
 	if err != nil {
 		return err

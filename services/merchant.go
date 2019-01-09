@@ -54,7 +54,7 @@ func CreateMerchant(merchant models.Merchant) (models.Merchant, error) {
 	return merchant, nil
 }
 
-func getMerchantStripeIdByMerchantId(merchantId string) (id string, err error) {
+func GetMerchantStripeIdByMerchantId(merchantId string) (id string, err error) {
 	r, err := DB.Query(`SELECT stripe_id FROM merchant WHERE id=?`, merchantId)
 
 	if err != nil {
@@ -74,7 +74,7 @@ func getMerchantStripeIdByMerchantId(merchantId string) (id string, err error) {
 }
 
 func GetMerchantStripeAccount(merchantId string) (*stripe.Account, error) {
-	stripeId, err := getMerchantStripeIdByMerchantId(merchantId)
+	stripeId, err := GetMerchantStripeIdByMerchantId(merchantId)
 
 	if err != nil {
 		panic(err)
@@ -287,11 +287,11 @@ func GetNearMerchantsLastLocation(location models.Location) (merchants []interfa
 
 //stripe operations
 func GetStripeCardList(merchantId string) ([]*stripe.Card, error) {
-	id, err := getMerchantStripeIdByMerchantId(merchantId)
+	id, err := GetMerchantStripeIdByMerchantId(merchantId)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return StripeGetCardListByStripeId(id)
+	return StripeConnectGetCardListByStripeId(id)
 }

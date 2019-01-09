@@ -29,6 +29,25 @@ func StripeOpsHandler(w http.ResponseWriter, req *http.Request, urlString string
 
 			_ = json.NewEncoder(w).Encode(cards)
 
+		case "acc-balance":
+			id, err := services.GetMerchantStripeIdByMerchantId(claims.Id)
+
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message: err.Error()})
+				return nil
+			}
+
+			b, err := services.StripeGetAccountBalance(id)
+
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message: err.Error()})
+				return nil
+			}
+
+			_ = json.NewEncoder(w).Encode(b)
+
 		default:
 			http.NotFound(w, req)
 		}
