@@ -83,16 +83,16 @@ func SignUpMerchant(w http.ResponseWriter, req *http.Request) {
 	}
 	log.Println(acc)
 
-	res, err := services.StripeCharge(merchant.StripeID, "Application Fee - Freeze App", 5)
+	//res, err := services.StripeCharge(merchant.StripeID, "Application Fee - Freeze App", 5)
 
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
-		return
-	}
+	//if err != nil {
+	//	log.Println(err)
+	//	w.WriteHeader(http.StatusInternalServerError)
+	//	_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
+	//	return
+	//}
 
-	log.Println(res)
+	//log.Println(res)
 
 	merchant.StripeID = acc.ID
 
