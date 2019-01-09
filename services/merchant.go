@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"github.com/satori/go.uuid"
+	"github.com/stripe/stripe-go"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 )
@@ -63,9 +64,24 @@ func getMerchantStripeIdByMerchantId(merchantId string) (id string, err error) {
 
 	if r.Next() {
 		err = r.Scan(&id)
+		if err != nil {
+			panic(err)
+			return "", nil
+		}
 	}
 
 	return id, err
+}
+
+func GetMerchantStripeAccount(merchantId string) (*stripe.Account, error) {
+	stripeId, err := getMerchantStripeIdByMerchantId(merchantId)
+
+	if err != nil {
+		panic(err)
+		return nil, err
+	}
+
+	return StripeConnectGetAccountById(stripeId)
 }
 
 func ChangeOnlineStatus(merchantId string) error {

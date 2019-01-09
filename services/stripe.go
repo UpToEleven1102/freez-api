@@ -111,8 +111,18 @@ func StripeConnectCreateAccount(merchant models.Merchant) (*stripe.Account, erro
 	return acc, err
 }
 
-func StripeGetAccountById(id string) (*stripe.Account, error) {
+func StripeConnectGetAccountById(id string) (*stripe.Account, error) {
 	return account.GetByID(id, nil)
+}
+
+func StripeConnectAddDebitCardToAccount(accId string, token string) (*stripe.Account , error) {
+	params := &stripe.AccountParams{
+		ExternalAccount: &stripe.AccountExternalAccountParams{
+			Token: stripe.String(token),
+		},
+	}
+
+	return account.Update(accId, params)
 }
 
 func StripeUpdateAccount(merchant models.Merchant) (*stripe.Account, error) {
