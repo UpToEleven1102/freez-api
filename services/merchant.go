@@ -284,3 +284,14 @@ func GetNearMerchantsLastLocation(location models.Location) (merchants []interfa
 
 	return merchants, nil
 }
+
+//stripe operations
+func GetStripeCardList(merchantId string) ([]*stripe.Card, error) {
+	id, err := getMerchantStripeIdByMerchantId(merchantId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return StripeGetCardListByStripeId(id)
+}

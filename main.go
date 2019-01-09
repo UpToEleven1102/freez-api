@@ -70,6 +70,17 @@ func apiHandler(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func stripeOpsHandler(w http.ResponseWriter, req *http.Request) {
+	repo, objectId := urlMatch(req.URL.Path)
+	w.Header().Set("Content-Type", "application/json")
+
+	err := identity.AuthorizeMiddleware(w, req, repo+"/"+objectId, controllers.StripeOpsHandler)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+	}
+}
+
 func authHandler(w http.ResponseWriter, req *http.Request) {
 	route, userType := urlMatch(req.URL.Path)
 	w.Header().Set("Content-Type", "application/json")
@@ -80,6 +91,7 @@ func authHandler(w http.ResponseWriter, req *http.Request) {
 	controllers.AuthHandler(w, req, route, userType)
 }
 
+
 func main() {
 	port := getPort()
 	_ = onesignal.NewClient(nil)
@@ -87,6 +99,8 @@ func main() {
 	http.HandleFunc("/api/", apiHandler)
 
 	http.HandleFunc("/auth/", authHandler)
+
+	http.HandleFunc("/stripe/", stripeOpsHandler)
 
 	fmt.Printf("Running on port %s \n", port)
 	panic(http.ListenAndServe(port, nil))

@@ -125,6 +125,21 @@ func StripeConnectAddDebitCardToAccount(accId string, token string) (*stripe.Acc
 	return account.Update(accId, params)
 }
 
+func StripeGetCardListByStripeId(stripeId string) (cards []*stripe.Card, err error){
+	params := &stripe.CardListParams{
+		Account: stripe.String(stripeId),
+	}
+
+	params.Filters.AddFilter("limit", "", "3")
+	i := card.List(params)
+	for i.Next() {
+		c:= i.Card()
+		cards = append(cards, c)
+	}
+
+	return cards, err
+}
+
 func StripeUpdateAccount(merchant models.Merchant) (*stripe.Account, error) {
 	params := &stripe.AccountParams{
 		SupportPhone: stripe.String(merchant.PhoneNumber),
