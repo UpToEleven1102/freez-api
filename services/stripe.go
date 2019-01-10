@@ -126,6 +126,15 @@ func StripeConnectAddDebitCard(accId string, token string) (*stripe.Account , er
 	return account.Update(accId, params)
 }
 
+func StripeConnectCreateDebitCard(accId string, token string) (*stripe.Card, error) {
+	params := &stripe.CardParams{
+		Account: stripe.String(accId),
+		Token: stripe.String(token),
+	}
+
+	return card.New(params)
+}
+
 func StripeConnectDeleteDebitCard(accId string, cardId string) (*stripe.Card, error) {
 	params := &stripe.CardParams{
 		Account: stripe.String(accId),

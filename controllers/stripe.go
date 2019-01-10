@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/config"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
@@ -13,6 +14,7 @@ import (
 type RequestObject struct {
 	StripeID string `json:"stripe_id"`
 	CardID string `json:"card_id"`
+	Token string `json:"token"`
 }
 
 func StripeOpsHandler(w http.ResponseWriter, req *http.Request, urlString string, claims models.JwtClaims) error {
@@ -67,6 +69,26 @@ func StripeOpsHandler(w http.ResponseWriter, req *http.Request, urlString string
 
 		default:
 			http.NotFound(w, req)
+		}
+
+	case "POST":
+		switch objectID {
+		case "card":
+			var data RequestObject
+			jsonEncoder := json.NewEncoder(w)
+
+			_ = json.NewDecoder(req.Body).Decode(&data)
+			fmt.Println(data)
+
+			c, err := services.StripeConnectCreateDebitCard(data.StripeID, data.Token)
+
+			if err != nil {
+				log.Println(err.Error())
+				_ = jsonEncoder.Encode(models.DataResponse{Success:false, Message:err.Error()})
+				return nil
+			}
+
+			_= jsonEncoder.Encode(c)
 		}
 	case "DELETE":
 		switch objectID {
