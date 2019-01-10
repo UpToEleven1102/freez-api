@@ -116,7 +116,7 @@ func StripeConnectGetAccountById(id string) (*stripe.Account, error) {
 	return account.GetByID(id, nil)
 }
 
-func StripeConnectAddDebitCardToAccount(accId string, token string) (*stripe.Account , error) {
+func StripeConnectAddDebitCard(accId string, token string) (*stripe.Account , error) {
 	params := &stripe.AccountParams{
 		ExternalAccount: &stripe.AccountExternalAccountParams{
 			Token: stripe.String(token),
@@ -124,6 +124,14 @@ func StripeConnectAddDebitCardToAccount(accId string, token string) (*stripe.Acc
 	}
 
 	return account.Update(accId, params)
+}
+
+func StripeConnectDeleteDebitCard(accId string, cardId string) (*stripe.Card, error) {
+	params := &stripe.CardParams{
+		Account: stripe.String(accId),
+	}
+
+	return card.Del(cardId, params)
 }
 
 func StripeConnectGetCardListByStripeId(stripeId string) (cards []*stripe.Card, err error){

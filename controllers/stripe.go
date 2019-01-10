@@ -6,8 +6,14 @@ import (
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/config"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
+	"log"
 	"net/http"
 )
+
+type RequestObject struct {
+	StripeID string `json:"stripe_id"`
+	CardID string `json:"card_id"`
+}
 
 func StripeOpsHandler(w http.ResponseWriter, req *http.Request, urlString string, claims models.JwtClaims) error {
 	if claims.Role != config.Merchant {
@@ -61,6 +67,23 @@ func StripeOpsHandler(w http.ResponseWriter, req *http.Request, urlString string
 
 		default:
 			http.NotFound(w, req)
+		}
+	case "DELETE":
+		switch objectID {
+		case "card":
+			var data RequestObject
+
+			var jsonEncoder = json.NewEncoder(w)
+			_ = json.NewDecoder(req.Body).Decode(&data)
+			c, err := services.StripeConnectDeleteDebitCard(data.StripeID, data.CardID)
+
+			if err != nil {
+				log.Println(err)
+				_ = jsonEncoder.Encode(models.DataResponse{Success:false, Message:err.Error()})
+				return nil
+			}
+
+			_ = jsonEncoder.Encode(c)
 		}
 
 	default:
