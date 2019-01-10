@@ -75,17 +75,6 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 			}
 			_ = json.NewEncoder(w).Encode(orders)
 
-		case "stripe-account":
-			acc, err := services.GetMerchantStripeAccount(claims.Id)
-
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message: err.Error()})
-				return nil
-			}
-
-			_ = json.NewEncoder(w).Encode(acc)
-
 		default:
 			objectID, param := getUrlParam(objectID)
 			if param == "" {
