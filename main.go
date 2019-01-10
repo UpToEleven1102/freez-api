@@ -61,20 +61,12 @@ func apiHandler(w http.ResponseWriter, req *http.Request) {
 		err = identity.AuthorizeMiddleware(w, req, objectID, controllers.RequestHandler)
 	case c.Location:
 		err = identity.AuthorizeMiddleware(w, req, objectID, controllers.LocationHandler)
+	case c.Stripe:
+		err = identity.AuthorizeMiddleware(w, req, objectID, controllers.StripeOpsHandler)
+
 	default:
 		http.NotFound(w, req)
 	}
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
-	}
-}
-
-func stripeOpsHandler(w http.ResponseWriter, req *http.Request) {
-	repo, objectId := urlMatch(req.URL.Path)
-	w.Header().Set("Content-Type", "application/json")
-
-	err := identity.AuthorizeMiddleware(w, req, repo+"/"+objectId, controllers.StripeOpsHandler)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
@@ -99,8 +91,6 @@ func main() {
 	http.HandleFunc("/api/", apiHandler)
 
 	http.HandleFunc("/auth/", authHandler)
-
-	http.HandleFunc("/stripe/", stripeOpsHandler)
 
 	fmt.Printf("Running on port %s \n", port)
 	panic(http.ListenAndServe(port, nil))

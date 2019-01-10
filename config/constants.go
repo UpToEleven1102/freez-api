@@ -10,6 +10,7 @@ const (
 	Verify = "verify"
 	Request = "request"
 	Location = "location"
+	Stripe = "stripe"
 	Email = "email"
 	PhoneNumber="phone-number"
 	SRID = 3857
