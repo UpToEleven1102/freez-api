@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
-	"github.com/stripe/stripe-go"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -162,44 +161,6 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 			}
 
 			_ = json.NewEncoder(w).Encode(models.DataResponse{Success: true, Message: url})
-		case "refund":
-			type refundData struct {
-				StripeID string  `json:"stripe_id"`
-				Amount   float64 `json:"amount"`
-				Reason   string  `json:"reason"`
-			}
-
-			var data refundData
-
-			err := json.NewDecoder(req.Body).Decode(&data)
-
-			if err != nil {
-				w.WriteHeader(http.StatusBadRequest)
-				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
-				return nil
-			}
-
-			var res interface{}
-
-			if data.Amount <= 0 {
-				res, err = services.StripeRefund(data.StripeID)
-			} else {
-				res, err = services.StripePartialRefund(data.StripeID, data.Amount)
-			}
-
-
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
-				return nil
-			}
-
-			refundRes := res.(*stripe.Refund)
-
-			fmt.Printf("%+v \n", res)
-			//_ = json.NewEncoder(w).Encode(res)
-
-			_ = json.NewEncoder(w).Encode(models.DataResponse{Success: refundRes.Status == "succeeded", Message:"Successfully refunded"})
 
 		default:
 			http.NotFound(w, req)
