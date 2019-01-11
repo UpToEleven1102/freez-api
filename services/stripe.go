@@ -158,3 +158,12 @@ func StripeConnectGetCardListByStripeId(stripeId string) (cards []*stripe.Card, 
 	return cards, err
 }
 
+func StripeConnectMakeDefaultCurrencyDebitCard(stripeId string, cardId string) (*stripe.Card, error) {
+	params := &stripe.CardParams {
+		Account: stripe.String(stripeId),
+		DefaultForCurrency: stripe.Bool(true),
+	}
+
+	return card.Update(cardId, params)
+}
+

@@ -13,8 +13,8 @@ import (
 
 type RequestObject struct {
 	StripeID string `json:"stripe_id"`
-	CardID string `json:"card_id"`
-	Token string `json:"token"`
+	CardID   string `json:"card_id"`
+	Token    string `json:"token"`
 }
 
 func StripeOpsHandler(w http.ResponseWriter, req *http.Request, urlString string, claims models.JwtClaims) error {
@@ -42,7 +42,7 @@ func StripeOpsHandler(w http.ResponseWriter, req *http.Request, urlString string
 
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
-				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message: err.Error()})
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
 				return nil
 			}
 
@@ -53,7 +53,7 @@ func StripeOpsHandler(w http.ResponseWriter, req *http.Request, urlString string
 
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
-				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message: err.Error()})
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
 				return nil
 			}
 
@@ -61,7 +61,7 @@ func StripeOpsHandler(w http.ResponseWriter, req *http.Request, urlString string
 
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
-				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message: err.Error()})
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
 				return nil
 			}
 
@@ -84,12 +84,16 @@ func StripeOpsHandler(w http.ResponseWriter, req *http.Request, urlString string
 
 			if err != nil {
 				log.Println(err.Error())
-				_ = jsonEncoder.Encode(models.DataResponse{Success:false, Message:err.Error()})
+				_ = jsonEncoder.Encode(models.DataResponse{Success: false, Message: err.Error()})
 				return nil
 			}
 
-			_= jsonEncoder.Encode(c)
+			_ = jsonEncoder.Encode(c)
+
+		default:
+			http.NotFound(w, req)
 		}
+
 	case "DELETE":
 		switch objectID {
 		case "card":
@@ -101,11 +105,36 @@ func StripeOpsHandler(w http.ResponseWriter, req *http.Request, urlString string
 
 			if err != nil {
 				log.Println(err)
-				_ = jsonEncoder.Encode(models.DataResponse{Success:false, Message:err.Error()})
+				_ = jsonEncoder.Encode(models.DataResponse{Success: false, Message: err.Error()})
 				return nil
 			}
 
 			_ = jsonEncoder.Encode(c)
+		default:
+			http.NotFound(w, req)
+		}
+
+	case "PUT":
+		switch objectID {
+		case "card":
+			var data RequestObject
+			var jsonEncoder = json.NewEncoder(w)
+
+			_ = json.NewDecoder(req.Body).Decode(&data)
+			fmt.Println(data)
+
+			card, err := services.StripeConnectMakeDefaultCurrencyDebitCard(data.StripeID, data.CardID)
+
+			if err != nil {
+				log.Println(err)
+				_ = jsonEncoder.Encode(models.DataResponse{Success:false, Message:err.Error()})
+				return nil
+			}
+
+			_ = jsonEncoder.Encode(card)
+
+		default:
+			http.NotFound(w, req)
 		}
 
 	default:
