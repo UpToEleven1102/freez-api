@@ -14,6 +14,9 @@ import (
 	"strings"
 )
 
+
+
+
 func sendResponse(w http.ResponseWriter, response models.DataResponse, status int) {
 	w.WriteHeader(status)
 	b, _ := json.Marshal(response)
@@ -53,7 +56,7 @@ func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, clai
 			}
 
 			b, _ := json.Marshal(response)
-			_,_ = w.Write(b)
+			_, _ = w.Write(b)
 		case "favorite":
 			r, err := services.GetFavorites(claims.Id)
 
@@ -69,11 +72,21 @@ func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, clai
 		case "notification":
 			notifications, err := services.GetUserNotifications(claims.Id)
 			if err != nil {
-				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
 				return nil
 			}
 
 			_ = json.NewEncoder(w).Encode(notifications)
+
+		case "order":
+			orders , err := services.GetOrderHistoryByUserId(claims.Id)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
+			}
+
+			_ = json.NewEncoder(w).Encode(orders)
+
 		default:
 			objectID, param := getUrlParam(objectID)
 			if param == "" {
@@ -95,7 +108,7 @@ func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, clai
 				if err != nil {
 					log.Println(err)
 					w.WriteHeader(http.StatusInternalServerError)
-					_  = json.NewEncoder(w).Encode(models.DataResponse{Success:false})
+					_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false})
 				}
 
 				_ = json.NewEncoder(w).Encode(notification)
@@ -139,6 +152,27 @@ func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, clai
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
+
+		case "charge":
+			var data models.OrderRequestData
+
+			err := json.NewDecoder(req.Body).Decode(&data)
+
+			if err != nil {
+				log.Println(err)
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
+				return nil
+			}
+			data.UserID = claims.Id
+
+			err = services.ChargeUser(data)
+
+			if err != nil {
+				log.Println(err)
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
+				return nil
+			}
+			_ = json.NewEncoder(w).Encode(models.DataResponse{Success:true})
 
 		default:
 			http.NotFound(w, req)
@@ -205,14 +239,14 @@ func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, clai
 
 			if err != nil {
 				log.Println(err)
-				json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message: err.Error()})
+				json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
 				return nil
 			}
 
 			err = services.UpdateUserNotification(notification)
 			if err != nil {
 				log.Println(err)
-				json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message: err.Error()})
+				json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
 				return nil
 			}
 		}

@@ -12,6 +12,8 @@ const schemaMerchant = `
 		password text NOT NULL,
 		last_location POINT,
 		image VARCHAR(255) NOT NULL DEFAULT 'https://freeze-app.s3.us-west-2.amazonaws.com/blank-profile-picture.jpg',
+		stripe_id VARCHAR(64) NOT NULL UNIQUE,
+		card_id VARCHAR(64) NOT NULL,
 		PRIMARY KEY (id)
 	);
 `
@@ -39,6 +41,36 @@ const schemaProduct = `CREATE TABLE product(
 		ON UPDATE CASCADE
 		ON DELETE CASCADE
 )`
+
+const schemaOrder = `CREATE TABLE m_order(
+	id INT NOT NULL AUTO_INCREMENT,
+	user_id VARCHAR(64) NOT NULL,
+	merchant_id VARCHAR(64) NOT NULL,
+	stripe_id VARCHAR(64) NOT NULL,
+	refund BOOL NOT NULL DEFAULT FALSE,
+	amount FLOAT NOT NULL,
+	date DATETIME NOT NULL DEFAULT NOW(),
+	PRIMARY KEY (id)
+	);
+	`
+
+const schemaOrderProduct = `CREATE TABLE m_order_product(
+	id INT NOT NULL AUTO_INCREMENT,
+	order_id INT NOT NULL,
+	product_id INT NOT NULL,
+	quantity INT NOT NULL,
+	price FLOAT NOT NULL,
+	PRIMARY KEY(id),
+	FOREIGN KEY fk_order_id(order_id)
+		REFERENCES m_order(id)
+		ON UPDATE CASCADE
+		ON DELETE CASCADE,
+	FOREIGN KEY fk_product_id(product_id)
+		REFERENCES product(id)
+		ON UPDATE CASCADE
+		ON DELETE CASCADE
+	)
+	`
 
 const schemaMerchantMOption = `
 	CREATE TABLE merchant_m_option(

@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/go-redis/redis"
 	"github.com/jmoiron/sqlx"
+	"github.com/stripe/stripe-go"
 	"github.com/tbalthazar/onesignal-go"
 	"log"
 	"os"
@@ -21,7 +22,7 @@ var (
 	oneSignalAppID  string
 
 	s3Client     *s3.S3
-	s3Uploader *s3manager.Uploader
+	s3Uploader   *s3manager.Uploader
 	s3BucketName string
 
 	RedisClient *redis.Client
@@ -57,9 +58,9 @@ func redisConfig() {
 	redisServer := os.Getenv("REDIS_ADDRESS")
 
 	RedisClient = redis.NewClient(&redis.Options{
-		Addr: redisServer,
+		Addr:     redisServer,
 		Password: "",
-		DB: 0,
+		DB:       0,
 	})
 
 	_, err := RedisClient.Ping().Result()
@@ -70,7 +71,7 @@ func redisConfig() {
 
 func loadNotifTypeToRedis() {
 	type ActivityType struct {
-		ID int `json:"id"`
+		ID   int    `json:"id"`
 		Type string `json:"type"`
 	}
 
@@ -87,10 +88,9 @@ func loadNotifTypeToRedis() {
 	for r.Next() {
 		_ = r.Scan(&activityType.ID, &activityType.ID)
 		//activityTypes = append(activityTypes, activityType)
-		RedisClient.Set(fmt.Sprintf("%d", activityType.ID), activityType, 3600 * time.Minute)
+		RedisClient.Set(fmt.Sprintf("%d", activityType.ID), activityType, 3600*time.Minute)
 	}
 }
-
 
 func init() {
 	DB, _ = db.Config()
@@ -99,6 +99,8 @@ func init() {
 	awsConfig()
 
 	redisConfig()
+
+	stripe.Key = os.Getenv("STRIPE_KEY")
 
 	//listObjects()
 

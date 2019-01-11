@@ -29,6 +29,8 @@ type Merchant struct {
 	Image        string          `json:"image"`
 	Role         string          `json:"role"`
 	LastLocation LongLat         `json:"last_location"`
+	StripeID     string          `json:"stripe_id"`
+	CardID       string          `json:"card_id"`
 	Option       merchantMOption `json:"option"`
 	Product      []Product       `json:"product"`
 }
@@ -85,6 +87,37 @@ type Product struct {
 	Image      string  `json:"image"`
 }
 
+type ItemHistory struct {
+	ID       int     `json:"id"`
+	Product  Product `json:"product"`
+	Quantity int     `json:"quantity"`
+	Price    float64 `json:"price"`
+}
+
+type OrderRequestData struct {
+	StripeToken string  `json:"stripe_token"`
+	Amount      float64 `json:"amount"`
+	UserID      string  `json:"user_id"`
+	MerchantID  string  `json:"merchant_id"`
+	StripeID    string  `json:"stripe_id"`
+	Items       []struct {
+		Product  Product `json:"product"`
+		Quantity int     `json:"quantity"`
+		Price    float64 `json:"price"`
+	} `json:"items"`
+}
+
+type OrderEntity struct {
+	ID         int         `json:"id"`
+	UserId     string      `json:"user_id"`
+	MerchantId string      `json:"merchant_id"`
+	StripeId   string      `json:"stripe_id"`
+	Refund     bool        `json:"refund"`
+	Amount     float64     `json:"amount"`
+	Date       string      `json:"date"`
+	Items      interface{} `json:"items"`
+}
+
 type MerchantInfo struct {
 	Online      bool          `json:"online"`
 	MerchantID  string        `json:"merchant_id"`
@@ -132,13 +165,13 @@ type RequestInfo struct {
 }
 
 type RequestNotification struct {
-	ID int `json:"id"`
-	User User `json:"user"`
+	ID       int          `json:"id"`
+	User     User         `json:"user"`
 	Merchant MerchantInfo `json:"merchant"`
-	Location LongLat `json:"location"`
-	Comment string `json:"comment"`
-	Active bool `json:"active"`
-	Accepted int `json:"accepted"`
+	Location LongLat      `json:"location"`
+	Comment  string       `json:"comment"`
+	Active   bool         `json:"active"`
+	Accepted int          `json:"accepted"`
 }
 
 type Request struct {

@@ -61,6 +61,9 @@ func apiHandler(w http.ResponseWriter, req *http.Request) {
 		err = identity.AuthorizeMiddleware(w, req, objectID, controllers.RequestHandler)
 	case c.Location:
 		err = identity.AuthorizeMiddleware(w, req, objectID, controllers.LocationHandler)
+	case c.Stripe:
+		err = identity.AuthorizeMiddleware(w, req, objectID, controllers.StripeOpsHandler)
+
 	default:
 		http.NotFound(w, req)
 	}
@@ -79,6 +82,7 @@ func authHandler(w http.ResponseWriter, req *http.Request) {
 
 	controllers.AuthHandler(w, req, route, userType)
 }
+
 
 func main() {
 	port := getPort()

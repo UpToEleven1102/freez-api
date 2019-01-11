@@ -21,6 +21,7 @@ func init() {
 }
 
 func seed(DB *sqlx.DB) {
+	DB.MustExec("DROP TABLE IF EXISTS m_order_product")
 	DB.MustExec("DROP TABLE IF EXISTS product")
 	DB.MustExec("DROP TABLE IF EXISTS merchant_m_option")
 	DB.MustExec("DROP TABLE IF EXISTS merchant")
@@ -32,6 +33,8 @@ func seed(DB *sqlx.DB) {
 	DB.MustExec("DROP TABLE IF EXISTS  merchant_notification")
 	DB.MustExec("DROP TABLE IF EXISTS user_notification")
 	DB.MustExec("DROP TABLE IF EXISTS activity_type")
+	DB.MustExec("DROP TABLE IF EXISTS m_order")
+
 
 	DB.MustExec(schemaMerchant)
 	DB.MustExec(schemaProduct)
@@ -46,9 +49,13 @@ func seed(DB *sqlx.DB) {
 	DB.MustExec(schemaActivityType)
 	DB.MustExec(schemaMerchantNotification)
 	DB.MustExec(schemaUserNotification)
+	DB.MustExec(schemaOrder)
+	DB.MustExec(schemaOrderProduct)
 
 	tx := DB.MustBegin()
 	tx.MustExec(`INSERT INTO activity_type (type) VALUE (?)`, config.NOTIF_TYPE_FLAG_REQUEST )
+	tx.MustExec(`INSERT INTO activity_type (type) VALUE (?)`, config.NOTIF_TYPE_PAYMENT_MADE)
+	tx.MustExec(`INSERT INTO activity_type (type) VALUE (?)`, config.NOTIF_TYPE_REFUND_MADE)
 	//
 	//tx.MustExec("INSERT INTO request (user_id, merchant_id, location) VALUES (123, '3412',ST_GeomFromText('POINT(1 1)'))")
 	//uid, _ := uuid.NewV4()

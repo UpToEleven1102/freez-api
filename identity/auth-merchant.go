@@ -7,6 +7,7 @@ import (
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
 	"golang.org/x/crypto/bcrypt"
 	"io/ioutil"
+	"log"
 	"net/http"
 )
 
@@ -62,12 +63,38 @@ func SignUpMerchant(w http.ResponseWriter, req *http.Request) {
 	var merchant models.Merchant
 
 	err = json.Unmarshal(body, &merchant)
+
+	log.Println(merchant)
+
 	if err != nil {
 		response.Success = false
 		response.Message = err.Error()
 		writeResponse(w, response, http.StatusBadRequest)
 		return
 	}
+
+	acc, err := services.StripeConnectCreateAccount(merchant)
+
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
+		return
+	}
+	log.Println(acc)
+
+	//res, err := services.StripeCharge(merchant.StripeID, "Application Fee - Freeze App", 5)
+
+	//if err != nil {
+	//	log.Println(err)
+	//	w.WriteHeader(http.StatusInternalServerError)
+	//	_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
+	//	return
+	//}
+
+	//log.Println(res)
+
+	merchant.StripeID = acc.ID
 
 	merchant, err = services.CreateMerchant(merchant)
 	if err != nil {

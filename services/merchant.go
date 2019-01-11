@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"github.com/satori/go.uuid"
+	"github.com/stripe/stripe-go"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 )
@@ -44,13 +45,43 @@ func CreateMerchant(merchant models.Merchant) (models.Merchant, error) {
 
 	location := fmt.Sprintf("POINT(%f %f)", merchant.LastLocation.Long, merchant.LastLocation.Lat)
 
-	_, err = DB.Exec(`INSERT INTO merchant (id, mobile, phone_number, email, name, password, last_location) VALUES (?, ?, ?, ?, ?, ?, ST_GeomFromText(?))`, merchant.ID, merchant.Mobile, merchant.PhoneNumber, merchant.Email, merchant.Name, merchant.Password, location)
+	_, err = DB.Exec(`INSERT INTO merchant (id, mobile, phone_number, email, name, password, last_location, stripe_id, card_id) VALUES (?, ?, ?, ?, ?, ?, ST_GeomFromText(?), ?, ?)`, merchant.ID, merchant.Mobile, merchant.PhoneNumber, merchant.Email, merchant.Name, merchant.Password, location, merchant.StripeID, merchant.CardID)
 
 	if err != nil {
 		return merchant, err
 	}
 
 	return merchant, nil
+}
+
+func GetMerchantStripeIdByMerchantId(merchantId string) (id string, err error) {
+	r, err := DB.Query(`SELECT stripe_id FROM merchant WHERE id=?`, merchantId)
+
+	if err != nil {
+		panic(err)
+		return "", nil
+	}
+
+	if r.Next() {
+		err = r.Scan(&id)
+		if err != nil {
+			panic(err)
+			return "", nil
+		}
+	}
+
+	return id, err
+}
+
+func GetMerchantStripeAccount(merchantId string) (*stripe.Account, error) {
+	stripeId, err := GetMerchantStripeIdByMerchantId(merchantId)
+
+	if err != nil {
+		panic(err)
+		return nil, err
+	}
+
+	return StripeConnectGetAccountById(stripeId)
 }
 
 func ChangeOnlineStatus(merchantId string) error {
@@ -252,4 +283,15 @@ func GetNearMerchantsLastLocation(location models.Location) (merchants []interfa
 	}
 
 	return merchants, nil
+}
+
+//stripe operations
+func GetStripeCardList(merchantId string) ([]*stripe.Card, error) {
+	id, err := GetMerchantStripeIdByMerchantId(merchantId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return StripeConnectGetCardListByStripeId(id)
 }
