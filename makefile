@@ -10,5 +10,6 @@ all:
 	go get github.com/aws/aws-sdk-go
 	go get github.com/go-redis/redis
 	go get github.com/stripe/stripe-go
+	go get golang.org/x/net/websocket
 	go build -o freeze-app
 	./freeze-app
