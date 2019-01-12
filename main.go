@@ -7,6 +7,7 @@ import (
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/identity"
 	"github.com/joho/godotenv"
 	"github.com/tbalthazar/onesignal-go"
+	"golang.org/x/net/websocket"
 	"log"
 	"net/http"
 	"os"
@@ -83,7 +84,6 @@ func authHandler(w http.ResponseWriter, req *http.Request) {
 	controllers.AuthHandler(w, req, route, userType)
 }
 
-
 func main() {
 	port := getPort()
 	_ = onesignal.NewClient(nil)
@@ -91,6 +91,8 @@ func main() {
 	http.HandleFunc("/api/", apiHandler)
 
 	http.HandleFunc("/auth/", authHandler)
+
+	http.Handle("/socket/user", websocket.Handler(controllers.UserWebSocketHandler))
 
 	fmt.Printf("Running on port %s \n", port)
 	panic(http.ListenAndServe(port, nil))
