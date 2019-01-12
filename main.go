@@ -94,6 +94,8 @@ func main() {
 
 	http.Handle("/socket/user", websocket.Handler(controllers.UserWebSocketHandler))
 
+	http.Handle("/socket/merchant", websocket.Handler(controllers.MerchantWebSocketHandler))
+
 	fmt.Printf("Running on port %s \n", port)
 	panic(http.ListenAndServe(port, nil))
 }
