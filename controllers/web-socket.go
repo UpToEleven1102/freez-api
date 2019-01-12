@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/identity"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
@@ -58,8 +57,7 @@ func UserWebSocketHandler(ws *websocket.Conn) {
 		case token:
 			claims, err = identity.AuthenticateToken(reqData.Payload)
 			if err != nil {
-				if err := websocket.Message.Send(ws, models.DataResponse{Success: false}); err != nil {
-					log.Println(err)
+				if err = websocket.Message.Send(ws, models.DataResponse{Success: false, Message:err.Error()}); err != nil {
 					break
 				}
 			}
@@ -67,12 +65,24 @@ func UserWebSocketHandler(ws *websocket.Conn) {
 			services.RedisClient.Set(secSocketKey, string(b), time.Hour*24)
 
 		case merchantNearby:
-			_, _ = getMerchantNearby()
+			var merchants []interface{}
+			merchants, err = getMerchantNearby()
+
+			if err != nil {
+				if err = websocket.Message.Send(ws, models.DataResponse{Success: false, Message:err.Error()}); err != nil {
+					break
+				}
+			}
+			b, _ := json.Marshal(merchants)
+			b, _ = json.Marshal(models.DataResponse{Success:true, Type: reqData.Type, Message: string(b)})
+
+			err = websocket.Message.Send(ws,string(b))
+			if err != nil {
+				break
+			}
 		}
 
-		response := "received message"
-
-		if err = websocket.Message.Send(ws, response); err != nil {
+		if err != nil {
 			log.Println(err)
 			break
 		}
@@ -84,8 +94,5 @@ func getMerchantNearby() (merchants []interface{}, err error) {
 	location.Id = claims.Id
 
 	_ = json.Unmarshal([]byte(reqData.Payload), &location.Location)
-
-	fmt.Printf("%+v", location)
-
-	return nil, nil
+	return services.GetNearMerchantsLastLocation(location)
 }

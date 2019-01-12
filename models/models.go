@@ -109,5 +109,6 @@ type LocationEntity struct {
 
 type DataResponse struct {
 	Success bool   `json:"success"`
+	Type    string `json:"type"`
 	Message string `json:"message"`
 }
