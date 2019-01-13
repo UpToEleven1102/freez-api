@@ -15,49 +15,49 @@ const (
 	token          = "token"
 )
 
-func parseMessage(ws *websocket.Conn) (interface{}, error) {
+var (
+	claims  models.JwtClaims
+	reqData models.WSRequestData
+	err error
+)
+
+func parseMessage(ws *websocket.Conn) (models.WSRequestData, error) {
 	var message string
 	if err := websocket.Message.Receive(ws, &message); err != nil {
-		log.Println(err)
-		return nil, err
+		return reqData, err
 	}
 
-	var reqData models.WSRequestData
-
 	if err := json.Unmarshal([]byte(message), &reqData); err != nil {
-		log.Println(err)
-		return nil, err
+		return reqData, err
 	}
 
 	return reqData, nil
 }
 
-var (
-	claims  models.JwtClaims
-	reqData models.WSRequestData
-)
+
 
 func UserWebSocketHandler(ws *websocket.Conn) {
 	var claimSt string
 	var secSocketKey string
+
+	defer ws.Close()
 
 	for {
 		secSocketKey = ws.Request().Header.Get("Sec-WebSocket-Key")
 		_ = services.RedisClient.Get(secSocketKey).Scan(&claimSt)
 		_ = json.Unmarshal([]byte(claimSt), &claims)
 
-		parsedMsg, err := parseMessage(ws)
+		reqData, err := parseMessage(ws)
 		if err != nil {
 			break
 		}
-
-		reqData = parsedMsg.(models.WSRequestData)
 
 		switch reqData.Type {
 		case token:
 			claims, err = identity.AuthenticateToken(reqData.Payload)
 			if err != nil {
-				if err = websocket.Message.Send(ws, models.DataResponse{Success: false, Message:err.Error()}); err != nil {
+				b, _ := json.Marshal(models.DataResponse{Success: false, Message:err.Error()})
+				if err = websocket.Message.Send(ws, string(b)); err != nil {
 					break
 				}
 			}
@@ -69,7 +69,8 @@ func UserWebSocketHandler(ws *websocket.Conn) {
 			merchants, err = getMerchantNearby()
 
 			if err != nil {
-				if err = websocket.Message.Send(ws, models.DataResponse{Success: false, Message:err.Error()}); err != nil {
+				b, _ := json.Marshal(models.DataResponse{Success: false, Message:err.Error()})
+				if err = websocket.Message.Send(ws, string(b)); err != nil {
 					break
 				}
 			}
