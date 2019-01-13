@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/identity"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
@@ -79,6 +80,20 @@ func UserWebSocketHandler(ws *websocket.Conn) {
 
 			err = websocket.Message.Send(ws,string(b))
 			if err != nil {
+				break
+			}
+
+		case postLocation:
+			var user models.User
+			user.ID = claims.Id
+
+			if err = json.Unmarshal([]byte(reqData.Payload), &user.LastLocation); err != nil {
+				break
+			}
+
+			fmt.Println(user)
+
+			if _ , err = services.UpdateUserLocation(user); err != nil {
 				break
 			}
 		}
