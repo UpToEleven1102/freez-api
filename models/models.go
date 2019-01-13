@@ -18,75 +18,6 @@ type RequestData struct {
 	Data   string `json:"data"`
 }
 
-type Merchant struct {
-	ID           string          `json:"id"`
-	Online       bool            `json:"online"`
-	PhoneNumber  string          `json:"phone_number"`
-	Email        string          `json:"email"`
-	Name         string          `json:"name"`
-	Mobile       bool            `json:"mobile"`
-	Password     string          `json:"password"`
-	Image        string          `json:"image"`
-	Role         string          `json:"role"`
-	LastLocation LongLat         `json:"last_location"`
-	StripeID     string          `json:"stripe_id"`
-	CardID       string          `json:"card_id"`
-	Option       merchantMOption `json:"option"`
-	Product      []Product       `json:"product"`
-}
-
-type merchantMOption struct {
-	AddConvenienceFee bool `json:"add_convenience_fee"`
-}
-
-type MerchantNotification struct {
-	ID           int    `json:"id"`
-	TimeStamp    string `json:"ts"`
-	MerchantID   string `json:"merchant_id"`
-	ActivityType string `json:"activity_type"`
-	SourceID     int    `json:"source_id"`
-	UnRead       bool   `json:"unread"`
-	Message      string `json:"message"`
-}
-
-type MerchantNotificationInfo struct {
-	ID           int         `json:"id"`
-	TimeStamp    string      `json:"ts"`
-	MerchantID   string      `json:"merchant_id"`
-	ActivityType string      `json:"activity_type"`
-	Source       interface{} `json:"source"`
-	UnRead       bool        `json:"unread"`
-	Message      string      `json:"message"`
-}
-
-type UserNotification struct {
-	ID           int    `json:"id"`
-	TimeStamp    string `json:"ts"`
-	UserID       string `json:"user_id"`
-	ActivityType string `json:"activity_type"`
-	SourceID     int    `json:"source_id"`
-	UnRead       bool   `json:"unread"`
-	Message      string `json:"message"`
-}
-
-type UserNotificationInfo struct {
-	ID           int         `json:"id"`
-	TimeStamp    string      `json:"ts"`
-	UserID       string      `json:"user_id"`
-	ActivityType string      `json:"activity_type"`
-	Source       interface{} `json:"source"`
-	UnRead       bool        `json:"unread"`
-	Message      string      `json:"message"`
-}
-
-type Product struct {
-	ID         int     `json:"id"`
-	MerchantId string  `json:"merchant_id"`
-	Name       string  `json:"name"`
-	Price      float64 `json:"price"`
-	Image      string  `json:"image"`
-}
-
 type ItemHistory struct {
 	ID       int     `json:"id"`
 	Product  Product `json:"product"`
@@ -116,37 +47,6 @@ type OrderEntity struct {
 	Amount     float64     `json:"amount"`
 	Date       string      `json:"date"`
 	Items      interface{} `json:"items"`
-}
-
-type MerchantInfo struct {
-	Online      bool          `json:"online"`
-	MerchantID  string        `json:"merchant_id"`
-	Location    LongLat       `json:"location"`
-	Distance    float32       `json:"distance"`
-	Name        string        `json:"name"`
-	PhoneNumber string        `json:"phone_number"`
-	Email       string        `json:"email"`
-	Mobile      bool          `json:"mobile"`
-	Image       string        `json:"image"`
-	IsFavorite  bool          `json:"is_favorite"`
-	Accepted    int           `json:"accepted"`
-	Products    []interface{} `json:"products"`
-}
-
-type User struct {
-	ID           string  `json:"id"`
-	PhoneNumber  string  `json:"phone_number"`
-	Email        string  `json:"email"`
-	Name         string  `json:"name"`
-	Password     string  `json:"password"`
-	LastLocation LongLat `json:"last_location"`
-	Image        string  `json:"image"`
-	Option       mOption `json:"option"`
-	Role         string  `json:"role"`
-}
-
-type mOption struct {
-	NotifFavNearby bool `json:"notif_fav_nearby"`
 }
 
 type RequestInfo struct {
@@ -209,5 +109,6 @@ type LocationEntity struct {
 
 type DataResponse struct {
 	Success bool   `json:"success"`
+	Type    string `json:"type"`
 	Message string `json:"message"`
 }
