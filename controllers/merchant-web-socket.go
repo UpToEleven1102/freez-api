@@ -13,6 +13,7 @@ import (
 
 const (
 	requestInfo = "request_info"
+	postLocation = "post_location"
 )
 
 func MerchantWebSocketHandler(ws *websocket.Conn) {
@@ -60,6 +61,19 @@ func MerchantWebSocketHandler(ws *websocket.Conn) {
 			b, _ := json.Marshal(requests)
 			b, _ = json.Marshal(models.DataResponse{Success: true, Type: requestInfo, Message: string(b)})
 			if err = websocket.Message.Send(ws, string(b) ); err != nil {
+				break
+			}
+		case postLocation:
+			var location models.Location
+			if err = json.Unmarshal([]byte(reqData.Payload), &location.Location); err != nil {
+				break
+			}
+
+			location.Id = claims.Id
+
+			fmt.Println(location)
+
+			if err = services.AddNewLocation(location); err != nil {
 				break
 			}
 		}
