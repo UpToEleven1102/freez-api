@@ -17,8 +17,13 @@ const (
 )
 
 func MerchantWebSocketHandler(ws *websocket.Conn) {
-	var claimSt string
-	var secSocketKey string
+	var (
+		claims  models.JwtClaims
+		reqData models.WSRequestData
+		err error
+		claimSt string
+		secSocketKey string
+	)
 
 	defer ws.Close()
 
@@ -50,13 +55,10 @@ func MerchantWebSocketHandler(ws *websocket.Conn) {
 
 			if err != nil {
 				b, _ := json.Marshal(models.DataResponse{Success: false, Message: err.Error()})
-				if err = websocket.Message.Send(ws, string(b)); err != nil {
-					break
-				}
-
+				_ = websocket.Message.Send(ws, string(b))
 				break
 			}
-			fmt.Println(claims)
+
 
 			b, _ := json.Marshal(requests)
 			b, _ = json.Marshal(models.DataResponse{Success: true, Type: requestInfo, Message: string(b)})

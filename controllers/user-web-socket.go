@@ -16,13 +16,9 @@ const (
 	token          = "token"
 )
 
-var (
-	claims  models.JwtClaims
-	reqData models.WSRequestData
-	err error
-)
 
-func parseMessage(ws *websocket.Conn) (models.WSRequestData, error) {
+
+func parseMessage(ws *websocket.Conn) (reqData models.WSRequestData, err error) {
 	var message string
 	if err := websocket.Message.Receive(ws, &message); err != nil {
 		return reqData, err
@@ -38,8 +34,13 @@ func parseMessage(ws *websocket.Conn) (models.WSRequestData, error) {
 
 
 func UserWebSocketHandler(ws *websocket.Conn) {
-	var claimSt string
-	var secSocketKey string
+	var (
+		claims  models.JwtClaims
+		reqData models.WSRequestData
+		err error
+		claimSt string
+		secSocketKey string
+	)
 
 	defer ws.Close()
 
@@ -48,7 +49,7 @@ func UserWebSocketHandler(ws *websocket.Conn) {
 		_ = services.RedisClient.Get(secSocketKey).Scan(&claimSt)
 		_ = json.Unmarshal([]byte(claimSt), &claims)
 
-		reqData, err := parseMessage(ws)
+		reqData, err = parseMessage(ws)
 		if err != nil {
 			break
 		}
@@ -67,7 +68,7 @@ func UserWebSocketHandler(ws *websocket.Conn) {
 
 		case merchantNearby:
 			var merchants []interface{}
-			merchants, err = getMerchantNearby()
+			merchants, err = getMerchantNearby(claims, reqData)
 
 			if err != nil {
 				b, _ := json.Marshal(models.DataResponse{Success: false, Message:err.Error()})
@@ -105,7 +106,7 @@ func UserWebSocketHandler(ws *websocket.Conn) {
 	}
 }
 
-func getMerchantNearby() (merchants []interface{}, err error) {
+func getMerchantNearby(claims models.JwtClaims, reqData models.WSRequestData) (merchants []interface{}, err error) {
 	var location models.Location
 	location.Id = claims.Id
 
