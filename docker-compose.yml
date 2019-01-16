@@ -1,0 +1,13 @@
+version: '2'
+
+services:
+  freez-app-rest:
+    build: .
+    image: freez-app-rest
+    network_mode: "host"
+    environment:
+      - PORT=8080
+    ports:
+      - "8080:8080"
+  redis:
+    image: redis

@@ -14,7 +14,7 @@ RUN go get github.com/go-redis/redis
 RUN go get github.com/stripe/stripe-go
 RUN go get golang.org/x/net/websocket
 
-ENV SOURCES /go/src/git.nextgencode.io/huyen.vu/freeze-app-rest/
+ENV SOURCES /go/src/git.nextgencode.io/huyen.vu/freez-app-rest/
 
 COPY . ${SOURCES}
 
@@ -22,6 +22,6 @@ RUN cd ${SOURCES} && CGO_ENABLED=0 go build
 
 WORKDIR ${SOURCES}
 
-CMD ${SOURCES}freeze-app-rest
+CMD ${SOURCES}freez-app-rest
 
 EXPOSE 8080
