@@ -72,11 +72,18 @@ func MerchantWebSocketHandler(ws *websocket.Conn) {
 			}
 
 			location.Id = claims.Id
-
-			fmt.Println(location)
-
 			if err = services.AddNewLocation(location); err != nil {
 				break
+			}
+
+			//push notification to user when the merchant is nearby
+			var userIds []interface{}
+			if userIds, err = services.GetUserIDNotifyMerchantNearbyByMerchantID(location); err != nil {
+				break
+			}
+
+			for _, userId := range userIds  {
+				fmt.Println(userId)
 			}
 		}
 
