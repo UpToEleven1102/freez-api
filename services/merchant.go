@@ -32,6 +32,30 @@ import (
 //	return merchants, err
 //}
 
+func GetUserIDNotifyMerchantNearbyByMerchantID(merchantLocation models.Location) (ids []interface{}, err error) {
+	location := fmt.Sprintf("POINT(%f %f)", merchantLocation.Location.Long, merchantLocation.Location.Lat)
+	r, err := DB.Query(`SELECT fav.user_id 
+								FROM favorite fav 
+								  LEFT JOIN m_option o 
+								    ON fav.user_id=o.user_id
+										LEFT JOIN user u on o.user_id = u.id
+								WHERE o.notif_fav_nearby=TRUE AND ST_Distance_Sphere(u.last_location, ST_GeomFromText(?)) < ? AND fav.merchant_id=?`, location, minNotifyDistance, merchantLocation.Id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for r.Next() {
+		var userId string
+		err = r.Scan(&userId)
+
+		if err != nil {
+			return nil, err
+		}
+		ids = append(ids,userId)
+	}
+	return ids, nil
+}
 
 func CreateMerchant(merchant models.Merchant) (models.Merchant, error) {
 	password, err := bcrypt.GenerateFromPassword([]byte(merchant.Password), bcrypt.DefaultCost)

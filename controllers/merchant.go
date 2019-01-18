@@ -130,6 +130,7 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
 				return nil
 			}
+
 		case "product-presign-url":
 			var product models.Product
 
@@ -165,6 +166,7 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 		default:
 			http.NotFound(w, req)
 		}
+
 	case "PUT":
 		switch objectID {
 		case "update-profile":

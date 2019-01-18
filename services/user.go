@@ -1,5 +1,6 @@
 package services
 
+
 import (
 	"fmt"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
@@ -7,7 +8,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"log"
 )
-
 
 func CreateUser(user models.User) (interface{}, error) {
 	uid, _ := uuid.NewV4()
@@ -25,7 +25,7 @@ func CreateUser(user models.User) (interface{}, error) {
 }
 
 func UpdateUser(user models.User) (err error) {
-	_, err = DB.Exec(`UPDATE user SET phone_number=?,email=?,name=?,image=? WHERE id=?;`,user.PhoneNumber,user.Email,user.Name,user.Image,user.ID)
+	_, err = DB.Exec(`UPDATE user SET phone_number=?,email=?,name=?,image=? WHERE id=?;`, user.PhoneNumber, user.Email, user.Name, user.Image, user.ID)
 	_, err = DB.Exec(`UPDATE m_option SET notif_fav_nearby=? WHERE user_id=?;`, user.Option.NotifFavNearby, user.ID)
 	return err
 }
@@ -91,7 +91,7 @@ func GetUserByPhoneNumber(phoneNumber string) (interface{}, error) {
 }
 
 func UpdateUserLocation(user models.User) (interface{}, error) {
-	point:= fmt.Sprintf(`POINT(%f %f)`,user.LastLocation.Long, user.LastLocation.Lat)
+	point := fmt.Sprintf(`POINT(%f %f)`, user.LastLocation.Long, user.LastLocation.Lat)
 
 	_, err := DB.Exec(`UPDATE user SET last_location=ST_GeomFromText(?) WHERE id=?`, point, user.ID)
 	if err != nil {
@@ -159,7 +159,7 @@ func ChargeUser(data models.OrderRequestData) (err error) {
 		return err
 	}
 
-	res, err := StripeConnectDestinationCharge(data.StripeToken, stripeAccId ,"Testing", data.Amount)
+	res, err := StripeConnectDestinationCharge(data.StripeToken, stripeAccId, "Testing", data.Amount)
 
 	log.Println(res)
 	if err != nil {

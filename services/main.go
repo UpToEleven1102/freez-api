@@ -28,6 +28,11 @@ var (
 	RedisClient *redis.Client
 )
 
+const (
+	minDistance = 1000
+	minNotifyDistance = 800
+)
+
 func oneSignalConfig() {
 	oneSignalAppID = os.Getenv("ONE_SIGNAL_APP_ID")
 	appKey := os.Getenv("ONE_SIGNAL_APP_KEY")
