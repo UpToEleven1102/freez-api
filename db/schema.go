@@ -118,6 +118,7 @@ const schemaUserNotification = `CREATE TABLE user_notification(
 	user_id VARCHAR(64) NOT NULL,
 	activity_type INT,
 	source_id int NOT NULL,
+	merchant_id VARCHAR(64) DEFAULT '' NULL,
 	unread BOOL NOT NULL DEFAULT true,
 	message VARCHAR(225) NOT NULL DEFAULT '',
 	PRIMARY KEY (id),

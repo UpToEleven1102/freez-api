@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"fmt"
+	"git.nextgencode.io/huyen.vu/freeze-app-rest/config"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"log"
 	"strconv"
@@ -30,7 +31,7 @@ func CreateRequest(request models.Request, claims models.JwtClaims) error {
 
 	data := models.RequestData{UserId: "id---", Data: "S3cr3t"}
 	if err == nil {
-		_, err := CreateNotificationByUserId(request.MerchantID, notificationRequestTitle, notificationRequestMessage, claims, data)
+		_, err := SendNotificationByUserId(request.MerchantID, notificationRequestTitle, notificationRequestMessage, data)
 		if err != nil {
 			panic(err)
 		}
@@ -299,30 +300,25 @@ func UpdateRequest(req models.RequestEntity) (err error) {
 }
 
 func UpdateRequestAccepted(request models.RequestEntity, claims models.JwtClaims) (err error) {
+	request.MerchantID = claims.Id
+	claims.Id = request.UserID
+	claims.Role = config.User
+
 	if request.Accepted == 1 {
-		_, err := CreateNotificationByUserId(request.UserID, "",  notificationRequestAcceptedMessage, claims, request)
-		if err != nil {
-			fmt.Println(err)
-		}
-
-		err = InsertUserNotification(request.UserID, 1, int64(request.ID), notificationRequestAcceptedMessage)
+		err := CreateNotification(config.NOTIF_TYPE_FLAG_REQUEST_ID, int64(request.ID), request.MerchantID, "Request Accepted", notificationRequestAcceptedMessage, claims)
 
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("Update request accepted", err)
 		}
 	} else {
-		_, err := CreateNotificationByUserId(request.UserID, "",  notificationRequestDeclinedMessage,claims, request)
+		err := CreateNotification(config.NOTIF_TYPE_FLAG_REQUEST_ID, int64(request.ID), request.MerchantID, "Request Declined", notificationRequestDeclinedMessage, claims)
+
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("Update request declined", err)
 		}
-
-		err = InsertUserNotification(request.UserID, 1, int64(request.ID), notificationRequestDeclinedMessage)
-
-		//RemoveRequestsByUserID(request.UserID)
-		//return nil
 	}
 
-	_, err = DB.Exec(`UPDATE request SET accepted=? WHERE id=?`, request.Accepted, request.ID)
+	_, err = DB.Exec(`UPDATE request SET accepted=?, active=FALSE WHERE id=?`, request.Accepted, request.ID)
 	return err
 }
 

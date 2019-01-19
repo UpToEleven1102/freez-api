@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"git.nextgencode.io/huyen.vu/freeze-app-rest/config"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"github.com/tbalthazar/onesignal-go"
 	"log"
@@ -12,8 +13,38 @@ import (
 	"strings"
 )
 
+func CreateNotification(activityType int, sourceID int64, id string, title string, message string, claims models.JwtClaims) (err error) {
+	switch claims.Role {
+	case config.User:
+		err := InsertUserNotification(claims.Id, activityType, sourceID, id, message)
 
-func CreateNotificationByUserId(userID string, title string, message string, claims models.JwtClaims, data interface{}) (res interface{}, err error) {
+		if err != nil {
+			panic(err)
+			return err
+		}
+
+	case config.Merchant:
+		err := InsertMerchantNotification(claims.Id, activityType, sourceID, message)
+
+		if err != nil {
+			panic(err)
+			return err
+		}
+	}
+
+	var data interface{}
+	_, err = SendNotificationByUserId(claims.Id, title, message, data)
+
+	if err != nil {
+		panic(err)
+		return err
+	}
+
+	return nil
+
+}
+
+func SendNotificationByUserId(userID string, title string, message string, data interface{}) (res interface{}, err error) {
 	notificationReq := &onesignal.NotificationRequest{
 		AppID:     oneSignalAppID,
 		Contents:  map[string]string{"en": message},

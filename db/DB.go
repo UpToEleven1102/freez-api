@@ -56,6 +56,7 @@ func seed(DB *sqlx.DB) {
 	tx.MustExec(`INSERT INTO activity_type (type) VALUE (?)`, config.NOTIF_TYPE_FLAG_REQUEST )
 	tx.MustExec(`INSERT INTO activity_type (type) VALUE (?)`, config.NOTIF_TYPE_PAYMENT_MADE)
 	tx.MustExec(`INSERT INTO activity_type (type) VALUE (?)`, config.NOTIF_TYPE_REFUND_MADE)
+	tx.MustExec(`INSERT INTO activity_type (type) VALUE (?)`, config.NOTIF_TYPE_REFUND_MADE)
 	//
 	//tx.MustExec("INSERT INTO request (user_id, merchant_id, location) VALUES (123, '3412',ST_GeomFromText('POINT(1 1)'))")
 	//uid, _ := uuid.NewV4()

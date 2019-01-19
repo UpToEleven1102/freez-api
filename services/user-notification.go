@@ -7,8 +7,8 @@ import (
 )
 
 
-func InsertUserNotification(userID string, activityType int, sourceID int64, message string) error {
-	_, err := DB.Exec(`INSERT INTO user_notification (user_id, activity_type, source_id, message) VALUES (?, ?, ?, ?)`, userID, activityType, sourceID, message)
+func InsertUserNotification(userID string, activityType int, sourceID int64, merchantID string, message string) error {
+	_, err := DB.Exec(`INSERT INTO user_notification (user_id, activity_type, source_id, merchant_id, message) VALUES (?, ?, ?, ?, ?)`, userID, activityType, sourceID, merchantID, message)
 	if err != nil {
 		log.Println(err)
 	}

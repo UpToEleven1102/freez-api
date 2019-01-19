@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
+	"git.nextgencode.io/huyen.vu/freeze-app-rest/config"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/identity"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
@@ -12,16 +12,17 @@ import (
 )
 
 const (
-	requestInfo = "request_info"
+	requestInfo  = "request_info"
 	postLocation = "post_location"
 )
 
+//notify user merchant nearby every 6 hours
 func MerchantWebSocketHandler(ws *websocket.Conn) {
 	var (
-		claims  models.JwtClaims
-		reqData models.WSRequestData
-		err error
-		claimSt string
+		claims       models.JwtClaims
+		reqData      models.WSRequestData
+		err          error
+		claimSt      string
 		secSocketKey string
 	)
 
@@ -42,7 +43,7 @@ func MerchantWebSocketHandler(ws *websocket.Conn) {
 		switch reqData.Type {
 		case token:
 			if claims, err = identity.AuthenticateToken(reqData.Payload); err != nil {
-				b, _ := json.Marshal(models.DataResponse{Success: false, Message:err.Error()})
+				b, _ := json.Marshal(models.DataResponse{Success: false, Message: err.Error()})
 				if err = websocket.Message.Send(ws, string(b)); err != nil {
 					break
 				}
@@ -59,10 +60,9 @@ func MerchantWebSocketHandler(ws *websocket.Conn) {
 				break
 			}
 
-
 			b, _ := json.Marshal(requests)
 			b, _ = json.Marshal(models.DataResponse{Success: true, Type: requestInfo, Message: string(b)})
-			if err = websocket.Message.Send(ws, string(b) ); err != nil {
+			if err = websocket.Message.Send(ws, string(b)); err != nil {
 				break
 			}
 		case postLocation:
@@ -82,13 +82,26 @@ func MerchantWebSocketHandler(ws *websocket.Conn) {
 				break
 			}
 
-			for _, userId := range userIds  {
-				fmt.Println(userId)
+			for _, userId := range userIds {
+				var merchantId string
+				r := services.RedisClient.Get("nearby_notification_" + userId.(string) + "_" + claims.Id)
+				if err = r.Scan(&merchantId); err != nil {
+					merchantId = claims.Id
+
+					claims.Id = userId.(string)
+					claims.Role = config.User
+					services.RedisClient.Set("nearby_notification_"+userId.(string)+"_"+merchantId, merchantId, time.Hour*6)
+					err = services.CreateNotification(config.NOTIF_TYPE_FAV_NEARBY_ID, -1, merchantId, "Favorite Nearby", "Your favorite merchant is nearby", claims)
+					if err != nil {
+						log.Println(err)
+					}
+				}
+				//do something else
 			}
 		}
 
 		if err != nil {
-			log.Println(err)
+			log.Println("merchant socket log err ", err)
 			break
 		}
 	}
