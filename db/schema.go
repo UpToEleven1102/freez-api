@@ -34,7 +34,7 @@ const schemaProduct = `CREATE TABLE product(
 	name VARCHAR(64) NOT NULL,
 	price DECIMAL(10,2) NOT NULL,
 	merchant_id VARCHAR(64) NOT NULL,
-	image VARCHAR(255) NOT NULL DEFAULT '',
+	image VARCHAR(255) NOT NULL DEFAULT 'https://www.houstonfoodbank.org/wp-content/uploads/2018/01/homepage_boxfood-276x300.png',
 	PRIMARY KEY (id),
 	FOREIGN KEY fk_product_merchant_id(merchant_id)
 		REFERENCES merchant(id)

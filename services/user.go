@@ -152,23 +152,21 @@ func GetFavorites(userID string) (merchants []interface{}, err error) {
 	return merchants, nil
 }
 
-func ChargeUser(data models.OrderRequestData) (err error) {
+func ChargeUser(data models.OrderRequestData) (orderId interface{}, err error) {
 	stripeAccId, err := GetMerchantStripeIdByMerchantId(data.MerchantID)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	res, err := StripeConnectDestinationCharge(data.StripeToken, stripeAccId, "Testing", data.Amount)
 
 	log.Println(res)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	data.StripeID = res.ID
 
-	err = CreateOrder(data)
-
-	return err
+	return CreateOrder(data)
 }

@@ -29,12 +29,12 @@ type (
 	}
 )
 
-func CreateOrder(data models.OrderRequestData) error {
+func CreateOrder(data models.OrderRequestData) (interface{}, error) {
 	r, err := DB.Exec(`INSERT INTO m_order (user_id, merchant_id, stripe_id, amount) VALUES (?,?,?,?)`, data.UserID, data.MerchantID, data.StripeID, data.Amount)
 
 	if err != nil {
 		log.Println(err)
-		return err
+		return nil, err
 	}
 
 	orderId, _ := r.LastInsertId()
@@ -47,7 +47,7 @@ func CreateOrder(data models.OrderRequestData) error {
 		}
 	}
 
-	return err
+	return orderId, err
 }
 
 func getItemOrder(orderId int) (items []interface{}, err error) {
