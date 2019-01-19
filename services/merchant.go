@@ -276,9 +276,9 @@ func GetNearbyMerchantsLastLocation(location models.Location) (merchants []inter
 								    SELECT merchant_id, MAX(ts) AS ts FROM location GROUP BY merchant_id
 								  ) latest
 								  ON l.ts=latest.ts
-								  JOIN merchant m
+								  LEFT JOIN merchant m
 								    ON l.merchant_id=m.id
-									  HAVING distance < ? AND online=true`, minDistance,userLocation)
+									  HAVING distance < ? AND online=true`,userLocation, minDistance)
 	defer r.Close()
 
 	if err != nil {
@@ -293,6 +293,7 @@ func GetNearbyMerchantsLastLocation(location models.Location) (merchants []inter
 
 		merchant.Location.Long, merchant.Location.Lat, err = getLongLat(loc)
 		if err != nil {
+			panic(err)
 			return nil, err
 		}
 
