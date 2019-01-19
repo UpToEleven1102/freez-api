@@ -6,6 +6,7 @@ type UserNotification struct {
 	UserID       string `json:"user_id"`
 	ActivityType string `json:"activity_type"`
 	SourceID     int    `json:"source_id"`
+	MerchantID   string `json:"merchant_id"`
 	UnRead       bool   `json:"unread"`
 	Message      string `json:"message"`
 }
@@ -16,6 +17,7 @@ type UserNotificationInfo struct {
 	UserID       string      `json:"user_id"`
 	ActivityType string      `json:"activity_type"`
 	Source       interface{} `json:"source"`
+	Merchant     interface{} `json:"merchant"`
 	UnRead       bool        `json:"unread"`
 	Message      string      `json:"message"`
 }
