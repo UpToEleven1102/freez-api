@@ -50,7 +50,11 @@ func GetUserNotifications(userID string) (notifications []interface{}, err error
 			notificationInfo.Source, _ = GetRequestNotificationById(notification.SourceID)
 		case config.NOTIF_TYPE_FAV_NEARBY:
 			notificationInfo.Merchant = models.MerchantInfo{MerchantID:notification.MerchantID}
+		case config.NOTIF_TYPE_REFUND_MADE:
+			notificationInfo.Source, _ = GetOrderById(notification.SourceID)
 		}
+
+		log.Println(notificationInfo)
 
 		notifications = append(notifications, notificationInfo)
 	}
@@ -79,8 +83,12 @@ func GetUserNotificationById(id int64) (interface{}, error){
 
 		notificationInfo := models.UserNotificationInfo{ID: notification.ID, TimeStamp:notification.TimeStamp, UserID:notification.UserID, ActivityType:notification.ActivityType, UnRead:notification.UnRead, Message:notification.Message}
 		switch notification.ActivityType {
-		case "request":
+		case config.NOTIF_TYPE_FLAG_REQUEST:
 			notificationInfo.Source, _ = GetRequestNotificationById(notification.SourceID)
+		case config.NOTIF_TYPE_REFUND_MADE:
+			notificationInfo.Source, _ = GetOrderById(notification.SourceID)
+		case config.NOTIF_TYPE_FAV_NEARBY:
+			notificationInfo.Merchant = models.MerchantInfo{MerchantID:notification.MerchantID}
 		}
 		return notificationInfo, nil
 	}
