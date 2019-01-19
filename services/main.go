@@ -29,8 +29,8 @@ var (
 )
 
 const (
-	minDistance = 1000
-	minNotifyDistance = 800
+	minDistance = 3000
+	minNotifyDistance = 1000
 )
 
 func oneSignalConfig() {

@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"git.nextgencode.io/huyen.vu/freeze-app-rest/config"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"log"
 )
@@ -28,17 +29,20 @@ func GetMerchantNotificationById(id int64) (interface{}, error) {
 	defer r.Close()
 
 	var notification models.MerchantNotification
-	if r.Next()  {
+	if r.Next() {
 		err = r.Scan(&notification.ID, &notification.TimeStamp, &notification.MerchantID, &notification.ActivityType, &notification.SourceID, &notification.UnRead, &notification.Message)
 		if err != nil {
 			log.Println(err)
 			return nil, err
 		}
 
-		notificationInfo := models.MerchantNotificationInfo{ID: notification.ID, TimeStamp:notification.TimeStamp, MerchantID:notification.MerchantID, ActivityType:notification.ActivityType, UnRead:notification.UnRead, Message:notification.Message}
+		notificationInfo := models.MerchantNotificationInfo{ID: notification.ID, TimeStamp: notification.TimeStamp, MerchantID: notification.MerchantID, ActivityType: notification.ActivityType, UnRead: notification.UnRead, Message: notification.Message}
 		switch notification.ActivityType {
-		case "request":
+		case config.NOTIF_TYPE_FLAG_REQUEST:
 			notificationInfo.Source, _ = GetRequestInfoById(notification.SourceID, notification.MerchantID)
+
+		case config.NOTIF_TYPE_PAYMENT_MADE:
+			notificationInfo.Source, _ = GetOrderPaymentById(notification.SourceID)
 		}
 
 		return notificationInfo, nil
@@ -60,16 +64,19 @@ func GetMerchantNotifications(merchantID string) (notifications []interface{}, e
 
 	defer r.Close()
 	var notification models.MerchantNotification
-	for r.Next()  {
+	for r.Next() {
 		err = r.Scan(&notification.ID, &notification.TimeStamp, &notification.MerchantID, &notification.ActivityType, &notification.SourceID, &notification.UnRead, &notification.Message)
 		if err != nil {
 			log.Println(err)
 		}
 
-		notificationInfo := models.MerchantNotificationInfo{ID: notification.ID, TimeStamp:notification.TimeStamp, MerchantID:notification.MerchantID, ActivityType:notification.ActivityType, UnRead:notification.UnRead, Message:notification.Message}
+		notificationInfo := models.MerchantNotificationInfo{ID: notification.ID, TimeStamp: notification.TimeStamp, MerchantID: notification.MerchantID, ActivityType: notification.ActivityType, UnRead: notification.UnRead, Message: notification.Message}
 		switch notification.ActivityType {
-		case "request":
+		case config.NOTIF_TYPE_FLAG_REQUEST:
 			notificationInfo.Source, _ = GetRequestInfoById(notification.SourceID, notification.MerchantID)
+
+		case config.NOTIF_TYPE_PAYMENT_MADE:
+			notificationInfo.Source, _ = GetOrderPaymentById(notification.SourceID)
 		}
 
 		notifications = append(notifications, notificationInfo)
@@ -84,4 +91,3 @@ func UpdateMerchantNotification(notification models.MerchantNotification) error 
 	}
 	return err
 }
-

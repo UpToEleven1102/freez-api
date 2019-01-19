@@ -165,12 +165,19 @@ func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, clai
 			}
 			data.UserID = claims.Id
 
-			err = services.ChargeUser(data)
+			orderId, err := services.ChargeUser(data)
 
 			if err != nil {
 				log.Println(err)
 				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
 				return nil
+			}
+
+			claims.Role = config.Merchant
+			claims.Id = data.MerchantID
+			err = services.CreateNotification(config.NOTIF_TYPE_PAYMENT_MADE_ID, orderId.(int64), data.UserID, "New order", "Payment made by customer", claims)
+			if err != nil {
+				log.Println("Notify payment made", err)
 			}
 			_ = json.NewEncoder(w).Encode(models.DataResponse{Success:true})
 

@@ -111,5 +111,5 @@ func getMerchantNearby(claims models.JwtClaims, reqData models.WSRequestData) (m
 	location.Id = claims.Id
 
 	_ = json.Unmarshal([]byte(reqData.Payload), &location.Location)
-	return services.GetNearMerchantsLastLocation(location)
+	return services.GetNearbyMerchantsLastLocation(location)
 }

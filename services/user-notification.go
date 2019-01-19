@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"git.nextgencode.io/huyen.vu/freeze-app-rest/config"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"log"
 )
@@ -25,7 +26,7 @@ func UpdateUserNotification(notification models.UserNotification) error {
 
 func GetUserNotifications(userID string) (notifications []interface{}, err error) {
 	notifications = []interface{}{}
-	r, err := DB.Query(`SELECT u.id, ts, user_id, type, source_id, unread, message 
+	r, err := DB.Query(`SELECT u.id, ts, user_id, type, source_id, merchant_id, unread, message 
 								FROM user_notification u
 								LEFT JOIN activity_type a on u.activity_type = a.id
 								WHERE user_id=?`, userID)
@@ -38,16 +39,22 @@ func GetUserNotifications(userID string) (notifications []interface{}, err error
 	defer r.Close()
 	var notification models.UserNotification
 	for r.Next()  {
-		err = r.Scan(&notification.ID, &notification.TimeStamp, &notification.UserID, &notification.ActivityType, &notification.SourceID, &notification.UnRead, &notification.Message)
+		err = r.Scan(&notification.ID, &notification.TimeStamp, &notification.UserID, &notification.ActivityType, &notification.SourceID, &notification.MerchantID, &notification.UnRead, &notification.Message)
 		if err != nil {
 			log.Println(err)
 		}
 
 		notificationInfo := models.UserNotificationInfo{ID: notification.ID, TimeStamp:notification.TimeStamp, UserID:notification.UserID, ActivityType:notification.ActivityType, UnRead:notification.UnRead, Message:notification.Message}
 		switch notification.ActivityType {
-		case "request":
+		case config.NOTIF_TYPE_FLAG_REQUEST:
 			notificationInfo.Source, _ = GetRequestNotificationById(notification.SourceID)
+		case config.NOTIF_TYPE_FAV_NEARBY:
+			notificationInfo.Merchant = models.MerchantInfo{MerchantID:notification.MerchantID}
+		case config.NOTIF_TYPE_REFUND_MADE:
+			notificationInfo.Source, _ = GetOrderById(notification.SourceID)
 		}
+
+		log.Println(notificationInfo)
 
 		notifications = append(notifications, notificationInfo)
 	}
@@ -76,8 +83,12 @@ func GetUserNotificationById(id int64) (interface{}, error){
 
 		notificationInfo := models.UserNotificationInfo{ID: notification.ID, TimeStamp:notification.TimeStamp, UserID:notification.UserID, ActivityType:notification.ActivityType, UnRead:notification.UnRead, Message:notification.Message}
 		switch notification.ActivityType {
-		case "request":
+		case config.NOTIF_TYPE_FLAG_REQUEST:
 			notificationInfo.Source, _ = GetRequestNotificationById(notification.SourceID)
+		case config.NOTIF_TYPE_REFUND_MADE:
+			notificationInfo.Source, _ = GetOrderById(notification.SourceID)
+		case config.NOTIF_TYPE_FAV_NEARBY:
+			notificationInfo.Merchant = models.MerchantInfo{MerchantID:notification.MerchantID}
 		}
 		return notificationInfo, nil
 	}

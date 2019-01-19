@@ -57,7 +57,7 @@ func LocationHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 
 			location.Id = claims.Id
 
-			merchants, err := services.GetNearMerchantsLastLocation(location)
+			merchants, err := services.GetNearbyMerchantsLastLocation(location)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return nil
