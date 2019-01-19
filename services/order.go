@@ -167,6 +167,26 @@ func GetOrderPaymentById(orderId int) (order interface{}, err error) {
 	return nil, err
 }
 
+func GetOrderEntityById(orderId int) (order interface{}, err error) {
+	r, err := DB.Query(`SELECT id, user_id, merchant_id, stripe_id, refund, amount, date FROM m_order WHERE id=?`, orderId)
+	defer r.Close()
+	if err != nil {
+		panic(err)
+		return nil, err
+	}
+
+	if r.Next() {
+		var order models.OrderEntity
+		err = r.Scan(&order.ID, &order.UserId, &order.MerchantId, &order.StripeId, &order.Refund, &order.Amount, &order.Date)
+		if err != nil {
+			panic(err)
+			return nil, err
+		}
+		return order, nil
+	}
+	return nil, nil
+}
+
 func UpdateOrder(order models.OrderEntity) error {
 	_, err := DB.Exec(`UPDATE m_order SET refund=? WHERE id=?`, order.Refund, order.ID)
 	return err

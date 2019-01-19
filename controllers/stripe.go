@@ -93,6 +93,7 @@ func StripeOpsHandler(w http.ResponseWriter, req *http.Request, urlString string
 
 		case "refund":
 			type refundData struct {
+				OrderID  int     `json:"order_id"`
 				StripeID string  `json:"stripe_id"`
 				Amount   float64 `json:"amount"`
 				Reason   string  `json:"reason"`
@@ -103,7 +104,7 @@ func StripeOpsHandler(w http.ResponseWriter, req *http.Request, urlString string
 			err := json.NewDecoder(req.Body).Decode(&data)
 
 			if err != nil {
-				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
 				return nil
 			}
 
@@ -115,9 +116,8 @@ func StripeOpsHandler(w http.ResponseWriter, req *http.Request, urlString string
 				res, err = services.StripePartialRefund(data.StripeID, data.Amount)
 			}
 
-
 			if err != nil {
-				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
 				return nil
 			}
 
@@ -126,7 +126,19 @@ func StripeOpsHandler(w http.ResponseWriter, req *http.Request, urlString string
 			fmt.Printf("%+v \n", res)
 			//_ = json.NewEncoder(w).Encode(res)
 
-			_ = json.NewEncoder(w).Encode(models.DataResponse{Success: refundRes.Status == "succeeded", Message:"Successfully refunded"})
+			orderEntity, err := services.GetOrderEntityById(data.OrderID)
+			order := orderEntity.(models.OrderEntity)
+			if err != nil {
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
+				return nil
+			}
+
+			var userClaims models.JwtClaims
+			userClaims.Id = order.UserId
+			userClaims.Role = config.User
+			res = services.CreateNotification(config.NOTIF_TYPE_REFUND_MADE_ID, int64(order.ID), order.MerchantId, "Order refunded", "Refund for your order started", userClaims )
+
+			_ = json.NewEncoder(w).Encode(models.DataResponse{Success: refundRes.Status == "succeeded", Message: "Successfully refunded"})
 
 		default:
 			http.NotFound(w, req)
@@ -165,7 +177,7 @@ func StripeOpsHandler(w http.ResponseWriter, req *http.Request, urlString string
 
 			if err != nil {
 				log.Println(err)
-				_ = jsonEncoder.Encode(models.DataResponse{Success:false, Message:err.Error()})
+				_ = jsonEncoder.Encode(models.DataResponse{Success: false, Message: err.Error()})
 				return nil
 			}
 
