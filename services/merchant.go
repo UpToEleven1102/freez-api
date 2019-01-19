@@ -268,7 +268,7 @@ func GetMerchantInfoById(id string, location models.Location) (interface{}, erro
 	return nil, nil
 }
 
-func GetNearMerchantsLastLocation(location models.Location) (merchants []interface{}, err error){
+func GetNearbyMerchantsLastLocation(location models.Location) (merchants []interface{}, err error){
 	userLocation := fmt.Sprintf(`POINT(%f %f)`, location.Location.Long, location.Location.Lat)
 
 	r, err := DB.Query(`SELECT online, email, name, mobile, phone_number, image, l.merchant_id, ST_AsText(location) as location, ST_Distance_Sphere(location, ST_GeomFromText(?)) as distance
@@ -278,7 +278,7 @@ func GetNearMerchantsLastLocation(location models.Location) (merchants []interfa
 								  ON l.ts=latest.ts
 								  JOIN merchant m
 								    ON l.merchant_id=m.id
-									  HAVING distance < 1000 AND online=true`, userLocation)
+									  HAVING distance < ? AND online=true`, minDistance,userLocation)
 	defer r.Close()
 
 	if err != nil {

@@ -104,7 +104,6 @@ func GetOrderHistoryByUserId(userID string) (orders []interface{}, err error) {
 }
 
 func GetOrderPaymentByMerchantId(merchantID string) (orders []interface{}, err error) {
-
 	r, err := DB.Query(`SELECT o.id, user_id, merchant_id, stripe_id, refund, amount, date, phone_number, email, name, image, ST_AsText(last_location)
 								FROM m_order o
 								LEFT JOIN user u ON o.user_id=u.id
@@ -134,6 +133,38 @@ func GetOrderPaymentByMerchantId(merchantID string) (orders []interface{}, err e
 	}
 
 	return orders, err
+}
+
+func GetOrderPaymentById(orderId int) (order interface{}, err error) {
+	r, err := DB.Query(`SELECT o.id, user_id, merchant_id, stripe_id, refund, amount, date, phone_number, email, name, image, ST_AsText(last_location)
+								FROM m_order o
+								LEFT JOIN user u ON o.user_id=u.id
+								WHERE o.id=?`, orderId)
+
+	defer r.Close()
+
+	if err != nil {
+		panic(err)
+		return nil, err
+	}
+
+	if r.Next() {
+		var order OrderMerchantEntity
+		var location string
+		err = r.Scan(&order.ID, &order.User.ID, &order.MerchantID, &order.StripeID, &order.Refund, &order.Amount, &order.Date,
+			&order.User.PhoneNumber, &order.User.Email, &order.User.Name, &order.User.Image, &location)
+		if err != nil {
+			panic(err)
+			return nil, err
+		}
+
+		order.User.LastLocation.Long, order.User.LastLocation.Lat, _ = getLongLat(location)
+		order.Items, _ = getItemOrder(order.ID)
+
+		return order, nil
+	}
+
+	return nil, err
 }
 
 func UpdateOrder(order models.OrderEntity) error {
