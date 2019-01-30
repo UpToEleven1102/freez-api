@@ -4,19 +4,32 @@ package db
 const schemaMerchant = `
 	CREATE TABLE merchant(
 		id VARCHAR(64) NOT NULL,
+		category VARCHAR(64) NOT NULL DEFAULT 'ice_cream_truck',
 		online BOOLEAN NOT NULL DEFAULT 0,
 		mobile BOOLEAN NOT NULL DEFAULT 0,
 		phone_number text NOT NULL,
-		email VARCHAR(64) NOT NULL UNIQUE,
+		email VARCHAR(64) NOT NULL,
 		name text NOT NULL,
 		password text NOT NULL,
 		last_location POINT,
 		image VARCHAR(255) NOT NULL DEFAULT 'https://freeze-app.s3.us-west-2.amazonaws.com/blank-profile-picture.jpg',
 		stripe_id VARCHAR(64) NOT NULL UNIQUE,
 		card_id VARCHAR(64) NOT NULL,
-		PRIMARY KEY (id)
+		PRIMARY KEY (id),
+		FOREIGN KEY merchant_category (category)
+			REFERENCES merchant_category(category)
+			ON DELETE CASCADE
+			ON UPDATE CASCADE
 	);
 `
+
+const schemaMerchantCategory = `
+	CREATE TABLE merchant_category(
+		category VARCHAR(64) NOT NULL,
+		PRIMARY KEY (category)
+	);
+`
+
 
 const schemaLocation = `
 	CREATE TABLE location(
