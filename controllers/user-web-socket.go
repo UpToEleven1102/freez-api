@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/identity"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
@@ -16,7 +15,10 @@ const (
 	token          = "token"
 )
 
-
+type requestMerchantData struct {
+	Location models.LongLat `json:"location"`
+	Filter   []string       `json:"filter"`
+}
 
 func parseMessage(ws *websocket.Conn) (reqData models.WSRequestData, err error) {
 	var message string
@@ -31,14 +33,12 @@ func parseMessage(ws *websocket.Conn) (reqData models.WSRequestData, err error) 
 	return reqData, nil
 }
 
-
-
 func UserWebSocketHandler(ws *websocket.Conn) {
 	var (
-		claims  models.JwtClaims
-		reqData models.WSRequestData
-		err error
-		claimSt string
+		claims       models.JwtClaims
+		reqData      models.WSRequestData
+		err          error
+		claimSt      string
 		secSocketKey string
 	)
 
@@ -51,6 +51,7 @@ func UserWebSocketHandler(ws *websocket.Conn) {
 
 		reqData, err = parseMessage(ws)
 		if err != nil {
+			log.Println(err)
 			break
 		}
 
@@ -58,7 +59,7 @@ func UserWebSocketHandler(ws *websocket.Conn) {
 		case token:
 			claims, err = identity.AuthenticateToken(reqData.Payload)
 			if err != nil {
-				b, _ := json.Marshal(models.DataResponse{Success: false, Message:err.Error()})
+				b, _ := json.Marshal(models.DataResponse{Success: false, Message: err.Error()})
 				if err = websocket.Message.Send(ws, string(b)); err != nil {
 					break
 				}
@@ -71,15 +72,15 @@ func UserWebSocketHandler(ws *websocket.Conn) {
 			merchants, err = getMerchantNearby(claims, reqData)
 
 			if err != nil {
-				b, _ := json.Marshal(models.DataResponse{Success: false, Message:err.Error()})
+				b, _ := json.Marshal(models.DataResponse{Success: false, Message: err.Error()})
 				if err = websocket.Message.Send(ws, string(b)); err != nil {
 					break
 				}
 			}
 			b, _ := json.Marshal(merchants)
-			b, _ = json.Marshal(models.DataResponse{Success:true, Type: reqData.Type, Message: string(b)})
+			b, _ = json.Marshal(models.DataResponse{Success: true, Type: reqData.Type, Message: string(b)})
 
-			err = websocket.Message.Send(ws,string(b))
+			err = websocket.Message.Send(ws, string(b))
 			if err != nil {
 				break
 			}
@@ -92,9 +93,7 @@ func UserWebSocketHandler(ws *websocket.Conn) {
 				break
 			}
 
-			fmt.Println(user)
-
-			if _ , err = services.UpdateUserLocation(user); err != nil {
+			if _, err = services.UpdateUserLocation(user); err != nil {
 				break
 			}
 		}
@@ -107,9 +106,12 @@ func UserWebSocketHandler(ws *websocket.Conn) {
 }
 
 func getMerchantNearby(claims models.JwtClaims, reqData models.WSRequestData) (merchants []interface{}, err error) {
+	var data requestMerchantData
 	var location models.Location
-	location.Id = claims.Id
 
-	_ = json.Unmarshal([]byte(reqData.Payload), &location.Location)
-	return services.GetNearbyMerchantsLastLocation(location)
+	_ = json.Unmarshal([]byte(reqData.Payload), &data)
+
+	location.Location = data.Location
+	location.Id = claims.Id
+	return services.GetNearbyMerchantsLastLocation(location, data.Filter...)
 }
