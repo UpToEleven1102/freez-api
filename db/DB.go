@@ -25,6 +25,7 @@ func seed(DB *sqlx.DB) {
 	DB.MustExec("DROP TABLE IF EXISTS product")
 	DB.MustExec("DROP TABLE IF EXISTS merchant_m_option")
 	DB.MustExec("DROP TABLE IF EXISTS merchant")
+	DB.MustExec("DROP TABLE IF EXISTS merchant_category")
 	DB.MustExec("DROP TABLE IF EXISTS m_option")
 	DB.MustExec("DROP TABLE IF EXISTS user")
 	DB.MustExec("DROP TABLE IF EXISTS request")
@@ -36,23 +37,13 @@ func seed(DB *sqlx.DB) {
 	DB.MustExec("DROP TABLE IF EXISTS m_order")
 
 
-	DB.MustExec(schemaMerchant)
-	DB.MustExec(schemaProduct)
-	DB.MustExec(schemaMerchantMOption)
-	DB.MustExec(triggerInsertMerchantMOption)
-	DB.MustExec(schemaUser)
-	DB.MustExec(schemaMOption)
-	DB.MustExec(triggerInsertUserMOption)
-	DB.MustExec(schemaRequest)
-	DB.MustExec(schemaLocation)
-	DB.MustExec(schemaFavorites)
+	DB.MustExec(schemaMerchantCategory)
 	DB.MustExec(schemaActivityType)
-	DB.MustExec(schemaMerchantNotification)
-	DB.MustExec(schemaUserNotification)
-	DB.MustExec(schemaOrder)
-	DB.MustExec(schemaOrderProduct)
 
 	tx := DB.MustBegin()
+	tx.MustExec(`INSERT INTO merchant_category (category) VALUE (?)`, config.MERCHANT_CATEGORY_FOOD_TRUCK)
+	tx.MustExec(`INSERT INTO merchant_category (category) VALUE (?)`, config.MERCHANT_CATEGORY_ICE_CREAM_TRUCK)
+
 	tx.MustExec(`INSERT INTO activity_type (type) VALUE (?)`, config.NOTIF_TYPE_FLAG_REQUEST )
 	tx.MustExec(`INSERT INTO activity_type (type) VALUE (?)`, config.NOTIF_TYPE_PAYMENT_MADE)
 	tx.MustExec(`INSERT INTO activity_type (type) VALUE (?)`, config.NOTIF_TYPE_REFUND_MADE)
@@ -65,6 +56,23 @@ func seed(DB *sqlx.DB) {
 	//tx.MustExec("INSERT INTO user (id, phone_number, email, name, password) VALUES (?, ?, ?, ?, ?)", uid.String(), "8013215431","a@truck.com", "H", "hot dog password")
 	//
 	tx.Commit()
+
+	DB.MustExec(schemaMerchant)
+	DB.MustExec(schemaProduct)
+	DB.MustExec(schemaMerchantMOption)
+	DB.MustExec(triggerInsertMerchantMOption)
+	DB.MustExec(schemaUser)
+	DB.MustExec(schemaMOption)
+	DB.MustExec(triggerInsertUserMOption)
+	DB.MustExec(schemaRequest)
+	DB.MustExec(schemaLocation)
+	DB.MustExec(schemaFavorites)
+	DB.MustExec(schemaMerchantNotification)
+	DB.MustExec(schemaUserNotification)
+	DB.MustExec(schemaOrder)
+	DB.MustExec(schemaOrderProduct)
+
+
 }
 
 func Config() (*sqlx.DB, error) {

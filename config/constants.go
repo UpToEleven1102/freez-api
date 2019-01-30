@@ -15,6 +15,9 @@ const (
 	PhoneNumber="phone-number"
 	SRID = 3857
 
+	MERCHANT_CATEGORY_ICE_CREAM_TRUCK = "ice_cream_truck"
+	MERCHANT_CATEGORY_FOOD_TRUCK = "food_truck"
+
 	NOTIF_TYPE_FLAG_REQUEST = "request"
 	NOTIF_TYPE_PAYMENT_MADE = "payment_made"
 	NOTIF_TYPE_REFUND_MADE  = "refund_made"

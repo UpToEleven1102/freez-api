@@ -23,6 +23,7 @@ type merchantMOption struct {
 
 type MerchantNotification struct {
 	ID           int    `json:"id"`
+	Category     string `json:"category"`
 	TimeStamp    string `json:"ts"`
 	MerchantID   string `json:"merchant_id"`
 	ActivityType string `json:"activity_type"`
@@ -43,6 +44,7 @@ type MerchantNotificationInfo struct {
 
 type MerchantInfo struct {
 	Online      bool          `json:"online"`
+	Category    string        `json:"category"`
 	MerchantID  string        `json:"merchant_id"`
 	Location    LongLat       `json:"location"`
 	Distance    float32       `json:"distance"`
