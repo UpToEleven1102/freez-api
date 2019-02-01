@@ -36,7 +36,6 @@ func SignInUser(w http.ResponseWriter, req *http.Request) {
 	r, err := services.GetUserByEmail(credentials.Email)
 
 	if err != nil || r == nil {
-		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:"Credentials Invalid"})
 		return
 	}
@@ -44,12 +43,10 @@ func SignInUser(w http.ResponseWriter, req *http.Request) {
 	err = bcrypt.CompareHashAndPassword([]byte(r.(models.User).Password), []byte(credentials.Password))
 
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:"Credentials Invalid"})
 		return
 	}
 
 	token, _ := createToken(r)
-	b, _ := json.Marshal(token)
-	w.Write(b)
+	_ = json.NewEncoder(w).Encode(models.DataResponse{Success:true, Message:token})
 }

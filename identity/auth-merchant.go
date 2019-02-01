@@ -39,13 +39,11 @@ func SignInMerchant(w http.ResponseWriter, req *http.Request) {
 				http.Error(w, "Something went wrong", http.StatusInternalServerError)
 				return
 			}
-			b, _ := json.Marshal(token)
 			w.WriteHeader(http.StatusAccepted)
-			w.Write(b)
+			_ = json.NewEncoder(w).Encode(models.DataResponse{Success:true, Message:token})
 			return
 		}
 	}
-	w.WriteHeader(http.StatusBadRequest)
 	_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:"Credentials Invalid"})
 }
 
