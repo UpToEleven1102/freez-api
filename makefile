@@ -11,5 +11,6 @@ all:
 	go get github.com/go-redis/redis
 	go get github.com/stripe/stripe-go
 	go get golang.org/x/net/websocket
+	go get -u github.com/huandu/facebook
 	go build -o freeze-app
 	./freeze-app

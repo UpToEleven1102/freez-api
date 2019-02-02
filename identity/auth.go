@@ -9,6 +9,7 @@ import (
 	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
 	"github.com/dgrijalva/jwt-go"
 	"io/ioutil"
+	"log"
 	"math/rand"
 	"net/http"
 	"os"
@@ -159,17 +160,35 @@ func EmailExists(w http.ResponseWriter, req *http.Request) {
 	w.Write(b)
 }
 
+func AuthenticateFacebook(w http.ResponseWriter, req *http.Request) {
+	var reqData models.FacebookTokenData
+	jsonEncoder := json.NewEncoder(w)
+
+	_ = json.NewDecoder(req.Body).Decode(&reqData)
+
+	user, err := services.GetFaceBookUserInfo(reqData)
+
+	if err != nil {
+		log.Println(err)
+		_ = jsonEncoder.Encode(models.DataResponse{Success:false, Message: err.Error()})
+	}
+
+	fmt.Println(user)
+
+	_ = jsonEncoder.Encode(models.DataResponse{Success: true, Message: reqData.AccessToken})
+}
+
 func PhoneNumberExists(w http.ResponseWriter, req *http.Request) {
 	var r request
 	_ = json.NewDecoder(req.Body).Decode(&r)
 
 	if merchant, _ := services.GetMerchantByPhoneNumber(r.PhoneNumber); merchant != nil {
-		json.NewEncoder(w).Encode(response{Message: "true", Role:c.Merchant})
+		_ = json.NewEncoder(w).Encode(response{Message: "true", Role: c.Merchant})
 	} else {
 		if merchant, _ = services.GetUserByPhoneNumber(r.PhoneNumber); merchant != nil {
-			json.NewEncoder(w).Encode(response{Message:"true", Role: c.User})
+			_ = json.NewEncoder(w).Encode(response{Message: "true", Role: c.User})
 		} else {
-			json.NewEncoder(w).Encode(response{Message:"false"})
+			_ = json.NewEncoder(w).Encode(response{Message: "false"})
 		}
 	}
 }

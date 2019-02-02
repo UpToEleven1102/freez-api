@@ -112,3 +112,16 @@ type DataResponse struct {
 	Type    string `json:"type"`
 	Message string `json:"message"`
 }
+
+type FacebookUserInfo struct {
+	ID string `json:"token"`
+	Email string `json:"email"`
+	Name string `json:"name"`
+	Picture string `json:"picture"`
+}
+
+type FacebookTokenData struct {
+	AccessToken string `json:"access_token"`
+	UserID      string `json:"user_id"`
+}
+
