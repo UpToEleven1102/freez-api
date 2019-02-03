@@ -160,22 +160,83 @@ func EmailExists(w http.ResponseWriter, req *http.Request) {
 	w.Write(b)
 }
 
+func GenerateTokenByFacebookAccount(reqData models.FacebookTokenData) (interface{}, error) {
+	user, err := services.GetFaceBookUserInfo(reqData)
+
+	var response models.DataResponse
+
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	userInfo, err := services.GetUserByFbId(user.(models.FacebookUserInfo).ID)
+
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	if userInfo == nil {
+		//no account in user table
+		userInfo, err = services.GetMerchantByFacebookID(user.(models.FacebookUserInfo).ID)
+
+		if err != nil {
+			return nil, err
+		}
+
+		if userInfo == nil {
+			//no account in both user and merchant tables
+			response.Success = true
+			response.Type = "register"
+			response.Message = reqData.AccessToken
+
+			return response, nil
+		} else {
+			//merchant account exists
+			token , err := createToken(userInfo)
+			if err != nil {
+				return nil, err
+			}
+
+			response.Success = true
+			response.Type = "login"
+			response.Role = c.Merchant
+			response.Message = token
+
+			return response, nil
+
+		}
+	} else {
+		//user account exists
+		token, err := createToken(userInfo)
+		if err != nil {
+			return nil, err
+		}
+
+		response.Success = true
+		response.Type = "login"
+		response.Role = c.User
+		response.Message = token
+
+		return response, nil
+	}
+
+}
+
 func AuthenticateFacebook(w http.ResponseWriter, req *http.Request) {
 	var reqData models.FacebookTokenData
 	jsonEncoder := json.NewEncoder(w)
 
 	_ = json.NewDecoder(req.Body).Decode(&reqData)
 
-	user, err := services.GetFaceBookUserInfo(reqData)
+	response, err := GenerateTokenByFacebookAccount(reqData)
 
 	if err != nil {
-		log.Println(err)
 		_ = jsonEncoder.Encode(models.DataResponse{Success:false, Message: err.Error()})
+	} else {
+		_ = jsonEncoder.Encode(response)
 	}
-
-	fmt.Println(user)
-
-	_ = jsonEncoder.Encode(models.DataResponse{Success: true, Message: reqData.AccessToken})
 }
 
 func PhoneNumberExists(w http.ResponseWriter, req *http.Request) {
@@ -271,15 +332,15 @@ func VerifySMSPin(w http.ResponseWriter, req *http.Request) {
 	if dbPin, err := services.RedisClient.Get(data.PhoneNumber).Result(); dbPin != data.Pin {
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
+			_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
 			return
 		}
-		json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: "Invalid pin number"})
+		_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: "Invalid pin number"})
 		return
 	}
 
 	services.RedisClient.Del(data.PhoneNumber)
-	json.NewEncoder(w).Encode(models.DataResponse{Success: true})
+	_ = json.NewEncoder(w).Encode(models.DataResponse{Success: true})
 }
 
 func SendRandomPinEmail(w http.ResponseWriter, req *http.Request) {
