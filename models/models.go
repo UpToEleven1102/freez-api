@@ -110,5 +110,18 @@ type LocationEntity struct {
 type DataResponse struct {
 	Success bool   `json:"success"`
 	Type    string `json:"type"`
+	Role    string `json:"role"`
 	Message string `json:"message"`
+}
+
+type FacebookUserInfo struct {
+	ID      string `json:"token"`
+	Email   string `json:"email"`
+	Name    string `json:"name"`
+	Picture string `json:"picture"`
+}
+
+type FacebookTokenData struct {
+	AccessToken string `json:"access_token"`
+	UserID      string `json:"user_id"`
 }

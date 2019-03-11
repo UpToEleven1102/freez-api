@@ -4,6 +4,7 @@ package db
 const schemaMerchant = `
 	CREATE TABLE merchant(
 		id VARCHAR(64) NOT NULL,
+		facebook_id varchar(64) UNIQUE,
 		category VARCHAR(64) NOT NULL DEFAULT 'ice_cream_truck',
 		online BOOLEAN NOT NULL DEFAULT 0,
 		mobile BOOLEAN NOT NULL DEFAULT 0,
@@ -149,6 +150,7 @@ const schemaUser = `
 		email VARCHAR(64) NOT NULL UNIQUE,
 		name text NOT NULL,
 		password text NOT NULL,
+		facebook_id varchar(64) UNIQUE,
 		image VARCHAR(255) NOT NULL DEFAULT 'https://freeze-app.s3.us-west-2.amazonaws.com/blank-profile-picture.jpg',
 		last_location POINT,
 		PRIMARY KEY (id)
