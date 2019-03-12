@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	c "git.nextgencode.io/huyen.vu/freeze-app-rest/config"
-	auth "git.nextgencode.io/huyen.vu/freeze-app-rest/identity"
+	c "git.nextgencode.io/huyen.vu/freez-app-rest/config"
+	auth "git.nextgencode.io/huyen.vu/freez-app-rest/identity"
 	"net/http"
 )
 

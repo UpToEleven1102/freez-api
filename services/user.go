@@ -3,7 +3,7 @@ package services
 
 import (
 	"fmt"
-	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
+	"git.nextgencode.io/huyen.vu/freez-app-rest/models"
 	"github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 	"log"

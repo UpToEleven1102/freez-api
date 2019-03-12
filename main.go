@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	c "git.nextgencode.io/huyen.vu/freeze-app-rest/config"
-	"git.nextgencode.io/huyen.vu/freeze-app-rest/controllers"
-	"git.nextgencode.io/huyen.vu/freeze-app-rest/identity"
+	c "git.nextgencode.io/huyen.vu/freez-app-rest/config"
+	"git.nextgencode.io/huyen.vu/freez-app-rest/controllers"
+	"git.nextgencode.io/huyen.vu/freez-app-rest/identity"
 	"github.com/joho/godotenv"
 	"github.com/tbalthazar/onesignal-go"
 	"golang.org/x/net/websocket"

@@ -2,7 +2,7 @@ package services
 
 import (
 	"fmt"
-	"git.nextgencode.io/huyen.vu/freeze-app-rest/db"
+	"git.nextgencode.io/huyen.vu/freez-app-rest/db"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"

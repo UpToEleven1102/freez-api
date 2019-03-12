@@ -3,7 +3,7 @@ package services
 import (
 	"errors"
 	"fmt"
-	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
+	"git.nextgencode.io/huyen.vu/freez-app-rest/models"
 	"github.com/satori/go.uuid"
 	"github.com/stripe/stripe-go"
 	"golang.org/x/crypto/bcrypt"

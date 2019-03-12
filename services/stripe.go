@@ -1,7 +1,7 @@
 package services
 
 import (
-	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
+	"git.nextgencode.io/huyen.vu/freez-app-rest/models"
 	"github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/account"
 	"github.com/stripe/stripe-go/balance"

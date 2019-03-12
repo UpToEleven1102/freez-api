@@ -1,7 +1,7 @@
 package db
 
 import (
-	"git.nextgencode.io/huyen.vu/freeze-app-rest/config"
+	"git.nextgencode.io/huyen.vu/freez-app-rest/config"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"

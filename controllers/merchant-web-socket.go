@@ -2,10 +2,10 @@ package controllers
 
 import (
 	"encoding/json"
-	"git.nextgencode.io/huyen.vu/freeze-app-rest/config"
-	"git.nextgencode.io/huyen.vu/freeze-app-rest/identity"
-	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
-	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
+	"git.nextgencode.io/huyen.vu/freez-app-rest/config"
+	"git.nextgencode.io/huyen.vu/freez-app-rest/identity"
+	"git.nextgencode.io/huyen.vu/freez-app-rest/models"
+	"git.nextgencode.io/huyen.vu/freez-app-rest/services"
 	"golang.org/x/net/websocket"
 	"log"
 	"time"

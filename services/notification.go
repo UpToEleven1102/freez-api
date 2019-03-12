@@ -3,8 +3,8 @@ package services
 import (
 	"encoding/json"
 	"fmt"
-	"git.nextgencode.io/huyen.vu/freeze-app-rest/config"
-	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
+	"git.nextgencode.io/huyen.vu/freez-app-rest/config"
+	"git.nextgencode.io/huyen.vu/freez-app-rest/models"
 	"github.com/tbalthazar/onesignal-go"
 	"log"
 	"net/http"

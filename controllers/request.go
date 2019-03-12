@@ -3,9 +3,9 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"git.nextgencode.io/huyen.vu/freeze-app-rest/config"
-	"git.nextgencode.io/huyen.vu/freeze-app-rest/models"
-	"git.nextgencode.io/huyen.vu/freeze-app-rest/services"
+	"git.nextgencode.io/huyen.vu/freez-app-rest/config"
+	"git.nextgencode.io/huyen.vu/freez-app-rest/models"
+	"git.nextgencode.io/huyen.vu/freez-app-rest/services"
 	"io/ioutil"
 	"log"
 	"net/http"
