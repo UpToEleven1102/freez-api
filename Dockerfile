@@ -13,6 +13,7 @@ RUN go get github.com/aws/aws-sdk-go
 RUN go get github.com/go-redis/redis
 RUN go get github.com/stripe/stripe-go
 RUN go get golang.org/x/net/websocket
+RUN go get -u github.com/huandu/facebook
 
 ENV SOURCES /go/src/git.nextgencode.io/huyen.vu/freez-app-rest/
 
