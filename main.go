@@ -1,3 +1,7 @@
+// @APIVersion 1.0.0
+// @APITitle My Cool Freez API
+// @APIDescription My API usually works as expected (sometimes it doesn't).
+// @BasePath http://35.162.158.187/
 package main
 
 import (
@@ -28,6 +32,7 @@ func urlMatch(url string) (repository string, objectID string) {
 	if len(fragments) == 4 {
 		objectID = fragments[3]
 	} else if len(fragments) > 4 {
+
 		objectID = fragments[3]
 		for i := 4; i < len(fragments); i++ {
 			objectID += "/" + fragments[i]
@@ -88,12 +93,16 @@ func main() {
 	port := getPort()
 	_ = onesignal.NewClient(nil)
 
+	// @SubApi Main API [/api]
 	http.HandleFunc("/api/", apiHandler)
 
+	// @SubApi Auth API [/auth]
 	http.HandleFunc("/auth/", authHandler)
 
+	// @SubApi Websocket routes for users [/socker/user]
 	http.Handle("/socket/user", websocket.Handler(controllers.UserWebSocketHandler))
 
+	// @SubApi Websocket routes for merchants [/socket/merchant]
 	http.Handle("/socket/merchant", websocket.Handler(controllers.MerchantWebSocketHandler))
 
 	fmt.Printf("Running on port %s \n", port)
