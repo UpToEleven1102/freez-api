@@ -20,6 +20,12 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 	switch req.Method {
 	case "GET":
 		switch objectID {
+		// @Title get merchants (Admin only)
+		// @Description get the list of all merchants
+		// @Accept  json
+		// @Success 200 {array}  my_api.model.Merchant
+		// @Resource /api
+		// @Router /api/merchants [get]
 		case "":
 			if claims.Role != "admin" {
 				return errors.New("Failed to authorize")
@@ -30,6 +36,13 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 			}
 			b, _ := json.Marshal(merchant)
 			_, _ = w.Write(b)
+			break
+
+			// @Title get presign-url
+			// @Description get presign-url to upload image (jpg only)
+			// @Accept  json
+			// @Success 200 my_api.model.DataResponse
+			// @Router /api/merchants/presign-url [get]
 		case "presign-url":
 			fileName := fmt.Sprint(claims.Id, "-profile.jpg")
 			url, err := services.GeneratePreSignedUrl(fileName)
