@@ -24,6 +24,7 @@ build: dep
 	./freeze-app
 
 dep: ##install dependencies
+	@go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
 	@go get -v -d
 
 lint: ##lint the files
