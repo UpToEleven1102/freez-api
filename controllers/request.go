@@ -13,6 +13,7 @@ import (
 )
 
 func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, claims models.JwtClaims) error {
+	jsonEncoder := json.NewEncoder(w)
 	switch req.Method {
 	case "POST":
 		if claims.Role != "user" {
@@ -76,14 +77,7 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 				return nil
 			}
 
-			if r == nil {
-				w.Write(nil)
-				return nil
-			}
-			request := r.(models.Request)
-
-			b, _ := json.Marshal(request)
-			w.Write(b)
+			panic(jsonEncoder.Encode(r))
 		case "merchant":
 			id := claims.Id
 			r, err := services.GetRequestByMerchantID(id)
@@ -93,14 +87,7 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 				return nil
 			}
 
-			if r == nil {
-				w.Write(nil)
-				return nil
-			}
-			request := r.(models.Request)
-
-			b, _ := json.Marshal(request)
-			w.Write(b)
+			panic(jsonEncoder.Encode(r))
 
 		default:
 			param, err := strconv.ParseInt(objectID, 0, 64)
@@ -131,7 +118,12 @@ func RequestHandler(w http.ResponseWriter, req *http.Request, objectID string, c
 			}
 
 			var request models.RequestEntity
-			json.Unmarshal(b, &request)
+			err = json.Unmarshal(b, &request)
+
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return nil
+			}
 
 			fmt.Printf("%+v", request)
 

@@ -10,7 +10,9 @@ import (
 	"net/http"
 )
 
+/*LocationHandler - HandleFunc for location route*/
 func LocationHandler(w http.ResponseWriter, req *http.Request, objectID string, claims models.JwtClaims) (err error){
+	jsonEncoder := json.NewEncoder(w)
 	switch req.Method {
 	case "POST":
 		switch objectID {
@@ -63,8 +65,7 @@ func LocationHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 				return nil
 			}
 
-			b, _ := json.Marshal(merchants)
-			w.Write(b)
+			panic(jsonEncoder.Encode(merchants))
 
 		default:
 			objectID, param := getUrlParam(objectID)
@@ -94,14 +95,13 @@ func LocationHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 				}
 
 				_ = json.NewEncoder(w).Encode(merchant)
-				break
 			}
 		}
 
 	case "GET":
-		if len(objectID) == 0 {
-			//get nearby merchants for user
-		}
+		//if len(objectID) == 0 {
+		//	//get nearby merchants for user
+		//}
 		// else get latest location for merchantID
 		//TODO: include merchant info into response
 		location, err := services.GetLastPositionByMerchantID(objectID)
@@ -110,9 +110,7 @@ func LocationHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 			return nil
 		}
 
-		b, _ := json.Marshal(location)
-
-		w.Write(b)
+		panic(jsonEncoder.Encode(location))
 	}
 	return nil
 }

@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"git.nextgencode.io/huyen.vu/freez-app-rest/models"
 	"log"
 )
@@ -55,11 +56,11 @@ func getItemOrder(orderId int) (items []interface{}, err error) {
 								FROM m_order_product o
 								LEFT JOIN product p on o.product_id = p.id
 								WHERE order_id=?`, orderId)
-	defer r.Close()
+
 	if err != nil {
-		log.Println(err)
-		return items, err
+		return nil, err
 	}
+	defer r.Close()
 
 	type Item struct {
 		Product  models.Product `json:"product"`
@@ -82,12 +83,13 @@ func GetOrderHistoryByUserId(userID string) (orders []interface{}, err error) {
 								FROM m_order o
 								LEFT JOIN merchant m ON o.merchant_id=m.id 
 								WHERE user_id=?`, userID)
-	defer r.Close()
 
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
+
+	defer r.Close()
 
 	for r.Next() {
 		var order OrderUserEntity
@@ -108,12 +110,13 @@ func GetOrderById(id int) (order interface{}, err error) {
 								FROM m_order o
 								LEFT JOIN merchant m ON o.merchant_id=m.id 
 								WHERE o.id=?`, id)
-	defer r.Close()
 
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
+
+	defer r.Close()
 
 	if r.Next() {
 		var order OrderUserEntity
@@ -136,12 +139,12 @@ func GetOrderPaymentByMerchantId(merchantID string) (orders []interface{}, err e
 								LEFT JOIN user u ON o.user_id=u.id
 								WHERE merchant_id=?`, merchantID)
 
-	defer r.Close()
-
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 		return nil, err
 	}
+
+	defer r.Close()
 
 	for r.Next() {
 		var order OrderMerchantEntity
@@ -149,7 +152,7 @@ func GetOrderPaymentByMerchantId(merchantID string) (orders []interface{}, err e
 		err = r.Scan(&order.ID, &order.User.ID, &order.MerchantID, &order.StripeID, &order.Refund, &order.Amount, &order.Date,
 			&order.User.PhoneNumber, &order.User.Email, &order.User.Name, &order.User.Image, &location)
 		if err != nil {
-			panic(err)
+			fmt.Println(err)
 			return nil, err
 		}
 
@@ -168,12 +171,12 @@ func GetOrderPaymentById(orderId int) (order interface{}, err error) {
 								LEFT JOIN user u ON o.user_id=u.id
 								WHERE o.id=?`, orderId)
 
-	defer r.Close()
-
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 		return nil, err
 	}
+
+	defer r.Close()
 
 	if r.Next() {
 		var order OrderMerchantEntity
@@ -181,7 +184,7 @@ func GetOrderPaymentById(orderId int) (order interface{}, err error) {
 		err = r.Scan(&order.ID, &order.User.ID, &order.MerchantID, &order.StripeID, &order.Refund, &order.Amount, &order.Date,
 			&order.User.PhoneNumber, &order.User.Email, &order.User.Name, &order.User.Image, &location)
 		if err != nil {
-			panic(err)
+			fmt.Println(err)
 			return nil, err
 		}
 
@@ -196,17 +199,19 @@ func GetOrderPaymentById(orderId int) (order interface{}, err error) {
 
 func GetOrderEntityById(orderId int) (order interface{}, err error) {
 	r, err := DB.Query(`SELECT id, user_id, merchant_id, stripe_id, refund, amount, date FROM m_order WHERE id=?`, orderId)
-	defer r.Close()
+
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 		return nil, err
 	}
+
+	defer r.Close()
 
 	if r.Next() {
 		var order models.OrderEntity
 		err = r.Scan(&order.ID, &order.UserId, &order.MerchantId, &order.StripeId, &order.Refund, &order.Amount, &order.Date)
 		if err != nil {
-			panic(err)
+			fmt.Println(err)
 			return nil, err
 		}
 		return order, nil

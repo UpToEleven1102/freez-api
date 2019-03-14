@@ -26,21 +26,28 @@ func CreateUser(user models.User) (interface{}, error) {
 
 func UpdateUser(user models.User) (err error) {
 	_, err = DB.Exec(`UPDATE user SET phone_number=?,email=?,name=?,image=? WHERE id=?;`, user.PhoneNumber, user.Email, user.Name, user.Image, user.ID)
+	if err != nil {
+		return err
+	}
 	_, err = DB.Exec(`UPDATE m_option SET notif_fav_nearby=? WHERE user_id=?;`, user.Option.NotifFavNearby, user.ID)
 	return err
 }
 
 func GetUserByEmail(email string) (interface{}, error) {
 	r, err := DB.Query(`SELECT id, phone_number, email, name, password, image, ST_AsText(last_location) FROM user WHERE email=?`, email)
-	defer r.Close()
 
 	if err != nil {
 		return nil, err
 	}
+	defer r.Close()
+
 	var location string
 	var user models.User
 	if r.Next() {
-		r.Scan(&user.ID, &user.PhoneNumber, &user.Email, &user.Name, &user.Password, &user.Image, &location)
+		err = r.Scan(&user.ID, &user.PhoneNumber, &user.Email, &user.Name, &user.Password, &user.Image, &location)
+		if err != nil {
+			return nil, err
+		}
 		return user, nil
 	}
 
@@ -54,16 +61,19 @@ func GetUserById(id string) (interface{}, error) {
 								  FROM user u 
 								    INNER JOIN m_option o 
 								      ON u.id=o.user_id WHERE u.id=?`, id)
-	defer r.Close()
 
 	if err != nil {
 		return nil, err
 	}
+	defer r.Close()
 
 	var location string
 	var user models.User
 	if r.Next() {
-		r.Scan(&user.ID, &user.PhoneNumber, &user.Email, &user.Name, &user.Password, &user.Image, &location, &user.Option.NotifFavNearby)
+		err = r.Scan(&user.ID, &user.PhoneNumber, &user.Email, &user.Name, &user.Password, &user.Image, &location, &user.Option.NotifFavNearby)
+		if err != nil {
+			return nil, err
+		}
 		user.LastLocation.Long, user.LastLocation.Lat, _ = getLongLat(location)
 		return user, nil
 	}
@@ -73,15 +83,19 @@ func GetUserById(id string) (interface{}, error) {
 
 func GetUserByPhoneNumber(phoneNumber string) (interface{}, error) {
 	r, err := DB.Query(`SELECT id, phone_number, email, name, password, image, ST_AsText(last_location) FROM user WHERE phone_number=?`, phoneNumber)
-	defer r.Close()
 
 	if err != nil {
 		return nil, err
 	}
+	defer r.Close()
+
 	var location string
 	var user models.User
 	if r.Next() {
-		r.Scan(&user.ID, &user.PhoneNumber, &user.Email, &user.Name, &user.Password, &user.Image, &location)
+		err = r.Scan(&user.ID, &user.PhoneNumber, &user.Email, &user.Name, &user.Password, &user.Image, &location)
+		if err != nil {
+			return nil, err
+		}
 		return user, nil
 	}
 
@@ -113,11 +127,11 @@ func RemoveFavorite(data models.RequestData) (err error) {
 
 func isFavorite(data models.RequestData) (bool, error) {
 	r, err := DB.Query(`SELECT * FROM favorite WHERE user_id=? AND merchant_id=?`, data.UserId, data.Data)
-	defer r.Close()
 
 	if err != nil {
 		return false, err
 	}
+	defer r.Close()
 
 	if r.Next() {
 		return true, nil
@@ -133,10 +147,10 @@ func GetFavorites(userID string) (merchants []interface{}, err error) {
 									INNER JOIN merchant m
 									  ON f.merchant_id=m.id
 										WHERE f.user_id=?`, userID)
-	defer r.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer r.Close()
 
 	var merchant models.MerchantInfo
 	var location string
@@ -173,15 +187,20 @@ func ChargeUser(data models.OrderRequestData) (orderId interface{}, err error) {
 
 func GetUserByFbId(facebookID string) (interface{}, error) {
 	r, err := DB.Query(`SELECT id, phone_number, email, name, password, image, ST_AsText(last_location) FROM user WHERE facebook_id=?`, facebookID)
-	defer r.Close()
 
 	if err != nil {
 		return nil, err
 	}
+	defer r.Close()
+
 	var location string
 	var user models.User
 	if r.Next() {
-		r.Scan(&user.ID, &user.PhoneNumber, &user.Email, &user.Name, &user.Password, &user.Image, &location)
+		err = r.Scan(&user.ID, &user.PhoneNumber, &user.Email, &user.Name, &user.Password, &user.Image, &location)
+
+		if err != nil {
+			return nil, err
+		}
 		return user, nil
 	}
 

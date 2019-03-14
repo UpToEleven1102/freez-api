@@ -19,7 +19,7 @@ func CreateNotification(activityType int, sourceID int64, id string, title strin
 		err := InsertUserNotification(claims.Id, activityType, sourceID, id, message)
 
 		if err != nil {
-			panic(err)
+			fmt.Println(err.Error())
 			return err
 		}
 
@@ -27,7 +27,7 @@ func CreateNotification(activityType int, sourceID int64, id string, title strin
 		err := InsertMerchantNotification(claims.Id, activityType, sourceID, message)
 
 		if err != nil {
-			panic(err)
+			fmt.Println(err.Error())
 			return err
 		}
 	}
@@ -36,7 +36,7 @@ func CreateNotification(activityType int, sourceID int64, id string, title strin
 	_, err = SendNotificationByUserId(claims.Id, title, message, data)
 
 	if err != nil {
-		panic(err)
+		fmt.Println(err.Error())
 		return err
 	}
 

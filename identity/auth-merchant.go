@@ -106,5 +106,5 @@ func SignUpMerchant(w http.ResponseWriter, req *http.Request) {
 	token, _ := createToken(merchant)
 	b, _ := json.Marshal(token)
 	w.WriteHeader(http.StatusCreated)
-	w.Write(b)
+	_, _ = w.Write(b)
 }

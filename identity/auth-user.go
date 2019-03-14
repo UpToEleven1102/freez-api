@@ -12,7 +12,7 @@ import (
 func SignUpUser(w http.ResponseWriter, req *http.Request) {
 	body, _ := ioutil.ReadAll(req.Body)
 	var user models.User
-	json.Unmarshal(body, &user)
+	_ = json.Unmarshal(body, &user)
 
 	r, err := services.CreateUser(user)
 	if err != nil {
@@ -22,16 +22,19 @@ func SignUpUser(w http.ResponseWriter, req *http.Request) {
 
 	user = r.(models.User)
 	token, err := createToken(user)
-
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	b, _ := json.Marshal(token)
 	w.WriteHeader(http.StatusCreated)
-	w.Write(b)
+	_ , _ = w.Write(b)
 }
 
 func SignInUser(w http.ResponseWriter, req *http.Request) {
 	body, _ := ioutil.ReadAll(req.Body)
 	var credentials Credentials
-	json.Unmarshal(body, &credentials)
+	_ = json.Unmarshal(body, &credentials)
 
 	r, err := services.GetUserByEmail(credentials.Email)
 

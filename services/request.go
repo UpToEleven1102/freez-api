@@ -64,21 +64,22 @@ func getLongLat(point string) (long float32, lat float32, err error) {
 
 func GetRequestByUserID(userID string) (interface{}, error) {
 	r, err := DB.Query(`SELECT id, user_id, merchant_id, ST_AsText(location), comment, accepted, active FROM request WHERE user_id=?`, userID)
-	defer r.Close()
 
 	if err != nil {
 		return nil, err
 	}
+	defer r.Close()
 
 	var point string
 	if r.Next() {
 		var request models.RequestEntity
 
-		err = r.Scan(&request.ID ,&request.UserID, &request.MerchantID, &point, &request.Comment, &request.Accepted, &request.Active)
-		request.Location.Long, request.Location.Lat, err = getLongLat(point)
+		err = r.Scan(&request.ID, &request.UserID, &request.MerchantID, &point, &request.Comment, &request.Accepted, &request.Active)
 		if err != nil {
 			return nil, err
 		}
+
+		request.Location.Long, request.Location.Lat, err = getLongLat(point)
 
 		if err != nil {
 			return nil, err
@@ -90,21 +91,22 @@ func GetRequestByUserID(userID string) (interface{}, error) {
 
 func GetRequestById(id int) (interface{}, error) {
 	r, err := DB.Query(`SELECT id, user_id, merchant_id, ST_AsText(location), comment, accepted, active FROM request WHERE id=?`, id)
-	defer r.Close()
 
 	if err != nil {
 		return nil, err
 	}
 
+	defer r.Close()
+
 	var point string
 	if r.Next() {
 		var request models.RequestEntity
 
-		err = r.Scan(&request.ID ,&request.UserID, &request.MerchantID, &point, &request.Comment, &request.Accepted, &request.Active)
-		request.Location.Long, request.Location.Lat, err = getLongLat(point)
+		err = r.Scan(&request.ID, &request.UserID, &request.MerchantID, &point, &request.Comment, &request.Accepted, &request.Active)
 		if err != nil {
 			return nil, err
 		}
+		request.Location.Long, request.Location.Lat, err = getLongLat(point)
 
 		if err != nil {
 			return nil, err
@@ -135,7 +137,7 @@ func GetRequestNotificationById(id int) (interface{}, error) {
 	var reqNotif models.RequestNotification
 	var location string
 
-	for r.Next() {
+	if r.Next() {
 		err = r.Scan(&reqNotif.ID, &reqNotif.Comment, &reqNotif.Active, &reqNotif.Accepted,
 			&reqNotif.User.ID, &reqNotif.User.Name, &reqNotif.User.Image, &reqNotif.User.PhoneNumber, &reqNotif.User.Email,
 			&reqNotif.Merchant.MerchantID, &reqNotif.Merchant.Name, &reqNotif.Merchant.Image, &reqNotif.Merchant.PhoneNumber, &reqNotif.Merchant.Email, &reqNotif.Merchant.Online, &reqNotif.Merchant.Mobile, &location, &reqNotif.Merchant.Distance)
@@ -146,10 +148,11 @@ func GetRequestNotificationById(id int) (interface{}, error) {
 		}
 
 		reqNotif.Merchant.Accepted = reqNotif.Accepted
-		reqNotif.Merchant.IsFavorite, err = isFavorite(models.RequestData{UserId:reqNotif.User.ID, Data: reqNotif.Merchant.MerchantID})
+		reqNotif.Merchant.IsFavorite, err = isFavorite(models.RequestData{UserId: reqNotif.User.ID, Data: reqNotif.Merchant.MerchantID})
 
 		if err != nil {
 			log.Println(err)
+			return nil, err
 		}
 
 		return reqNotif, nil
@@ -160,22 +163,22 @@ func GetRequestNotificationById(id int) (interface{}, error) {
 
 func GetRequestByMerchantID(merchantID string) (interface{}, error) {
 	r, err := DB.Query(`SELECT id, user_id, merchant_id, ST_AsText(location), comment, accepted, active FROM request WHERE merchant_id=?`, merchantID)
-	defer r.Close()
 
 	if err != nil {
 		return nil, err
 	}
+	defer r.Close()
 
 	var point string
 
 	if r.Next() {
 		var request models.RequestEntity
 
-		err = r.Scan(&request.ID ,&request.UserID, &request.MerchantID, &point, &request.Comment, &request.Accepted, &request.Active)
-		request.Location.Long, request.Location.Lat, err = getLongLat(point)
+		err = r.Scan(&request.ID, &request.UserID, &request.MerchantID, &point, &request.Comment, &request.Accepted, &request.Active)
 		if err != nil {
 			return nil, err
 		}
+		request.Location.Long, request.Location.Lat, err = getLongLat(point)
 
 		if err != nil {
 			return nil, err
@@ -198,18 +201,18 @@ func GetRequestInfoById(id int, merchantId string) (interface{}, error) {
 								  LEFT OUTER JOIN user u 
 								    ON r.user_id=u.id 
 								WHERE r.id=?`, location, id)
-	defer r.Close()
 
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 		return nil, err
 	}
+	defer r.Close()
 
 	location = ""
 
 	if r.Next() {
 		var request models.RequestInfo
-		err = r.Scan(&request.ID, &request.UserId,&request.MerchantId, &request.Name, &request.Email, &request.PhoneNumber, &request.Image, &location, &request.Distance, &request.Comment, &request.Accepted, &request.Active)
+		err = r.Scan(&request.ID, &request.UserId, &request.MerchantId, &request.Name, &request.Email, &request.PhoneNumber, &request.Image, &location, &request.Distance, &request.Comment, &request.Accepted, &request.Active)
 		request.Location.Long, request.Location.Lat, _ = getLongLat(location)
 
 		if err != nil {
@@ -233,19 +236,19 @@ func GetRequestInfoByMerchantId(merchantId string) (interface{}, error) {
 								  LEFT OUTER JOIN user u 
 								    ON r.user_id=u.id 
 								WHERE merchant_id=? AND active=TRUE`, location, merchantId)
-	defer r.Close()
 
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 		return nil, err
 	}
+	defer r.Close()
 
 	var requests []models.RequestInfo
 	location = ""
 
 	for r.Next() {
 		var request models.RequestInfo
-		_ = r.Scan(&request.ID, &request.UserId,&request.MerchantId, &request.Name, &request.Email, &request.PhoneNumber, &request.Image, &location, &request.Distance, &request.Comment, &request.Accepted, &request.Active)
+		_ = r.Scan(&request.ID, &request.UserId, &request.MerchantId, &request.Name, &request.Email, &request.PhoneNumber, &request.Image, &location, &request.Distance, &request.Comment, &request.Accepted, &request.Active)
 		request.Location.Long, request.Location.Lat, _ = getLongLat(location)
 		requests = append(requests, request)
 	}
@@ -265,12 +268,12 @@ func GetRequestedMerchantByUserID(userId string) (interface{}, error) {
 											JOIN user u
 												ON u.id=r.user_id
 										WHERE r.user_id=? AND active=TRUE`, userId)
-	defer r.Close()
 
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
 	}
+	defer r.Close()
 
 	var merchant models.MerchantInfo
 	var location string
@@ -293,7 +296,7 @@ func GetRequestedMerchantByUserID(userId string) (interface{}, error) {
 }
 
 func UpdateRequest(req models.RequestEntity) (err error) {
-	location:= fmt.Sprintf("POINT(%f %f)", req.Location.Long, req.Location.Lat)
+	location := fmt.Sprintf("POINT(%f %f)", req.Location.Long, req.Location.Lat)
 	_, err = DB.Exec(`UPDATE request SET user_id=?, merchant_id=?, location=ST_GeomFromText(?), comment=?, accepted=?, active=? WHERE id=?`, req.UserID, req.MerchantID, location, req.Comment, req.Accepted, req.Active, req.ID)
 
 	return err
@@ -305,13 +308,13 @@ func UpdateRequestAccepted(request models.RequestEntity, claims models.JwtClaims
 	claims.Role = config.User
 
 	if request.Accepted == 1 {
-		err := CreateNotification(config.NOTIF_TYPE_FLAG_REQUEST_ID, int64(request.ID), request.MerchantID, "Request Accepted", notificationRequestAcceptedMessage, claims)
+		err := CreateNotification(config.NotifTypeFlagRequestID, int64(request.ID), request.MerchantID, "Request Accepted", notificationRequestAcceptedMessage, claims)
 
 		if err != nil {
 			fmt.Println("Update request accepted", err)
 		}
 	} else {
-		err := CreateNotification(config.NOTIF_TYPE_FLAG_REQUEST_ID, int64(request.ID), request.MerchantID, "Request Declined", notificationRequestDeclinedMessage, claims)
+		err := CreateNotification(config.NotifTypeFlagRequestID, int64(request.ID), request.MerchantID, "Request Declined", notificationRequestDeclinedMessage, claims)
 
 		if err != nil {
 			fmt.Println("Update request declined", err)
@@ -324,11 +327,11 @@ func UpdateRequestAccepted(request models.RequestEntity, claims models.JwtClaims
 
 func GetRequests() (interface{}, error) {
 	r, err := DB.Query(`SELECT user_id, merchant_id, ST_ASTEXT(location) FROM request`)
-	defer r.Close()
 
 	if err != nil {
 		return nil, err
 	}
+	defer r.Close()
 
 	var requests []models.Request
 	var request models.Request
@@ -348,6 +351,6 @@ func GetRequests() (interface{}, error) {
 
 func RemoveRequestsByUserID(userID string) (err error) {
 	_, err = DB.Exec(`UPDATE request SET active=FALSE WHERE user_id=?`, userID)
-	_, err = DB.Exec(`# DELETE FROM request WHERE user_id=?`, userID)
+	//_, err = DB.Exec(`# DELETE FROM request WHERE user_id=?`, userID)
 	return err
 }
