@@ -1,0 +1,29 @@
+image: golang:1.12
+
+cache:
+  paths:
+    - /go/src/git.nextgencode.io
+    - /go/src/github.com
+    - /go/src/golang.org
+    - /go/src/google.golang.org
+    - /go/src/gopkg.in
+
+stages:
+  - test
+  - build
+
+before_script:
+  - mkdir -p /go/src/git.nextgencode.io/huyen.vu /go/src/_/builds
+  - cp -r $CI_PROJECT_DIR /go/src/git.nextgencode.io/huyen.vu/freez-app-rest
+  - ln -s /go/src/git.nextgencode.io/huyen.vu /go/src/_/builds/huyen.vu
+  - make dep
+
+lint_code:
+  stage: test
+  script:
+    - make lint
+
+build:
+  stage: build
+  script:
+    - make

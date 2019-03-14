@@ -5,7 +5,7 @@ GO_FILES := $(shell find . -name '*.go' | grep -v /vendor/ | grep -v _test.go)
 
 all: build
 
-build: dev
+build: dep
 	##go get github.com/tbalthazar/onesignal-go
 	##go get github.com/satori/go.uuid
 	##go get github.com/jmoiron/sqlx
@@ -23,7 +23,7 @@ build: dev
 	go build -o freeze-app
 	./freeze-app
 
-dev: ##install dependencies
+dep: ##install dependencies
 	@go get -v -d
 
 lint: ##lint the files
