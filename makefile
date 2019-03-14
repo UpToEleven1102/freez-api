@@ -1,4 +1,11 @@
-all:
+PROJECT_NAME := "freez-app-rest"
+PKG := "git.nextgencode.io/huyen.vu/$(PROJECT_NAME)"
+PKG_LIST := $(shell go list ${PKG}/... | grep -v /vendor/)
+GO_FILES := $(shell find . -name '*.go' | grep -v /vendor/ | grep -v _test.go)
+
+all: build
+
+build:
 	go get github.com/tbalthazar/onesignal-go
 	go get github.com/satori/go.uuid
 	go get github.com/jmoiron/sqlx
@@ -11,5 +18,15 @@ all:
 	go get github.com/stripe/stripe-go
 	go get golang.org/x/net/websocket
 	go get -u github.com/huandu/facebook
+	go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
 	go build -o freeze-app
 	./freeze-app
+
+lint: ##lint the files
+	@golangci-lint run
+
+push-code: ## push code to remote server
+	scp -i /home/huyen/.ssh/Freeze.pem -r /home/huyen/gospace/src/git.nextgencode.io/huyen.vu/freez-app-rest/ ubuntu@35.162.158.187:/home/ubuntu/go/src/git.nextgencode.io/huyen.vu
+
+generate-docs: ## generate swagger docs
+	swagger -apiPackage=git.nextgencode.io/huyen.vu/freez-app-rest -format=swagger -output=./docs
