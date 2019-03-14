@@ -8,4 +8,5 @@ services:
     build: .
     image: freez-app-rest
     network_mode: "host"
-
+    depends_on:
+      - redis
