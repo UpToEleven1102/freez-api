@@ -12,10 +12,11 @@ services:
     restart: always
     network_mode: "host"
     environment:
-      MYSQL_ROOT_PASSWORD: 123
-      MYSQL_DATABASE: freez_app
-      MYSQL_USER: h
-      MYSQL_PASSWORD: 123
+      MYSQL_ROOT_PASSWORD: "s3cr3t!"
+      MYSQL_DATABASE: "freez_app"
+      MYSQL_USER: "h"
+      MYSQL_PASSWORD: "s3cr3t!"
+      MYSQL_ROOT_HOST: "%"
 
   freez-app-rest:
     build: .
