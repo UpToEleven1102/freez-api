@@ -5,11 +5,7 @@ GO_FILES := $(shell find . -name '*.go' | grep -v /vendor/ | grep -v _test.go)
 
 all: build
 
-<<<<<<< HEAD
 build: dep
-=======
-build:
->>>>>>> feature/auto-ci-gitlab
 	##go get github.com/tbalthazar/onesignal-go
 	##go get github.com/satori/go.uuid
 	##go get github.com/jmoiron/sqlx
