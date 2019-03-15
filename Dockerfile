@@ -1,12 +1,11 @@
-FROM golang:alpine
+FROM alpine
 
-RUN apk update && apk upgrade && apk add --no-cache bash git make
+RUN mkdir /app
 
-ENV SOURCES /go/src/git.nextgencode.io/huyen.vu/freez-app-rest/
+ENV SOURCES /app/
 
-COPY . ${SOURCES}
-
-RUN cd ${SOURCES} && make dep && CGO_ENABLED=0 go build
+COPY freez-app-rest ${SOURCES}
+COPY .env ${SOURCES}
 
 WORKDIR ${SOURCES}
 

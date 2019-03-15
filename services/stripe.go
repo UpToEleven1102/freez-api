@@ -89,7 +89,6 @@ func StripeConnectDestinationCharge(token string, accId string, desc string, amo
 	return charge.New(params)
 }
 
-
 func StripeConnectCreateAccount(merchant models.Merchant) (*stripe.Account, error) {
 	params := &stripe.AccountParams{
 		Country: stripe.String("US"),
