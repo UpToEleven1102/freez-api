@@ -17,6 +17,7 @@ lint_code:
     - mkdir -p /go/src/git.nextgencode.io/huyen.vu /go/src/_/builds
     - cp -r $CI_PROJECT_DIR /go/src/git.nextgencode.io/huyen.vu/freez-app-rest
     - ln -s /go/src/git.nextgencode.io/huyen.vu /go/src/_/builds/huyen.vu
+    - make dep
 
   stage: test
   script:
