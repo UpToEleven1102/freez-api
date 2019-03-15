@@ -5,7 +5,7 @@ GO_FILES := $(shell find . -name '*.go' | grep -v /vendor/ | grep -v _test.go)
 
 all: build
 
-build: dep
+build:
 	##go get github.com/tbalthazar/onesignal-go
 	##go get github.com/satori/go.uuid
 	##go get github.com/jmoiron/sqlx
@@ -19,7 +19,7 @@ build: dep
 	##go get golang.org/x/net/websocket
 	##go get -u github.com/huandu/facebook
 	##go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
-
+	go get -v -d
 	CGO_ENABLED=0 GOOS=linux go build -o freez-app-rest
 
 dep: ##install dependencies
