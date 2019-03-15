@@ -36,8 +36,5 @@ test: ##test code
 push-code: ## push code to remote server
 	scp -i /home/huyen/.ssh/Freeze.pem -r /home/huyen/gospace/src/git.nextgencode.io/huyen.vu/freez-app-rest/ ubuntu@35.162.158.187:/home/ubuntu/go/src/git.nextgencode.io/huyen.vu
 
-push-code-gitlab: ##use to deploy from gitlabci
-	scp -i ~/.ssh/id_rsa -r /go/src/git.nextgencode.io/huyen.vu/freez-app-rest/ ubuntu@35.162.158.187:/home/ubuntu/go/src/git.nextgencode.io/huyen.vu
-
 generate-docs: ## generate swagger docs
 	swagger -apiPackage=git.nextgencode.io/huyen.vu/freez-app-rest -format=swagger -output=./docs
