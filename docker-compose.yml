@@ -3,33 +3,43 @@ version: '2'
 services:
   redis:
     image: redis
-    network_mode: "host"
+    ports:
+      - 6379:6379
+
+  phpMyAdmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - 8181:80
+    environment:
+      MYSQL_USERNAME: root
+      MYSQL_ROOT_PASSWORD: s3cr3t!
+    links:
+      - db
 
   db:
     image: mysql:5.7
     volumes:
       - db_data:/var/lib/mysql
     restart: always
-    network_mode: "host"
+    ports:
+      - 3306:3306
     environment:
-      MYSQL_ROOT_PASSWORD: "s3cr3t!"
-      MYSQL_DATABASE: "freez_app"
-      MYSQL_USER: "h"
-      MYSQL_PASSWORD: "s3cr3t!"
+      MYSQL_ROOT_PASSWORD: s3cr3t!
+      MYSQL_DATABASE: freez_app
+      MYSQL_USER: h
+      MYSQL_PASSWORD: s3cr3t!
       MYSQL_ROOT_HOST: "%"
 
   freez-app-rest:
     build: .
     image: freez-app-rest
-    network_mode: "host"
     environment:
       RESET_DB: "true"
     ports:
-      - 8080:80
-    depends_on:
+      - 80:80
+    links:
       - db
       - redis
-
 
 volumes:
   db_data: {}

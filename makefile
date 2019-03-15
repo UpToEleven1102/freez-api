@@ -22,6 +22,9 @@ build:
 	go get -v -d
 	CGO_ENABLED=0 GOOS=linux go build -o freez-app-rest
 
+build-docker: build
+	sudo docker build -t freez-app-rest .
+
 dep: ##install dependencies
 	@go get -v -d
 	@go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
