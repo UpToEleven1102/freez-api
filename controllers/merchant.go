@@ -36,8 +36,6 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 			}
 			b, _ := json.Marshal(merchant)
 			_, _ = w.Write(b)
-			break
-
 			// @Title get presign-url
 			// @Description get presign-url to upload image (jpg only)
 			// @Accept  json

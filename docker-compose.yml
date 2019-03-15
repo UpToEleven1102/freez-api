@@ -4,8 +4,32 @@ services:
   redis:
     image: redis
     network_mode: "host"
+
+  db:
+    image: mysql:5.7
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
+    network_mode: "host"
+    environment:
+      MYSQL_ROOT_PASSWORD: "s3cr3t!"
+      MYSQL_DATABASE: "freez_app"
+      MYSQL_USER: "h"
+      MYSQL_PASSWORD: "s3cr3t!"
+      MYSQL_ROOT_HOST: "%"
+
   freez-app-rest:
     build: .
     image: freez-app-rest
     network_mode: "host"
+    environment:
+      RESET_DB: "true"
+    ports:
+      - 8080:80
+    depends_on:
+      - db
+      - redis
 
+
+volumes:
+  db_data: {}

@@ -9,7 +9,6 @@ import (
 	c "git.nextgencode.io/huyen.vu/freez-app-rest/config"
 	"git.nextgencode.io/huyen.vu/freez-app-rest/controllers"
 	"git.nextgencode.io/huyen.vu/freez-app-rest/identity"
-	"git.nextgencode.io/huyen.vu/freez-app-rest/scripts"
 	"github.com/joho/godotenv"
 	"github.com/tbalthazar/onesignal-go"
 	"golang.org/x/net/websocket"
@@ -91,12 +90,6 @@ func authHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
-
-	if len(os.Args) == 2 {
-		scripts.RunScripts(os.Args[1])
-		return
-	}
-
 	port := getPort()
 	_ = onesignal.NewClient(nil)
 

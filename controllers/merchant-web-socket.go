@@ -16,7 +16,9 @@ const (
 	postLocation = "post_location"
 )
 
-//notify user merchant nearby every 6 hours
+/*MerchantWebSocketHandler - HandleFunc for merchant websocket route
+
+Notes: notify user merchant nearby every 6 hours*/
 func MerchantWebSocketHandler(ws *websocket.Conn) {
 	var (
 		claims       models.JwtClaims
@@ -82,16 +84,16 @@ func MerchantWebSocketHandler(ws *websocket.Conn) {
 				break
 			}
 
-			for _, userId := range userIds {
-				var merchantId string
-				r := services.RedisClient.Get("nearby_notification_" + userId.(string) + "_" + claims.Id)
-				if err = r.Scan(&merchantId); err != nil {
-					merchantId = claims.Id
+			for _, userID := range userIds {
+				var merchantID string
+				r := services.RedisClient.Get("nearby_notification_" + userID.(string) + "_" + claims.Id)
+				if err = r.Scan(&merchantID); err != nil {
+					merchantID = claims.Id
 
-					claims.Id = userId.(string)
+					claims.Id = userID.(string)
 					claims.Role = config.User
-					services.RedisClient.Set("nearby_notification_"+userId.(string)+"_"+merchantId, merchantId, time.Hour*6)
-					err = services.CreateNotification(config.NOTIF_TYPE_FAV_NEARBY_ID, -1, merchantId, "Favorite Nearby", "Your favorite merchant is nearby", claims)
+					services.RedisClient.Set("nearby_notification_"+userID.(string)+"_"+merchantID, merchantID, time.Hour*6)
+					err = services.CreateNotification(config.NotifTypeFavNearbyID, -1, merchantID, "Favorite Nearby", "Your favorite merchant is nearby", claims)
 					if err != nil {
 						log.Println(err)
 					}

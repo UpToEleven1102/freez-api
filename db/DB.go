@@ -41,13 +41,13 @@ func seed(DB *sqlx.DB) {
 	DB.MustExec(schemaActivityType)
 
 	tx := DB.MustBegin()
-	tx.MustExec(`INSERT INTO merchant_category (category) VALUE (?)`, config.MERCHANT_CATEGORY_FOOD_TRUCK)
-	tx.MustExec(`INSERT INTO merchant_category (category) VALUE (?)`, config.MERCHANT_CATEGORY_ICE_CREAM_TRUCK)
+	tx.MustExec(`INSERT INTO merchant_category (category) VALUE (?)`, config.MerchantCategoryFoodTruck)
+	tx.MustExec(`INSERT INTO merchant_category (category) VALUE (?)`, config.MerchantCategoryIceCreamTruck)
 
-	tx.MustExec(`INSERT INTO activity_type (type) VALUE (?)`, config.NOTIF_TYPE_FLAG_REQUEST )
-	tx.MustExec(`INSERT INTO activity_type (type) VALUE (?)`, config.NOTIF_TYPE_PAYMENT_MADE)
-	tx.MustExec(`INSERT INTO activity_type (type) VALUE (?)`, config.NOTIF_TYPE_REFUND_MADE)
-	tx.MustExec(`INSERT INTO activity_type (type) VALUE (?)`, config.NOTIF_TYPE_REFUND_MADE)
+	tx.MustExec(`INSERT INTO activity_type (type) VALUE (?)`, config.NotifTypeFlagRequest)
+	tx.MustExec(`INSERT INTO activity_type (type) VALUE (?)`, config.NotifTypePaymentMade)
+	tx.MustExec(`INSERT INTO activity_type (type) VALUE (?)`, config.NotifTypeRefundMade)
+	tx.MustExec(`INSERT INTO activity_type (type) VALUE (?)`, config.NotifTypeRefundMade)
 	//
 	//tx.MustExec("INSERT INTO request (user_id, merchant_id, location) VALUES (123, '3412',ST_GeomFromText('POINT(1 1)'))")
 	//uid, _ := uuid.NewV4()
@@ -55,7 +55,10 @@ func seed(DB *sqlx.DB) {
 	//uid, _ = uuid.NewV4()
 	//tx.MustExec("INSERT INTO user (id, phone_number, email, name, password) VALUES (?, ?, ?, ?, ?)", uid.String(), "8013215431","a@truck.com", "H", "hot dog password")
 	//
-	tx.Commit()
+	err = tx.Commit()
+	if err != nil {
+		panic(err)
+	}
 
 	DB.MustExec(schemaMerchant)
 	DB.MustExec(schemaProduct)
@@ -71,8 +74,6 @@ func seed(DB *sqlx.DB) {
 	DB.MustExec(schemaUserNotification)
 	DB.MustExec(schemaOrder)
 	DB.MustExec(schemaOrderProduct)
-
-
 }
 
 func Config() (*sqlx.DB, error) {
@@ -80,12 +81,18 @@ func Config() (*sqlx.DB, error) {
 
 	if DB == nil {
 		DB, err = sqlx.Connect("mysql", dbUri)
+
 		if err != nil {
-			panic(err)
+			log.Println("Failed to connect to DB. Sleep for awhile")
+			return nil, err
 		}
 	}
 
-	//seed(DB)
+	if DB != nil {
+		if os.Getenv("RESET_DB") == "true" {
+			seed(DB)
+		}
+	}
 
 	return DB, err
 }

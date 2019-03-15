@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"git.nextgencode.io/huyen.vu/freez-app-rest/models"
 	"github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/account"
@@ -81,7 +82,7 @@ func StripeConnectDestinationCharge(token string, accId string, desc string, amo
 	err := params.SetSource(token)
 
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 		return nil , err
 	}
 
@@ -104,7 +105,7 @@ func StripeConnectCreateAccount(merchant models.Merchant) (*stripe.Account, erro
 	acc, err := account.New(params)
 
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 		return nil, err
 	}
 

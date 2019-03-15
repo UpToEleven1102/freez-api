@@ -42,7 +42,7 @@ type Credentials struct {
 func writeResponse(w http.ResponseWriter, res models.DataResponse, statusCode int) {
 	b, _ := json.Marshal(res)
 	w.WriteHeader(statusCode)
-	w.Write(b)
+	_, _ = w.Write(b)
 }
 
 func getToken(w http.ResponseWriter, req *http.Request) (string, error) {
@@ -72,7 +72,7 @@ func AuthorizeMiddleware(w http.ResponseWriter, req *http.Request, objectID stri
 func AuthenticateToken(jwtToken string) (models.JwtClaims, error) {
 	token, err := jwt.ParseWithClaims(jwtToken, &JWTData{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New(fmt.Sprintf("Unexpected signing method: %v", token.Header["alg"]))
+			return nil, fmt.Errorf(fmt.Sprintf("Unexpected signing method: %v", token.Header["alg"]))
 		}
 		return []byte(os.Getenv("SECRET_KEY")), nil
 	})
@@ -90,13 +90,12 @@ func AuthenticateToken(jwtToken string) (models.JwtClaims, error) {
 func createToken(acc interface{}) (string, error) {
 	var claims JWTData
 
-	switch acc.(type) {
+	switch acc := acc.(type) {
 	case models.Merchant:
-		merchant := acc.(models.Merchant)
 		claims = JWTData{
 			jwt.StandardClaims{
 				ExpiresAt: time.Now().Add(time.Hour * 72).Unix(),
-				Id:        merchant.ID,
+				Id:        acc.ID,
 				IssuedAt:  time.Now().Unix(),
 				Subject:   "merchant",
 			},
@@ -106,11 +105,10 @@ func createToken(acc interface{}) (string, error) {
 			//},
 		}
 	case models.User:
-		user := acc.(models.User)
 		claims = JWTData{
 			jwt.StandardClaims{
 				ExpiresAt: time.Now().Add(time.Hour * 72).Unix(),
-				Id:        user.ID,
+				Id:        acc.ID,
 				IssuedAt:  time.Now().Unix(),
 				Subject:   "user",
 			},
@@ -157,7 +155,7 @@ func EmailExists(w http.ResponseWriter, req *http.Request) {
 	}
 
 	b, _ := json.Marshal(r)
-	w.Write(b)
+	_, _ = w.Write(b)
 }
 
 func GenerateTokenByFacebookAccount(reqData models.FacebookTokenData) (interface{}, error) {
@@ -262,6 +260,10 @@ func GetUserInfo(w http.ResponseWriter, req *http.Request) {
 
 	claims, err := AuthenticateToken(token)
 
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+	}
+
 	if claims.Role == c.Merchant {
 		merchant, err := services.GetMerchantById(claims.Id)
 		if err != nil {
@@ -275,8 +277,7 @@ func GetUserInfo(w http.ResponseWriter, req *http.Request) {
 		}
 		res := merchant.(models.Merchant)
 		res.Role = claims.Role
-		b, _ := json.Marshal(res)
-		w.Write(b)
+		_ = json.NewEncoder(w).Encode(res)
 
 	} else if claims.Role == c.User {
 		user, err := services.GetUserById(claims.Id)
@@ -291,8 +292,7 @@ func GetUserInfo(w http.ResponseWriter, req *http.Request) {
 		}
 		res := user.(models.User)
 		res.Role = claims.Role
-		b, _ := json.Marshal(res)
-		w.Write(b)
+		_ = json.NewEncoder(w).Encode(res)
 	}
 }
 
@@ -389,6 +389,5 @@ func VerifyEmailPin(w http.ResponseWriter, req *http.Request) {
 		res.Success = true
 	}
 
-	b, _ = json.Marshal(res)
-	w.Write(b)
+	_ = json.NewEncoder(w).Encode(res)
 }
