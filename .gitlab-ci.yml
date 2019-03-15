@@ -20,7 +20,7 @@ lint_code:
 
   stage: test
   script:
-    - make generate-docs
+    - make test
 
 deploy:
   stage: deploy
