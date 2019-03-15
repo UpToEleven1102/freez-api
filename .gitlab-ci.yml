@@ -9,7 +9,19 @@ cache:
     - /go/src/gopkg.in
 
 stages:
+  - test
   - deploy
+
+lint_code:
+  before_script:
+    - mkdir -p /go/src/git.nextgencode.io/huyen.vu /go/src/_/builds
+    - cp -r $CI_PROJECT_DIR /go/src/git.nextgencode.io/huyen.vu/freez-app-rest
+    - ln -s /go/src/git.nextgencode.io/huyen.vu /go/src/_/builds/huyen.vu
+    - make dep
+
+  stage: test
+  script:
+    - make lint
 
 deploy:
   stage: deploy
