@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"git.nextgencode.io/huyen.vu/freez-app-rest/db"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -70,7 +71,10 @@ func redisConfig() {
 	_, err := RedisClient.Ping().Result()
 	if err != nil {
 		log.Printf("%s\n", err)
+		time.AfterFunc(3 * time.Second, redisConfig)
+		return
 	}
+	fmt.Println("connected to redis db")
 }
 
 //func loadNotifTypeToRedis() {

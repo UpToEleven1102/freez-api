@@ -40,3 +40,9 @@ push-code: ## push code to remote server
 
 generate-docs: ## generate swagger docs
 	swagger -apiPackage=git.nextgencode.io/huyen.vu/freez-app-rest -format=swagger -output=./docs
+
+dev: build-docker
+	sudo docker-compose kill
+	sudo docker-compose rm -v
+	sudo docker-compose up -d
+

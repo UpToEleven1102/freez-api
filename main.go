@@ -5,10 +5,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	c "git.nextgencode.io/huyen.vu/freez-app-rest/config"
 	"git.nextgencode.io/huyen.vu/freez-app-rest/controllers"
 	"git.nextgencode.io/huyen.vu/freez-app-rest/identity"
+	"git.nextgencode.io/huyen.vu/freez-app-rest/models"
 	"github.com/joho/godotenv"
 	"github.com/tbalthazar/onesignal-go"
 	"golang.org/x/net/websocket"
@@ -69,6 +71,8 @@ func apiHandler(w http.ResponseWriter, req *http.Request) {
 		err = identity.AuthorizeMiddleware(w, req, objectID, controllers.LocationHandler)
 	case c.Stripe:
 		err = identity.AuthorizeMiddleware(w, req, objectID, controllers.StripeOpsHandler)
+	case "test":
+		_ = json.NewEncoder(w).Encode(models.DataResponse{Success:true, Message:"Test Message"})
 
 	default:
 		http.NotFound(w, req)
