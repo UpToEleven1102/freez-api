@@ -136,7 +136,11 @@ func StripeOpsHandler(w http.ResponseWriter, req *http.Request, urlString string
 			var userClaims models.JwtClaims
 			userClaims.Id = order.UserId
 			userClaims.Role = config.User
-			res = services.CreateNotification(config.NOTIF_TYPE_REFUND_MADE_ID, int64(order.ID), order.MerchantId, "Order refunded", "Refund for your order started", userClaims )
+			err = services.CreateNotification(config.NotifTypeRefundMadeID, int64(order.ID), order.MerchantId, "Order refunded", "Refund for your order started", userClaims )
+
+			if err != nil {
+				panic(json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message: err.Error()}))
+			}
 
 			_ = json.NewEncoder(w).Encode(models.DataResponse{Success: refundRes.Status == "succeeded", Message: "Successfully refunded"})
 

@@ -38,10 +38,10 @@ func GetMerchantNotificationById(id int64) (interface{}, error) {
 
 		notificationInfo := models.MerchantNotificationInfo{ID: notification.ID, TimeStamp: notification.TimeStamp, MerchantID: notification.MerchantID, ActivityType: notification.ActivityType, UnRead: notification.UnRead, Message: notification.Message}
 		switch notification.ActivityType {
-		case config.NOTIF_TYPE_FLAG_REQUEST:
+		case config.NotifTypeFlagRequest:
 			notificationInfo.Source, _ = GetRequestInfoById(notification.SourceID, notification.MerchantID)
 
-		case config.NOTIF_TYPE_PAYMENT_MADE:
+		case config.NotifTypePaymentMade:
 			notificationInfo.Source, _ = GetOrderPaymentById(notification.SourceID)
 		}
 
@@ -72,10 +72,10 @@ func GetMerchantNotifications(merchantID string) (notifications []interface{}, e
 
 		notificationInfo := models.MerchantNotificationInfo{ID: notification.ID, TimeStamp: notification.TimeStamp, MerchantID: notification.MerchantID, ActivityType: notification.ActivityType, UnRead: notification.UnRead, Message: notification.Message}
 		switch notification.ActivityType {
-		case config.NOTIF_TYPE_FLAG_REQUEST:
+		case config.NotifTypeFlagRequest:
 			notificationInfo.Source, _ = GetRequestInfoById(notification.SourceID, notification.MerchantID)
 
-		case config.NOTIF_TYPE_PAYMENT_MADE:
+		case config.NotifTypePaymentMade:
 			notificationInfo.Source, _ = GetOrderPaymentById(notification.SourceID)
 		}
 

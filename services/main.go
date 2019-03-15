@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"git.nextgencode.io/huyen.vu/freez-app-rest/db"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -74,31 +73,40 @@ func redisConfig() {
 	}
 }
 
-func loadNotifTypeToRedis() {
-	type ActivityType struct {
-		ID   int    `json:"id"`
-		Type string `json:"type"`
-	}
+//func loadNotifTypeToRedis() {
+//	type ActivityType struct {
+//		ID   int    `json:"id"`
+//		Type string `json:"type"`
+//	}
+//
+//	r, err := DB.Query(`SELECT id, type FROM activity_type`)
+//	if err != nil {
+//		log.Println(err)
+//		return
+//	}
+//
+//	//var activityTypes []ActivityType
+//	var activityType ActivityType
+//	defer r.Close()
+//
+//	for r.Next() {
+//		_ = r.Scan(&activityType.ID, &activityType.ID)
+//		//activityTypes = append(activityTypes, activityType)
+//		RedisClient.Set(fmt.Sprintf("%d", activityType.ID), activityType, 3600*time.Minute)
+//	}
+//}
 
-	r, err := DB.Query(`SELECT id, type FROM activity_type`)
+func connectDB() {
+	var err error
+	DB, err = db.Config()
+
 	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	//var activityTypes []ActivityType
-	var activityType ActivityType
-	defer r.Close()
-
-	for r.Next() {
-		_ = r.Scan(&activityType.ID, &activityType.ID)
-		//activityTypes = append(activityTypes, activityType)
-		RedisClient.Set(fmt.Sprintf("%d", activityType.ID), activityType, 3600*time.Minute)
+		time.AfterFunc(5 * time.Second, connectDB)
 	}
 }
 
 func init() {
-	DB, _ = db.Config()
+	connectDB()
 	oneSignalConfig()
 
 	awsConfig()
