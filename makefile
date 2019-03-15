@@ -5,7 +5,11 @@ GO_FILES := $(shell find . -name '*.go' | grep -v /vendor/ | grep -v _test.go)
 
 all: build
 
+<<<<<<< HEAD
 build: dep
+=======
+build:
+>>>>>>> feature/auto-ci-gitlab
 	##go get github.com/tbalthazar/onesignal-go
 	##go get github.com/satori/go.uuid
 	##go get github.com/jmoiron/sqlx
@@ -20,8 +24,7 @@ build: dep
 	##go get -u github.com/huandu/facebook
 	##go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
 
-	go build -o freeze-app
-	./freeze-app
+	CGO_ENABLED=0 GOOS=linux go build -o freez-app-rest
 
 dep: ##install dependencies
 	@go get -v -d
