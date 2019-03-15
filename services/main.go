@@ -12,6 +12,7 @@ import (
 	"github.com/tbalthazar/onesignal-go"
 	"log"
 	"os"
+	"time"
 )
 
 var (
@@ -95,8 +96,17 @@ func redisConfig() {
 //	}
 //}
 
+func connectDB() {
+	var err error
+	DB, err = db.Config()
+
+	if err != nil {
+		time.AfterFunc(5 * time.Second, connectDB)
+	}
+}
+
 func init() {
-	DB, _ = db.Config()
+	connectDB()
 	oneSignalConfig()
 
 	awsConfig()

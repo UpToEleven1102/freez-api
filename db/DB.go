@@ -81,13 +81,17 @@ func Config() (*sqlx.DB, error) {
 
 	if DB == nil {
 		DB, err = sqlx.Connect("mysql", dbUri)
+
 		if err != nil {
-			panic(err)
+			log.Println("Failed to connect to DB. Sleep for awhile")
+			return nil, err
 		}
 	}
 
-	if false {
-		seed(DB)
+	if DB != nil {
+		if os.Getenv("RESET_DB") == "true" {
+			seed(DB)
+		}
 	}
 
 	return DB, err
