@@ -100,7 +100,7 @@ func Config() (*sqlx.DB, error) {
 func getMysqlUri() (uri string) {
 	uri = os.Getenv("MYSQL_URI")
 	if len(uri) == 0 {
-		uri = `root@tcp(127.0.0.1:3306)/freeze_app`
+		uri = `h@tcp(127.0.0.1:3306)/freeze_app`
 	}
 	return uri
 }
