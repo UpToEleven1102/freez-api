@@ -26,4 +26,4 @@ lint_code:
 build:
   stage: build
   script:
-    - make
+    - docker-compose up
