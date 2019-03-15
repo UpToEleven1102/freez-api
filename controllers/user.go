@@ -19,8 +19,7 @@ import (
 
 func sendResponse(w http.ResponseWriter, response models.DataResponse, status int) {
 	w.WriteHeader(status)
-	b, _ := json.Marshal(response)
-	w.Write(b)
+	panic(json.NewEncoder(w).Encode(response))
 }
 
 func getUrlParam(objectID string) (objectId string, param string) {
@@ -32,6 +31,7 @@ func getUrlParam(objectID string) (objectId string, param string) {
 }
 
 func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, claims models.JwtClaims) error {
+	jsonEncoder := json.NewEncoder(w)
 	if claims.Role != config.User {
 		return errors.New("Unauthenticated")
 	}
@@ -66,9 +66,8 @@ func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, clai
 				sendResponse(w, response, http.StatusInternalServerError)
 				return nil
 			}
+			panic(jsonEncoder.Encode(r))
 
-			b, _ := json.Marshal(r)
-			w.Write(b)
 		case "notification":
 			notifications, err := services.GetUserNotifications(claims.Id)
 			if err != nil {
@@ -175,7 +174,7 @@ func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, clai
 
 			claims.Role = config.Merchant
 			claims.Id = data.MerchantID
-			err = services.CreateNotification(config.NOTIF_TYPE_PAYMENT_MADE_ID, orderId.(int64), data.UserID, "New order", "Payment made by customer", claims)
+			err = services.CreateNotification(config.NotifTypePaymentMadeID, orderId.(int64), data.UserID, "New order", "Payment made by customer", claims)
 			if err != nil {
 				log.Println("Notify payment made", err)
 			}
@@ -246,14 +245,14 @@ func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, clai
 
 			if err != nil {
 				log.Println(err)
-				json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
 				return nil
 			}
 
 			err = services.UpdateUserNotification(notification)
 			if err != nil {
 				log.Println(err)
-				json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
 				return nil
 			}
 		}

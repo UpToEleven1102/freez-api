@@ -83,14 +83,12 @@ func GetMerchantStripeIdByMerchantId(merchantId string) (id string, err error) {
 
 	if err != nil {
 		panic(err)
-		return "", nil
 	}
 
 	if r.Next() {
 		err = r.Scan(&id)
 		if err != nil {
 			panic(err)
-			return "", nil
 		}
 	}
 
@@ -102,7 +100,6 @@ func GetMerchantStripeAccount(merchantId string) (*stripe.Account, error) {
 
 	if err != nil {
 		panic(err)
-		return nil, err
 	}
 
 	return StripeConnectGetAccountById(stripeId)
@@ -135,16 +132,19 @@ func GetMerchantByEmail(email string) (interface{}, error) {
 	var merchant models.Merchant
 
 	r, err := DB.Query(`SELECT id, online, mobile, phone_number, email, name, password, image, ST_AsText(last_location) FROM merchant WHERE email=?`, email)
-	defer r.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer r.Close()
 
 	var location string
 
 	if r.Next() {
-		r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image, &location)
+		err = r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image, &location)
 		merchant.LastLocation.Long, merchant.LastLocation.Lat, _ = getLongLat(location)
+		if err != nil {
+			return nil, err
+		}
 		return merchant, nil
 	}
 	return nil, nil
@@ -154,16 +154,20 @@ func GetMerchantById(id string) (interface{}, error) {
 	var merchant models.Merchant
 
 	r, err := DB.Query(`SELECT id, online, mobile, phone_number, email, name, password, image, ST_AsText(last_location) FROM merchant WHERE id=?`, id)
-	defer r.Close()
 
 	if err != nil {
 		return nil, err
 	}
+	defer r.Close()
+
 	var location string
 
 	if r.Next() {
-		r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image, &location)
+		err = r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image, &location)
 		merchant.LastLocation.Long, merchant.LastLocation.Lat, _ = getLongLat(location)
+		if err != nil {
+			return nil, err
+		}
 		return merchant, nil
 	}
 	return nil, nil
@@ -173,15 +177,19 @@ func GetMerchantByPhoneNumber(phoneNumber string) (interface{}, error) {
 	var merchant models.Merchant
 
 	r, err := DB.Query(`SELECT id, online, mobile, phone_number, email, name, password, image, ST_AsText(last_location) FROM merchant WHERE phone_number=?`, phoneNumber)
-	defer r.Close()
 
 	if err != nil {
 		return nil, err
 	}
+	defer r.Close()
+
 	var location string
 
 	if r.Next() {
-		r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image, &location)
+		_ = r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image, &location)
+		if err != nil {
+			return nil, err
+		}
 		merchant.LastLocation.Long, merchant.LastLocation.Lat, _ = getLongLat(location)
 		return merchant, nil
 	}
@@ -192,15 +200,19 @@ func GetMerchantByFacebookID(facebookID string) (interface{}, error) {
 	var merchant models.Merchant
 
 	r, err := DB.Query(`SELECT id, online, mobile, phone_number, email, name, password, image, ST_AsText(last_location) FROM merchant WHERE facebook_id=?`, facebookID)
-	defer r.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer r.Close()
+
 
 	var location string
 
 	if r.Next() {
-		r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image, &location)
+		err = r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image, &location)
+		if err != nil {
+			return nil, err
+		}
 		merchant.LastLocation.Long, merchant.LastLocation.Lat, _ = getLongLat(location)
 		return merchant, nil
 	}
@@ -227,10 +239,10 @@ func AddNewLocation(location models.Location) (error) {
 
 func GetLastPositionByMerchantID(merchantID string) (interface{}, error) {
 	r, err := DB.Query(`SELECT merchant_id, ST_AsText(location) FROM location WHERE merchant_id=? ORDER BY ts DESC LIMIT 1;`, merchantID)
-	defer r.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer r.Close()
 
 	var location models.Location
 	var point string
@@ -258,11 +270,11 @@ func GetMerchantInfoById(id string, location models.Location) (interface{}, erro
 								  JOIN merchant m
 								    ON l.merchant_id=m.id
 									  WHERE l.merchant_id=?`, userLocation, id)
-	defer r.Close()
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
+	defer r.Close()
 
 	var loc string
 
@@ -310,11 +322,11 @@ func GetNearbyMerchantsLastLocation(location models.Location, filters ...string)
 								  LEFT JOIN merchant m
 								    ON l.merchant_id=m.id
 									  HAVING distance < ? AND online=true` + filter,userLocation, minDistance)
-	defer r.Close()
 
 	if err != nil {
 		return nil, err
 	}
+	defer r.Close()
 
 	var loc string
 
@@ -324,7 +336,7 @@ func GetNearbyMerchantsLastLocation(location models.Location, filters ...string)
 
 		merchant.Location.Long, merchant.Location.Lat, err = getLongLat(loc)
 		if err != nil {
-			panic(err)
+			fmt.Println(err.Error())
 			return nil, err
 		}
 

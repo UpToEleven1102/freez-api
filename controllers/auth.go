@@ -6,6 +6,7 @@ import (
 	"net/http"
 )
 
+/*AuthHandler ... - HandleFunc for auth route*/
 func AuthHandler(w http.ResponseWriter, req *http.Request, route string, userType string) {
 	if req.Method != "POST" {
 		http.NotFound(w, req)

@@ -1,0 +1,35 @@
+image: golang:1.12
+
+cache:
+  paths:
+    - /go/src/git.nextgencode.io
+    - /go/src/github.com
+    - /go/src/golang.org
+    - /go/src/google.golang.org
+    - /go/src/gopkg.in
+
+stages:
+  - test
+  - deploy
+
+lint_code:
+  before_script:
+    - mkdir -p /go/src/git.nextgencode.io/huyen.vu /go/src/_/builds
+    - cp -r $CI_PROJECT_DIR /go/src/git.nextgencode.io/huyen.vu/freez-app-rest
+    - ln -s /go/src/git.nextgencode.io/huyen.vu /go/src/_/builds/huyen.vu
+    - make dep
+
+  stage: test
+  script:
+    - make lint
+
+deploy:
+  stage: deploy
+  before_script:
+    - mkdir -p ~/.ssh
+    - echo "$CI_PROJECT_DIR"
+    - echo -e "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  script:
+    - bash .gitlab-deploy.sh

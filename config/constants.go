@@ -1,5 +1,8 @@
 package config
 
+/**
+Constants for frequently used strings
+ */
 const (
 	SignUp      = "signup"
 	SignIn      = "signin"
@@ -15,18 +18,18 @@ const (
 	PhoneNumber = "phone-number"
 	Facebook    = "facebook"
 
-	SRID = 3857
+	//srid = 3857
 
-	MERCHANT_CATEGORY_ICE_CREAM_TRUCK = "ice_cream_truck"
-	MERCHANT_CATEGORY_FOOD_TRUCK      = "food_truck"
+	MerchantCategoryIceCreamTruck = "ice_cream_truck"
+	MerchantCategoryFoodTruck     = "food_truck"
 
-	NOTIF_TYPE_FLAG_REQUEST = "request"
-	NOTIF_TYPE_PAYMENT_MADE = "payment_made"
-	NOTIF_TYPE_REFUND_MADE  = "refund_made"
-	NOTIF_TYPE_FAV_NEARBY   = "merchant_nearby"
+	NotifTypeFlagRequest = "request"
+	NotifTypePaymentMade = "payment_made"
+	NotifTypeRefundMade  = "refund_made"
+	NotifTypeFavNearby   = "merchant_nearby"
 
-	NOTIF_TYPE_FLAG_REQUEST_ID = 1
-	NOTIF_TYPE_PAYMENT_MADE_ID = 2
-	NOTIF_TYPE_REFUND_MADE_ID  = 3
-	NOTIF_TYPE_FAV_NEARBY_ID   = 4
+	NotifTypeFlagRequestID = 1
+	NotifTypePaymentMadeID = 2
+	NotifTypeRefundMadeID  = 3
+	NotifTypeFavNearbyID   = 4
 )

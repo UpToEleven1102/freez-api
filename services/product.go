@@ -18,12 +18,12 @@ func CreateProduct(product models.Product) error {
 
 func GetProducts(merchantID string) (products []interface{}, err error) {
 	r, err := DB.Query(`SELECT id, name, price, merchant_id, image FROM product WHERE merchant_id=?`, merchantID)
-	defer r.Close()
 
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
+	defer r.Close()
 
 	var product models.Product
 	for r.Next() {
