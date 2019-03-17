@@ -43,6 +43,4 @@ generate-docs: ## generate swagger docs
 
 dev: build-docker
 	sudo docker-compose kill
-	sudo docker-compose rm -v
-	sudo docker-compose up -d
-
+	sudo docker-compose up

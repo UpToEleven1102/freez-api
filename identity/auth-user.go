@@ -7,12 +7,15 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"io/ioutil"
 	"net/http"
+	"fmt"
 )
-
+/*SignUpUser - sign up user*/
 func SignUpUser(w http.ResponseWriter, req *http.Request) {
 	body, _ := ioutil.ReadAll(req.Body)
 	var user models.User
 	_ = json.Unmarshal(body, &user)
+
+	fmt.Printf("%+v", user)
 
 	r, err := services.CreateUser(user)
 	if err != nil {

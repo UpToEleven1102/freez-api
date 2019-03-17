@@ -20,8 +20,10 @@ const (
 
 	//srid = 3857
 
-	MerchantCategoryIceCreamTruck = "ice_cream_truck"
-	MerchantCategoryFoodTruck     = "food_truck"
+	MerchantCategoryBreakfast = "breakfast"
+	MerchantCategoryLunch     = "lunch"
+	MerchantCategoryDinner     = "dinner"
+	MerchantCategorySweets     = "sweets"
 
 	NotifTypeFlagRequest = "request"
 	NotifTypePaymentMade = "payment_made"

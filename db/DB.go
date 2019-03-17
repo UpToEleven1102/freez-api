@@ -41,8 +41,10 @@ func seed(DB *sqlx.DB) {
 	DB.MustExec(schemaActivityType)
 
 	tx := DB.MustBegin()
-	tx.MustExec(`INSERT INTO merchant_category (category) VALUE (?)`, config.MerchantCategoryFoodTruck)
-	tx.MustExec(`INSERT INTO merchant_category (category) VALUE (?)`, config.MerchantCategoryIceCreamTruck)
+	tx.MustExec(`INSERT INTO merchant_category (category) VALUE (?)`, config.MerchantCategoryBreakfast)
+	tx.MustExec(`INSERT INTO merchant_category (category) VALUE (?)`, config.MerchantCategoryLunch)
+	tx.MustExec(`INSERT INTO merchant_category (category) VALUE (?)`, config.MerchantCategoryDinner)
+	tx.MustExec(`INSERT INTO merchant_category (category) VALUE (?)`, config.MerchantCategorySweets)
 
 	tx.MustExec(`INSERT INTO activity_type (type) VALUE (?)`, config.NotifTypeFlagRequest)
 	tx.MustExec(`INSERT INTO activity_type (type) VALUE (?)`, config.NotifTypePaymentMade)
@@ -87,6 +89,8 @@ func Config() (*sqlx.DB, error) {
 			return nil, err
 		}
 	}
+
+	log.Printf("Reset db: %s", os.Getenv("RESET_DB"))
 
 	if DB != nil {
 		if os.Getenv("RESET_DB") == "true" {

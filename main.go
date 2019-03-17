@@ -72,7 +72,7 @@ func apiHandler(w http.ResponseWriter, req *http.Request) {
 	case c.Stripe:
 		err = identity.AuthorizeMiddleware(w, req, objectID, controllers.StripeOpsHandler)
 	case "test":
-		_ = json.NewEncoder(w).Encode(models.DataResponse{Success:true, Message:"Test Message"})
+		_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:"Test update update Message"})
 
 	default:
 		http.NotFound(w, req)

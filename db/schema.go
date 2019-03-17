@@ -39,7 +39,11 @@ const schemaLocation = `
 		merchant_id VARCHAR(64) NOT NULL,
 		location POINT NOT NULL,
 		SPATIAL INDEX(location),
-		PRIMARY KEY(id)
+		PRIMARY KEY(id),
+		FOREIGN KEY fk_merchant_location (merchant_id)
+			REFERENCES merchant(id)
+			ON DELETE CASCADE
+			ON UPDATE CASCADE
 	);
 `
 
@@ -179,7 +183,14 @@ const schemaFavorites = `
 	CREATE TABLE favorite(
 		user_id VARCHAR(64) NOT NULL,
 		merchant_id VARCHAR(64) NOT NULL,
-		PRIMARY KEY(user_id, merchant_id)
+		PRIMARY KEY(user_id, merchant_id),
+		FOREIGN KEY fk_user_fav (user_id)
+			REFERENCES user(id)
+			ON UPDATE CASCADE
+			ON DELETE CASCADE,
+		FOREIGN KEY fk_user_fav_merchant (merchant_id)
+			REFERENCES merchant(id)
+			ON UPDATE CASCADE
 	);
 `
 const schemaRequest = `CREATE TABLE request(
