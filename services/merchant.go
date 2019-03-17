@@ -186,7 +186,7 @@ func GetMerchantByPhoneNumber(phoneNumber string) (interface{}, error) {
 	var location string
 
 	if r.Next() {
-		_ = r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image, &location)
+		err = r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image, &location)
 		if err != nil {
 			return nil, err
 		}
