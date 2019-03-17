@@ -25,6 +25,8 @@ lint_code:
 
 deploy:
   stage: deploy
+  only:
+    - develop
   before_script:
     - mkdir -p ~/.ssh
     - echo "$CI_PROJECT_DIR"
