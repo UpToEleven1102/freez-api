@@ -59,7 +59,7 @@ func AuthHandler(w http.ResponseWriter, req *http.Request, route string, userTyp
 			http.NotFound(w, req)
 		}
 	case c.Facebook:
-		auth.AuthenticateFacebook(w, req)
+		auth.AuthenticateFacebook(w, req, userType)
 	default:
 		http.NotFound(w, req)
 	}

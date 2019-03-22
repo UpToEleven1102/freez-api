@@ -192,7 +192,7 @@ func GenerateTokenByFacebookAccount(reqData models.FacebookTokenData) (interface
 			return response, nil
 		} else {
 			//merchant account exists
-			token , err := createToken(userInfo)
+			token, err := createToken(userInfo)
 			if err != nil {
 				return nil, err
 			}
@@ -222,18 +222,38 @@ func GenerateTokenByFacebookAccount(reqData models.FacebookTokenData) (interface
 
 }
 
-func AuthenticateFacebook(w http.ResponseWriter, req *http.Request) {
+func AuthenticateFacebook(w http.ResponseWriter, req *http.Request, userType string) {
 	var reqData models.FacebookTokenData
 	jsonEncoder := json.NewEncoder(w)
 
-	_ = json.NewDecoder(req.Body).Decode(&reqData)
-
-	response, err := GenerateTokenByFacebookAccount(reqData)
+	err := json.NewDecoder(req.Body).Decode(&reqData)
 
 	if err != nil {
-		_ = jsonEncoder.Encode(models.DataResponse{Success:false, Message: err.Error()})
-	} else {
-		_ = jsonEncoder.Encode(response)
+		w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message: "Incorrect data types"})
+		return
+	}
+
+	switch userType {
+	case "":
+		response, err := GenerateTokenByFacebookAccount(reqData)
+
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			_ = jsonEncoder.Encode(models.DataResponse{Success: false, Message: err.Error()})
+		} else {
+			_ = jsonEncoder.Encode(response)
+		}
+	case c.Merchant:
+		// do sign up merchant
+		fmt.Printf("%+v", reqData)
+		w.WriteHeader(http.StatusBadRequest)
+		_ = jsonEncoder.Encode(models.DataResponse{Success: false, Message: "shit happened"})
+	case c.User:
+		//do sign up user
+		fmt.Printf("%+v", reqData)
+		w.WriteHeader(http.StatusBadRequest)
+		_ = jsonEncoder.Encode(models.DataResponse{Success: false, Message: "shit happened"})
 	}
 }
 

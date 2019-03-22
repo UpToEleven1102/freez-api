@@ -29,7 +29,7 @@ var (
 )
 
 const (
-	minDistance = 3000
+	minDistance       = 3000
 	minNotifyDistance = 1000
 )
 
@@ -62,6 +62,10 @@ func awsConfig() {
 func redisConfig() {
 	redisServer := os.Getenv("REDIS_ADDRESS")
 
+	if len(redisServer) == 0 {
+		redisServer = "127.0.0.1:6379"
+	}
+
 	RedisClient = redis.NewClient(&redis.Options{
 		Addr:     redisServer,
 		Password: "",
@@ -71,7 +75,7 @@ func redisConfig() {
 	_, err := RedisClient.Ping().Result()
 	if err != nil {
 		log.Printf("%s\n", err)
-		time.AfterFunc(3 * time.Second, redisConfig)
+		time.AfterFunc(3*time.Second, redisConfig)
 		return
 	}
 	fmt.Println("connected to redis db")
@@ -105,7 +109,7 @@ func connectDB() {
 	DB, err = db.Config()
 
 	if err != nil {
-		time.AfterFunc(5 * time.Second, connectDB)
+		time.AfterFunc(5*time.Second, connectDB)
 	}
 }
 
