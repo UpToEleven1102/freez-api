@@ -35,14 +35,14 @@ func SignUpUserFB(reqData models.FacebookTokenData) (response models.DataRespons
 	})
 
 	if err != nil {
-		fmt.Println("%s \n", err.Error())
+		fmt.Printf("%s \n", err.Error())
 		response.Message = err.Error()
 		return response, err
 	}
 
 	token, err := createToken(user)
 	if err != nil {
-		fmt.Println("%s \n", err.Error())
+		fmt.Printf("%s \n", err.Error())
 		response.Message = err.Error()
 		return response, err
 	}
