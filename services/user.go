@@ -24,6 +24,22 @@ func CreateUser(user models.User) (interface{}, error) {
 	return user, nil
 }
 
+func CreateUserFB(user models.User) (interface{}, error) {
+	uid, _ := uuid.NewV4()
+	user.ID = uid.String()
+
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	user.Password = string(hashedPassword)
+	location := fmt.Sprintf("POINT(%f %f)", user.LastLocation.Long, user.LastLocation.Lat)
+	_, err := DB.Exec(`INSERT INTO user (id, email, phone_number, name, password, last_location, image, facebook_id) VALUES(?,?,?,?,?,ST_GeomFromText(?),?,?)`, user.ID, user.Email, user.PhoneNumber, user.Name, user.Password, location, user.Image, user.FacebookID);
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+
 func UpdateUser(user models.User) (err error) {
 	_, err = DB.Exec(`UPDATE user SET phone_number=?,email=?,name=?,image=? WHERE id=?;`, user.PhoneNumber, user.Email, user.Name, user.Image, user.ID)
 	if err != nil {

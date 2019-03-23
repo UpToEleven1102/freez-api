@@ -186,19 +186,19 @@ func GenerateTokenByFacebookAccount(reqData models.FacebookTokenData) (interface
 		if userInfo == nil {
 			//no account in both user and merchant tables
 			response.Success = true
-			response.Type = "register"
+			response.Type = c.SignUp
 			response.Message = reqData.AccessToken
 
 			return response, nil
 		} else {
 			//merchant account exists
-			token , err := createToken(userInfo)
+			token, err := createToken(userInfo)
 			if err != nil {
 				return nil, err
 			}
 
 			response.Success = true
-			response.Type = "login"
+			response.Type = c.SignIn
 			response.Role = c.Merchant
 			response.Message = token
 
@@ -213,7 +213,7 @@ func GenerateTokenByFacebookAccount(reqData models.FacebookTokenData) (interface
 		}
 
 		response.Success = true
-		response.Type = "login"
+		response.Type = c.SignIn
 		response.Role = c.User
 		response.Message = token
 
@@ -222,16 +222,38 @@ func GenerateTokenByFacebookAccount(reqData models.FacebookTokenData) (interface
 
 }
 
-func AuthenticateFacebook(w http.ResponseWriter, req *http.Request) {
+func AuthenticateFacebook(w http.ResponseWriter, req *http.Request, userType string) {
 	var reqData models.FacebookTokenData
 	jsonEncoder := json.NewEncoder(w)
 
-	_ = json.NewDecoder(req.Body).Decode(&reqData)
-
-	response, err := GenerateTokenByFacebookAccount(reqData)
+	err := json.NewDecoder(req.Body).Decode(&reqData)
 
 	if err != nil {
-		_ = jsonEncoder.Encode(models.DataResponse{Success:false, Message: err.Error()})
+		w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message: "Incorrect data types"})
+		return
+	}
+
+	var response interface{}
+
+	switch userType {
+	case "":
+		response, err = GenerateTokenByFacebookAccount(reqData)
+	case c.Merchant:
+		// do sign up merchant
+		response, err = SignUpMerchantFB(reqData)
+	case c.User:
+		//do sign up user
+		response, err = SignUpUserFB(reqData)
+	default:
+		http.Error(w, "Route does not exist",http.StatusNotFound)
+		return
+	}
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		_ = jsonEncoder.Encode(models.DataResponse{Success: false, Message: err.Error()})
+		return
 	} else {
 		_ = jsonEncoder.Encode(response)
 	}

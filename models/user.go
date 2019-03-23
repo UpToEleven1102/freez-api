@@ -30,6 +30,7 @@ type User struct {
 	Password     string  `json:"password"`
 	LastLocation LongLat `json:"last_location"`
 	Image        string  `json:"image"`
+	FacebookID   string  `json:"facebook_id"`
 	Option       mOption `json:"option"`
 	Role         string  `json:"role"`
 }
