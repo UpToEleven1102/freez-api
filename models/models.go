@@ -122,6 +122,9 @@ type FacebookUserInfo struct {
 }
 
 type FacebookTokenData struct {
-	AccessToken string `json:"access_token"`
-	UserID      string `json:"user_id"`
+	AccessToken  string `json:"access_token"`
+	UserID       string `json:"user_id"`
+	Stripe_Token string `json:"stripe_token"`
+	Password     string `json:"password"`
+	PhoneNumber string `json:"phone_number"`
 }

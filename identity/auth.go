@@ -186,7 +186,7 @@ func GenerateTokenByFacebookAccount(reqData models.FacebookTokenData) (interface
 		if userInfo == nil {
 			//no account in both user and merchant tables
 			response.Success = true
-			response.Type = "register"
+			response.Type = c.SignUp
 			response.Message = reqData.AccessToken
 
 			return response, nil
@@ -198,7 +198,7 @@ func GenerateTokenByFacebookAccount(reqData models.FacebookTokenData) (interface
 			}
 
 			response.Success = true
-			response.Type = "login"
+			response.Type = c.SignIn
 			response.Role = c.Merchant
 			response.Message = token
 
@@ -213,7 +213,7 @@ func GenerateTokenByFacebookAccount(reqData models.FacebookTokenData) (interface
 		}
 
 		response.Success = true
-		response.Type = "login"
+		response.Type = c.SignIn
 		response.Role = c.User
 		response.Message = token
 
@@ -234,26 +234,28 @@ func AuthenticateFacebook(w http.ResponseWriter, req *http.Request, userType str
 		return
 	}
 
+	var response interface{}
+
 	switch userType {
 	case "":
-		response, err := GenerateTokenByFacebookAccount(reqData)
-
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			_ = jsonEncoder.Encode(models.DataResponse{Success: false, Message: err.Error()})
-		} else {
-			_ = jsonEncoder.Encode(response)
-		}
+		response, err = GenerateTokenByFacebookAccount(reqData)
 	case c.Merchant:
 		// do sign up merchant
-		fmt.Printf("%+v", reqData)
-		w.WriteHeader(http.StatusBadRequest)
-		_ = jsonEncoder.Encode(models.DataResponse{Success: false, Message: "shit happened"})
+		response, err = SignUpMerchantFB(reqData)
 	case c.User:
 		//do sign up user
-		fmt.Printf("%+v", reqData)
+		response, err = SignUpUserFB(reqData)
+	default:
+		http.Error(w, "Route does not exist",http.StatusNotFound)
+		return
+	}
+
+	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		_ = jsonEncoder.Encode(models.DataResponse{Success: false, Message: "shit happened"})
+		_ = jsonEncoder.Encode(models.DataResponse{Success: false, Message: err.Error()})
+		return
+	} else {
+		_ = jsonEncoder.Encode(response)
 	}
 }
 

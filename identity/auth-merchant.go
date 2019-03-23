@@ -47,6 +47,31 @@ func SignInMerchant(w http.ResponseWriter, req *http.Request) {
 	_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:"Credentials Invalid"})
 }
 
+func SignUpMerchantFB(reqData models.FacebookTokenData) (response models.DataResponse, err error) {
+	response.Success = false
+
+	fbInfo, err := services.GetFaceBookUserInfo(reqData)
+
+	userInfo := fbInfo.(models.FacebookUserInfo)
+	if err != nil {
+		response.Message = err.Error()
+		return response, err
+	}
+
+	_, err = services.CreateMerchant(models.Merchant{
+		Email: userInfo.Email,
+		Image: userInfo.Picture,
+		Name: userInfo.Name,
+	})
+
+	if err != nil {
+		response.Message = err.Error()
+		return response, err
+	}
+
+	return response, err
+}
+
 func SignUpMerchant(w http.ResponseWriter, req *http.Request) {
 	body, err := ioutil.ReadAll(req.Body)
 	var response models.DataResponse

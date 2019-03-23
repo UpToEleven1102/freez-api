@@ -2,6 +2,7 @@ package identity
 
 import (
 	"encoding/json"
+	"git.nextgencode.io/huyen.vu/freez-app-rest/config"
 	"git.nextgencode.io/huyen.vu/freez-app-rest/models"
 	"git.nextgencode.io/huyen.vu/freez-app-rest/services"
 	"golang.org/x/crypto/bcrypt"
@@ -9,7 +10,49 @@ import (
 	"net/http"
 	"fmt"
 )
-/*SignUpUser - sign up user*/
+
+func SignUpUserFB(reqData models.FacebookTokenData) (response models.DataResponse, err error) {
+	response.Success = false
+	response.Role = config.User
+	response.Type = config.SignUp
+
+	fbInfo, err := services.GetFaceBookUserInfo(reqData)
+
+	if err != nil {
+		response.Message = err.Error()
+		return response, err
+	}
+
+	userInfo := fbInfo.(models.FacebookUserInfo)
+
+	user, err := services.CreateUserFB(models.User{
+		Image: userInfo.Picture,
+		Name: userInfo.Name,
+		Email:userInfo.Email,
+		PhoneNumber: reqData.PhoneNumber,
+		FacebookID:userInfo.ID,
+		Password:reqData.Password,
+	})
+
+	if err != nil {
+		fmt.Println("%s \n", err.Error())
+		response.Message = err.Error()
+		return response, err
+	}
+
+	token, err := createToken(user)
+	if err != nil {
+		fmt.Println("%s \n", err.Error())
+		response.Message = err.Error()
+		return response, err
+	}
+
+	response.Success = true
+	response.Message = token
+
+	return response, err
+}
+
 func SignUpUser(w http.ResponseWriter, req *http.Request) {
 	body, _ := ioutil.ReadAll(req.Body)
 	var user models.User
