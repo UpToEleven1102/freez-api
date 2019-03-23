@@ -93,6 +93,7 @@ func StripeConnectCreateAccount(merchant models.Merchant) (*stripe.Account, erro
 	params := &stripe.AccountParams{
 		Country: stripe.String("US"),
 		Email: stripe.String(merchant.Email),
+		RequestedCapabilities: []*string {stripe.String("platform_payments")},
 		DefaultCurrency: stripe.String(string(stripe.CurrencyUSD)),
 		ExternalAccount: &stripe.AccountExternalAccountParams{
 			Token: stripe.String(merchant.StripeID),

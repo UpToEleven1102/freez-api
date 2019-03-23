@@ -3,6 +3,7 @@ package identity
 import (
 	"encoding/json"
 	"fmt"
+	"git.nextgencode.io/huyen.vu/freez-app-rest/config"
 	"git.nextgencode.io/huyen.vu/freez-app-rest/models"
 	"git.nextgencode.io/huyen.vu/freez-app-rest/services"
 	"golang.org/x/crypto/bcrypt"
@@ -49,6 +50,8 @@ func SignInMerchant(w http.ResponseWriter, req *http.Request) {
 
 func SignUpMerchantFB(reqData models.FacebookTokenData) (response models.DataResponse, err error) {
 	response.Success = false
+	response.Type = config.SignUp
+	response.Role = config.Merchant
 
 	fbInfo, err := services.GetFaceBookUserInfo(reqData)
 
@@ -58,16 +61,43 @@ func SignUpMerchantFB(reqData models.FacebookTokenData) (response models.DataRes
 		return response, err
 	}
 
-	_, err = services.CreateMerchant(models.Merchant{
+	merchant := models.Merchant{
 		Email: userInfo.Email,
 		Image: userInfo.Picture,
 		Name: userInfo.Name,
-	})
+		PhoneNumber: reqData.PhoneNumber,
+		FacebookID: userInfo.ID,
+		Password: reqData.Password,
+		Mobile: reqData.IsMobile,
+		StripeID: reqData.Stripe_Token,
+		Category: reqData.Category,
+	}
 
+	acc, err := services.StripeConnectCreateAccount(merchant)
 	if err != nil {
 		response.Message = err.Error()
 		return response, err
 	}
+	merchant.StripeID = acc.ID
+
+	merchant, err = services.CreateMerchant(merchant)
+
+	fmt.Printf("merchant: %+v \n", merchant)
+
+	if err != nil {
+		fmt.Println(err.Error())
+		response.Message = err.Error()
+		return response, err
+	}
+
+	token, err := createToken(merchant)
+	if err != nil {
+		response.Message = err.Error()
+		return response, err
+	}
+
+	response.Success = true
+	response.Message = token
 
 	return response, err
 }

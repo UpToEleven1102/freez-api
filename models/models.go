@@ -126,5 +126,7 @@ type FacebookTokenData struct {
 	UserID       string `json:"user_id"`
 	Stripe_Token string `json:"stripe_token"`
 	Password     string `json:"password"`
-	PhoneNumber string `json:"phone_number"`
+	PhoneNumber  string `json:"phone_number"`
+	IsMobile     bool   `json:"is_mobile"`
+	Category     string `json:"category"`
 }

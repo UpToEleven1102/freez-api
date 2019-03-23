@@ -15,7 +15,6 @@ const schemaMerchant = `
 		last_location POINT,
 		image VARCHAR(255) NOT NULL DEFAULT 'https://freeze-app.s3.us-west-2.amazonaws.com/blank-profile-picture.jpg',
 		stripe_id VARCHAR(64) NOT NULL UNIQUE,
-		card_id VARCHAR(64) NOT NULL,
 		PRIMARY KEY (id),
 		FOREIGN KEY merchant_category (category)
 			REFERENCES merchant_category(category)

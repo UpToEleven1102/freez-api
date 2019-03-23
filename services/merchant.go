@@ -57,6 +57,27 @@ func GetUserIDNotifyMerchantNearbyByMerchantID(merchantLocation models.Location)
 	return ids, nil
 }
 
+func CreateMerchantFB(merchant models.Merchant) (models.Merchant, error) {
+	password, err := bcrypt.GenerateFromPassword([]byte(merchant.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return merchant, err
+	}
+
+	merchant.Password = string(password)
+	uid, _ := uuid.NewV4()
+	merchant.ID = uid.String()
+
+	location := fmt.Sprintf("POINT(%f %f)", merchant.LastLocation.Long, merchant.LastLocation.Lat)
+
+	_, err = DB.Exec(`INSERT INTO merchant (id, mobile, phone_number, email, name, password, last_location, stripe_id, image, facebook_id) VALUES (?, ?, ?, ?, ?, ?, ST_GeomFromText(?), ?, ?, ?)`, merchant.ID, merchant.Mobile, merchant.PhoneNumber, merchant.Email, merchant.Name, merchant.Password, location, merchant.StripeID, merchant.Image, merchant.FacebookID)
+
+	if err != nil {
+		return merchant, err
+	}
+
+	return merchant, nil
+}
+
 func CreateMerchant(merchant models.Merchant) (models.Merchant, error) {
 	password, err := bcrypt.GenerateFromPassword([]byte(merchant.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -69,7 +90,7 @@ func CreateMerchant(merchant models.Merchant) (models.Merchant, error) {
 
 	location := fmt.Sprintf("POINT(%f %f)", merchant.LastLocation.Long, merchant.LastLocation.Lat)
 
-	_, err = DB.Exec(`INSERT INTO merchant (id, mobile, phone_number, email, name, password, last_location, stripe_id, card_id, image) VALUES (?, ?, ?, ?, ?, ?, ST_GeomFromText(?), ?, ?, ?)`, merchant.ID, merchant.Mobile, merchant.PhoneNumber, merchant.Email, merchant.Name, merchant.Password, location, merchant.StripeID, merchant.CardID, merchant.Image)
+	_, err = DB.Exec(`INSERT INTO merchant (id, mobile, phone_number, email, name, password, last_location, stripe_id, facebook_id, image, category) VALUES (?, ?, ?, ?, ?, ?, ST_GeomFromText(?), ?, ?, ?, ?)`, merchant.ID, merchant.Mobile, merchant.PhoneNumber, merchant.Email, merchant.Name, merchant.Password, location, merchant.StripeID, merchant.FacebookID, merchant.Image, merchant.Category)
 
 	if err != nil {
 		return merchant, err
