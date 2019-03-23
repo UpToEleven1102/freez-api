@@ -16,7 +16,7 @@ func CreateUser(user models.User) (interface{}, error) {
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	user.Password = string(hashedPassword)
 	location := fmt.Sprintf("POINT(%f %f)", user.LastLocation.Long, user.LastLocation.Lat)
-	_, err := DB.Exec(`INSERT INTO user (id, phone_number, email, name, password, last_location, image) VALUES(?,?,?,?,?,ST_GeomFromText(?),?)`, user.ID, user.PhoneNumber, user.Email, user.Name, user.Password, location, user.Image);
+	_, err := DB.Exec(`INSERT INTO user (id, phone_number, email, name, password, last_location) VALUES(?,?,?,?,?,ST_GeomFromText(?))`, user.ID, user.PhoneNumber, user.Email, user.Name, user.Password, location);
 	if err != nil {
 		return nil, err
 	}

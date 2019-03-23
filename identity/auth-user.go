@@ -72,9 +72,12 @@ func SignUpUser(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	b, _ := json.Marshal(token)
+
 	w.WriteHeader(http.StatusCreated)
-	_ , _ = w.Write(b)
+	_ = json.NewEncoder(w).Encode(struct {
+		success bool
+		message string
+	}{true, token})
 }
 
 func SignInUser(w http.ResponseWriter, req *http.Request) {
@@ -97,5 +100,9 @@ func SignInUser(w http.ResponseWriter, req *http.Request) {
 	}
 
 	token, _ := createToken(r)
-	_ = json.NewEncoder(w).Encode(models.DataResponse{Success:true, Message:token})
+
+	_ = json.NewEncoder(w).Encode(struct {
+		success bool
+		message string
+	}{true, token})
 }
