@@ -134,7 +134,15 @@ func createToken(acc interface{}) (string, error) {
 
 func EmailExists(w http.ResponseWriter, req *http.Request) {
 	body, _ := ioutil.ReadAll(req.Body)
-	var r response
+
+	var response struct {
+		Success bool   `json:"success"`
+		Role    string `json:"role"`
+	}
+
+	var r struct {
+		Email string `json:"email"`
+	}
 	err := json.Unmarshal(body, &r)
 
 	if err != nil {
@@ -142,19 +150,19 @@ func EmailExists(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if merchant, _ := services.GetMerchantByEmail(r.Message); merchant != nil {
-		r.Message = "true"
-		r.Role = c.Merchant
+	if merchant, _ := services.GetMerchantByEmail(r.Email); merchant != nil {
+		response.Success = true
+		response.Role = c.Merchant
 	} else {
-		if merchant, _ = services.GetUserByEmail(r.Message); merchant != nil {
-			r.Message = "true"
-			r.Role = c.User
+		if merchant, _ = services.GetUserByEmail(r.Email); merchant != nil {
+			response.Success = true
+			response.Role = c.User
 		} else {
-			r.Message = "false"
+			response.Success = false
 		}
 	}
 
-	b, _ := json.Marshal(r)
+	b, _ := json.Marshal(response)
 	_, _ = w.Write(b)
 }
 
@@ -230,7 +238,7 @@ func AuthenticateFacebook(w http.ResponseWriter, req *http.Request, userType str
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message: "Incorrect data types"})
+		_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: "Incorrect data types"})
 		return
 	}
 
@@ -246,7 +254,7 @@ func AuthenticateFacebook(w http.ResponseWriter, req *http.Request, userType str
 		//do sign up user
 		response, err = SignUpUserFB(reqData)
 	default:
-		http.Error(w, "Route does not exist",http.StatusNotFound)
+		http.Error(w, "Route does not exist", http.StatusNotFound)
 		return
 	}
 
