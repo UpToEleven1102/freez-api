@@ -117,8 +117,6 @@ func SignUpMerchant(w http.ResponseWriter, req *http.Request) {
 
 	err = json.Unmarshal(body, &merchant)
 
-	log.Println(merchant)
-
 	if err != nil {
 		response.Success = false
 		response.Message = err.Error()
@@ -134,7 +132,6 @@ func SignUpMerchant(w http.ResponseWriter, req *http.Request) {
 		_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
 		return
 	}
-	log.Println(acc)
 
 	//res, err := services.StripeCharge(merchant.StripeID, "Application Fee - Freeze App", 5)
 
@@ -159,7 +156,10 @@ func SignUpMerchant(w http.ResponseWriter, req *http.Request) {
 	}
 
 	token, _ := createToken(merchant)
-	b, _ := json.Marshal(token)
 	w.WriteHeader(http.StatusCreated)
-	_, _ = w.Write(b)
+
+	_ = json.NewEncoder(w).Encode(struct {
+		Success bool `json:"success"`
+		Message string `json:"message"`
+	}{true, token})
 }

@@ -90,7 +90,7 @@ func CreateMerchant(merchant models.Merchant) (models.Merchant, error) {
 
 	location := fmt.Sprintf("POINT(%f %f)", merchant.LastLocation.Long, merchant.LastLocation.Lat)
 
-	_, err = DB.Exec(`INSERT INTO merchant (id, mobile, phone_number, email, name, password, last_location, stripe_id, facebook_id, image, category) VALUES (?, ?, ?, ?, ?, ?, ST_GeomFromText(?), ?, ?, ?, ?)`, merchant.ID, merchant.Mobile, merchant.PhoneNumber, merchant.Email, merchant.Name, merchant.Password, location, merchant.StripeID, merchant.FacebookID, merchant.Image, merchant.Category)
+	_, err = DB.Exec(`INSERT INTO merchant (id, mobile, phone_number, email, name, password, last_location, stripe_id, category) VALUES (?, ?, ?, ?, ?, ?, ST_GeomFromText(?), ?, ?)`, merchant.ID, merchant.Mobile, merchant.PhoneNumber, merchant.Email, merchant.Name, merchant.Password, location, merchant.StripeID, merchant.Category)
 
 	if err != nil {
 		return merchant, err
