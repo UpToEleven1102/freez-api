@@ -2,13 +2,13 @@ package identity
 
 import (
 	"encoding/json"
+	"fmt"
 	"git.nextgencode.io/huyen.vu/freez-app-rest/config"
 	"git.nextgencode.io/huyen.vu/freez-app-rest/models"
 	"git.nextgencode.io/huyen.vu/freez-app-rest/services"
 	"golang.org/x/crypto/bcrypt"
 	"io/ioutil"
 	"net/http"
-	"fmt"
 )
 
 func SignUpUserFB(reqData models.FacebookTokenData) (response models.DataResponse, err error) {
@@ -26,12 +26,12 @@ func SignUpUserFB(reqData models.FacebookTokenData) (response models.DataRespons
 	userInfo := fbInfo.(models.FacebookUserInfo)
 
 	user, err := services.CreateUserFB(models.User{
-		Image: userInfo.Picture,
-		Name: userInfo.Name,
-		Email:userInfo.Email,
+		Image:       userInfo.Picture,
+		Name:        userInfo.Name,
+		Email:       userInfo.Email,
 		PhoneNumber: reqData.PhoneNumber,
-		FacebookID:userInfo.ID,
-		Password:reqData.Password,
+		FacebookID:  userInfo.ID,
+		Password:    reqData.Password,
 	})
 
 	if err != nil {
@@ -54,27 +54,33 @@ func SignUpUserFB(reqData models.FacebookTokenData) (response models.DataRespons
 }
 
 func SignUpUser(w http.ResponseWriter, req *http.Request) {
+	jsonEncoder := json.NewEncoder(w)
+
+	type ResponseObj struct {
+		Success bool   `json:"success"`
+		Message string `json:"message"`
+	}
+
 	body, _ := ioutil.ReadAll(req.Body)
 	var user models.User
 	_ = json.Unmarshal(body, &user)
 
-	fmt.Printf("%+v", user)
-
 	r, err := services.CreateUser(user)
 	if err != nil {
-		http.Error(w, "account exists", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		_ = jsonEncoder.Encode(ResponseObj{false, "Account exists"})
 		return
 	}
 
 	user = r.(models.User)
 	token, err := createToken(user)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		_ = jsonEncoder.Encode(ResponseObj{false, err.Error()})
 		return
 	}
-	b, _ := json.Marshal(token)
-	w.WriteHeader(http.StatusCreated)
-	_ , _ = w.Write(b)
+
+	_ = json.NewEncoder(w).Encode(ResponseObj{true, token})
 }
 
 func SignInUser(w http.ResponseWriter, req *http.Request) {
@@ -85,17 +91,21 @@ func SignInUser(w http.ResponseWriter, req *http.Request) {
 	r, err := services.GetUserByEmail(credentials.Email)
 
 	if err != nil || r == nil {
-		_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:"Credentials Invalid"})
+		_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: "Credentials Invalid"})
 		return
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(r.(models.User).Password), []byte(credentials.Password))
 
 	if err != nil {
-		_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:"Credentials Invalid"})
+		_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: "Credentials Invalid"})
 		return
 	}
 
 	token, _ := createToken(r)
-	_ = json.NewEncoder(w).Encode(models.DataResponse{Success:true, Message:token})
+
+	_ = json.NewEncoder(w).Encode(struct {
+		Success bool   `json:"success"`
+		Message string `json:"message"`
+	}{true, token})
 }
