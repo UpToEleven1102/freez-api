@@ -280,8 +280,6 @@ func GetLastPositionByMerchantID(merchantID string) (interface{}, error) {
 }
 
 func GetMerchantInfoById(id string, location models.Location) (interface{}, error) {
-	fmt.Println(id)
-	fmt.Println(location)
 	userLocation := fmt.Sprintf(`POINT(%f %f)`, location.Location.Long, location.Location.Lat)
 	r, err := DB.Query(`SELECT online, email, name, mobile, phone_number, image, l.merchant_id, ST_AsText(location) as location, ST_Distance_Sphere(location, ST_GeomFromText(?)) as distance
 								FROM location l INNER JOIN (
@@ -313,6 +311,11 @@ func GetMerchantInfoById(id string, location models.Location) (interface{}, erro
 		data.Data = merchant.MerchantID
 
 		merchant.IsFavorite, _ = isFavorite(data)
+
+		if merchant.IsFavorite {
+			fmt.Printf("true %+v\n", merchant)
+		}
+
 		merchant.Products, _ = GetProducts(merchant.MerchantID)
 		return merchant, nil
 	}

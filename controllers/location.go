@@ -86,6 +86,8 @@ func LocationHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 					return nil
 				}
 
+				location.Id = claims.Id
+
 				merchant, err := services.GetMerchantInfoById(param, location)
 
 				if err != nil {
