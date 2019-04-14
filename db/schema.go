@@ -154,6 +154,7 @@ const schemaUser = `
 		name text NOT NULL,
 		password text NOT NULL,
 		facebook_id varchar(64) UNIQUE,
+		freez_point INT NOT NULL DEFAULT 0,
 		image VARCHAR(255) NOT NULL DEFAULT 'https://freeze-app.s3.us-west-2.amazonaws.com/blank-profile-picture.jpg',
 		last_location POINT,
 		PRIMARY KEY (id)

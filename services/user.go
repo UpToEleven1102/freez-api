@@ -50,7 +50,8 @@ func UpdateUser(user models.User) (err error) {
 }
 
 func GetUserByEmail(email string) (interface{}, error) {
-	r, err := DB.Query(`SELECT id, phone_number, email, name, password, image, ST_AsText(last_location) FROM user WHERE email=?`, email)
+	r, err := DB.Query(`SELECT id, phone_number, email, name, password, image, ST_AsText(last_location), freez_point
+								FROM user WHERE email=?`, email)
 
 	if err != nil {
 		return nil, err
@@ -60,7 +61,7 @@ func GetUserByEmail(email string) (interface{}, error) {
 	var location string
 	var user models.User
 	if r.Next() {
-		err = r.Scan(&user.ID, &user.PhoneNumber, &user.Email, &user.Name, &user.Password, &user.Image, &location)
+		err = r.Scan(&user.ID, &user.PhoneNumber, &user.Email, &user.Name, &user.Password, &user.Image, &location, &user.FreezPoint)
 		if err != nil {
 			return nil, err
 		}
@@ -73,7 +74,7 @@ func GetUserByEmail(email string) (interface{}, error) {
 }
 
 func GetUserById(id string) (interface{}, error) {
-	r, err := DB.Query(`SELECT u.id, phone_number, email, name, password, image, ST_AsText(last_location), notif_fav_nearby 
+	r, err := DB.Query(`SELECT u.id, phone_number, email, name, password, image, ST_AsText(last_location), notif_fav_nearby, freez_point
 								  FROM user u 
 								    INNER JOIN m_option o 
 								      ON u.id=o.user_id WHERE u.id=?`, id)
@@ -86,7 +87,7 @@ func GetUserById(id string) (interface{}, error) {
 	var location string
 	var user models.User
 	if r.Next() {
-		err = r.Scan(&user.ID, &user.PhoneNumber, &user.Email, &user.Name, &user.Password, &user.Image, &location, &user.Option.NotifFavNearby)
+		err = r.Scan(&user.ID, &user.PhoneNumber, &user.Email, &user.Name, &user.Password, &user.Image, &location, &user.Option.NotifFavNearby, &user.FreezPoint)
 		if err != nil {
 			return nil, err
 		}
@@ -98,7 +99,8 @@ func GetUserById(id string) (interface{}, error) {
 }
 
 func GetUserByPhoneNumber(phoneNumber string) (interface{}, error) {
-	r, err := DB.Query(`SELECT id, phone_number, email, name, password, image, ST_AsText(last_location) FROM user WHERE phone_number=?`, phoneNumber)
+	r, err := DB.Query(`SELECT id, phone_number, email, name, password, image, ST_AsText(last_location), freez_point 
+								FROM user WHERE phone_number=?`, phoneNumber)
 
 	if err != nil {
 		return nil, err
@@ -108,7 +110,7 @@ func GetUserByPhoneNumber(phoneNumber string) (interface{}, error) {
 	var location string
 	var user models.User
 	if r.Next() {
-		err = r.Scan(&user.ID, &user.PhoneNumber, &user.Email, &user.Name, &user.Password, &user.Image, &location)
+		err = r.Scan(&user.ID, &user.PhoneNumber, &user.Email, &user.Name, &user.Password, &user.Image, &location, &user.FreezPoint)
 		if err != nil {
 			return nil, err
 		}
@@ -203,7 +205,8 @@ func ChargeUser(data models.OrderRequestData) (orderId interface{}, err error) {
 }
 
 func GetUserByFbId(facebookID string) (interface{}, error) {
-	r, err := DB.Query(`SELECT id, phone_number, email, name, password, image, ST_AsText(last_location) FROM user WHERE facebook_id=?`, facebookID)
+	r, err := DB.Query(`SELECT id, phone_number, email, name, password, image, ST_AsText(last_location), freez_point
+			FROM user WHERE facebook_id=?`, facebookID)
 
 	if err != nil {
 		return nil, err
@@ -213,7 +216,7 @@ func GetUserByFbId(facebookID string) (interface{}, error) {
 	var location string
 	var user models.User
 	if r.Next() {
-		err = r.Scan(&user.ID, &user.PhoneNumber, &user.Email, &user.Name, &user.Password, &user.Image, &location)
+		err = r.Scan(&user.ID, &user.PhoneNumber, &user.Email, &user.Name, &user.Password, &user.Image, &location, &user.FreezPoint)
 
 		if err != nil {
 			return nil, err

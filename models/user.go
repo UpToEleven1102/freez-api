@@ -33,6 +33,7 @@ type User struct {
 	FacebookID   string  `json:"facebook_id"`
 	Option       mOption `json:"option"`
 	Role         string  `json:"role"`
+	FreezPoint   int     `json:"freez_point"`
 }
 
 type mOption struct {

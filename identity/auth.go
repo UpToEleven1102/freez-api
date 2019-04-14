@@ -322,6 +322,7 @@ func GetUserInfo(w http.ResponseWriter, req *http.Request) {
 		}
 		res := user.(models.User)
 		res.Role = claims.Role
+
 		_ = json.NewEncoder(w).Encode(res)
 	}
 }
