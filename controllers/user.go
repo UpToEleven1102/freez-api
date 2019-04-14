@@ -66,7 +66,7 @@ func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, clai
 				sendResponse(w, response, http.StatusInternalServerError)
 				return nil
 			}
-			panic(jsonEncoder.Encode(r))
+			_ = jsonEncoder.Encode(r)
 
 		case "notification":
 			notifications, err := services.GetUserNotifications(claims.Id)

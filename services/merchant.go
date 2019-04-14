@@ -312,10 +312,6 @@ func GetMerchantInfoById(id string, location models.Location) (interface{}, erro
 
 		merchant.IsFavorite, _ = isFavorite(data)
 
-		if merchant.IsFavorite {
-			fmt.Printf("true %+v\n", merchant)
-		}
-
 		merchant.Products, _ = GetProducts(merchant.MerchantID)
 		return merchant, nil
 	}

@@ -142,7 +142,6 @@ func RemoveFavorite(data models.RequestData) (err error) {
 }
 
 func isFavorite(data models.RequestData) (bool, error) {
-	fmt.Printf("%+v ", data)
 	r, err := DB.Query(`SELECT * FROM favorite WHERE user_id=? AND merchant_id=?`, data.UserId, data.Data)
 
 	if err != nil {
@@ -177,6 +176,7 @@ func GetFavorites(userID string) (merchants []interface{}, err error) {
 			return nil, err
 		}
 		merchant.Location.Long, merchant.Location.Lat, _ = getLongLat(location)
+		merchant.IsFavorite = true
 		merchants = append(merchants, merchant)
 	}
 
