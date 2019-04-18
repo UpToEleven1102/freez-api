@@ -48,7 +48,7 @@ func SignInMerchant(w http.ResponseWriter, req *http.Request) {
 	_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:"Credentials Invalid"})
 }
 
-func SignUpMerchantFB(reqData models.FacebookTokenData) (response models.DataResponse, err error) {
+func SignUpMerchantFB(reqData models.FacebookTokenData, ipAdd string) (response models.DataResponse, err error) {
 	response.Success = false
 	response.Type = config.SignUp
 	response.Role = config.Merchant
@@ -73,7 +73,7 @@ func SignUpMerchantFB(reqData models.FacebookTokenData) (response models.DataRes
 		Category: reqData.Category,
 	}
 
-	acc, err := services.StripeConnectCreateAccount(merchant)
+	acc, err := services.StripeConnectCreateAccount(merchant, ipAdd)
 	if err != nil {
 		response.Message = err.Error()
 		return response, err
@@ -102,7 +102,7 @@ func SignUpMerchantFB(reqData models.FacebookTokenData) (response models.DataRes
 	return response, err
 }
 
-func SignUpMerchant(w http.ResponseWriter, req *http.Request) {
+func SignUpMerchant(w http.ResponseWriter, req *http.Request, ipAdd string) {
 	body, err := ioutil.ReadAll(req.Body)
 	var response models.DataResponse
 	if err != nil {
@@ -124,7 +124,7 @@ func SignUpMerchant(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	acc, err := services.StripeConnectCreateAccount(merchant)
+	acc, err := services.StripeConnectCreateAccount(merchant, ipAdd)
 
 	if err != nil {
 		log.Println(err)

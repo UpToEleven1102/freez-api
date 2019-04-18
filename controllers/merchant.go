@@ -16,6 +16,7 @@ import (
 
 func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, claims models.JwtClaims) error {
 	var response models.DataResponse
+	fmt.Printf("IP address %s ", req.RemoteAddr)
 
 	switch req.Method {
 	case "GET":

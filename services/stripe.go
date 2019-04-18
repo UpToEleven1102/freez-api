@@ -12,15 +12,15 @@ import (
 	"math"
 	"os"
 	"strconv"
+	"time"
 )
 
-
 func StripeCharge(token string, des string, amount float64) (*stripe.Charge, error) {
-	total := int64(math.Round(amount* 100))
+	total := int64(math.Round(amount * 100))
 
 	chargeParams := &stripe.ChargeParams{
-		Amount: stripe.Int64(total),
-		Currency: stripe.String(string(stripe.CurrencyUSD)),
+		Amount:      stripe.Int64(total),
+		Currency:    stripe.String(string(stripe.CurrencyUSD)),
 		Description: stripe.String(des),
 	}
 	err := chargeParams.SetSource(token)
@@ -57,24 +57,24 @@ func StripePartialRefund(token string, amount float64) (interface{}, error) {
 
 func StripeGetAccountBalance(accId string) (*stripe.Balance, error) {
 	params := &stripe.BalanceParams{
-		Params: stripe.Params{StripeAccount:stripe.String(accId)},
+		Params: stripe.Params{StripeAccount: stripe.String(accId)},
 	}
 
-	 return balance.Get(params)
+	return balance.Get(params)
 }
 
 //stripe connect
 
 func StripeConnectDestinationCharge(token string, accId string, desc string, amount float64) (*stripe.Charge, error) {
 	platformFeePercent, _ := strconv.ParseFloat(os.Getenv("PLATFORM_FEE_PERCENTAGE"), 64)
-	total := int64(amount*100)
+	total := int64(amount * 100)
 	desAmount := int64(math.Round(amount * (100 - platformFeePercent)))
 	params := &stripe.ChargeParams{
-		Amount: stripe.Int64(total),
-		Currency: stripe.String(string(stripe.CurrencyUSD)),
+		Amount:      stripe.Int64(total),
+		Currency:    stripe.String(string(stripe.CurrencyUSD)),
 		Description: stripe.String(desc),
 		Destination: &stripe.DestinationParams{
-			Amount: stripe.Int64(desAmount),
+			Amount:  stripe.Int64(desAmount),
 			Account: stripe.String(accId),
 		},
 	}
@@ -83,23 +83,27 @@ func StripeConnectDestinationCharge(token string, accId string, desc string, amo
 
 	if err != nil {
 		fmt.Println(err)
-		return nil , err
+		return nil, err
 	}
 
 	return charge.New(params)
 }
 
-func StripeConnectCreateAccount(merchant models.Merchant) (*stripe.Account, error) {
+func StripeConnectCreateAccount(merchant models.Merchant, ipAdd string) (*stripe.Account, error) {
 	params := &stripe.AccountParams{
-		Country: stripe.String("US"),
-		Email: stripe.String(merchant.Email),
-		RequestedCapabilities: []*string {stripe.String("platform_payments")},
-		DefaultCurrency: stripe.String(string(stripe.CurrencyUSD)),
+		Country:               stripe.String("US"),
+		Email:                 stripe.String(merchant.Email),
+		RequestedCapabilities: []*string{stripe.String("platform_payments")},
+		DefaultCurrency:       stripe.String(string(stripe.CurrencyUSD)),
 		ExternalAccount: &stripe.AccountExternalAccountParams{
-			Token: stripe.String(merchant.StripeID),
+			Token:    stripe.String(merchant.StripeID),
 			Currency: stripe.String(string(stripe.CurrencyUSD)),
 		},
 		Type: stripe.String(string(stripe.AccountTypeCustom)),
+		TOSAcceptance: &stripe.AccountTOSAcceptanceParams{
+			Date: stripe.Int64(time.Now().Unix()),
+			IP:   stripe.String(ipAdd),
+		},
 	}
 
 	acc, err := account.New(params)
@@ -116,7 +120,7 @@ func StripeConnectGetAccountById(id string) (*stripe.Account, error) {
 	return account.GetByID(id, nil)
 }
 
-func StripeConnectAddDebitCard(accId string, token string) (*stripe.Account , error) {
+func StripeConnectAddDebitCard(accId string, token string) (*stripe.Account, error) {
 	params := &stripe.AccountParams{
 		ExternalAccount: &stripe.AccountExternalAccountParams{
 			Token: stripe.String(token),
@@ -129,7 +133,7 @@ func StripeConnectAddDebitCard(accId string, token string) (*stripe.Account , er
 func StripeConnectCreateDebitCard(accId string, token string) (*stripe.Card, error) {
 	params := &stripe.CardParams{
 		Account: stripe.String(accId),
-		Token: stripe.String(token),
+		Token:   stripe.String(token),
 	}
 
 	return card.New(params)
@@ -143,7 +147,7 @@ func StripeConnectDeleteDebitCard(accId string, cardId string) (*stripe.Card, er
 	return card.Del(cardId, params)
 }
 
-func StripeConnectGetCardListByStripeId(stripeId string) (cards []*stripe.Card, err error){
+func StripeConnectGetCardListByStripeId(stripeId string) (cards []*stripe.Card, err error) {
 	params := &stripe.CardListParams{
 		Account: stripe.String(stripeId),
 	}
@@ -151,7 +155,7 @@ func StripeConnectGetCardListByStripeId(stripeId string) (cards []*stripe.Card, 
 	params.Filters.AddFilter("limit", "", "3")
 	i := card.List(params)
 	for i.Next() {
-		c:= i.Card()
+		c := i.Card()
 		cards = append(cards, c)
 	}
 
@@ -159,11 +163,10 @@ func StripeConnectGetCardListByStripeId(stripeId string) (cards []*stripe.Card, 
 }
 
 func StripeConnectMakeDefaultCurrencyDebitCard(stripeId string, cardId string) (*stripe.Card, error) {
-	params := &stripe.CardParams {
-		Account: stripe.String(stripeId),
+	params := &stripe.CardParams{
+		Account:            stripe.String(stripeId),
 		DefaultForCurrency: stripe.Bool(true),
 	}
 
 	return card.Update(cardId, params)
 }
-

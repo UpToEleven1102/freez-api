@@ -3,6 +3,7 @@ package controllers
 import (
 	c "git.nextgencode.io/huyen.vu/freez-app-rest/config"
 	auth "git.nextgencode.io/huyen.vu/freez-app-rest/identity"
+	"net"
 	"net/http"
 )
 
@@ -31,7 +32,9 @@ func AuthHandler(w http.ResponseWriter, req *http.Request, route string, userTyp
 		}
 	case c.SignUp:
 		if userType == c.Merchant {
-			auth.SignUpMerchant(w, req)
+			ip , _, _ := net.SplitHostPort(req.RemoteAddr)
+
+			auth.SignUpMerchant(w, req, ip)
 		} else if userType == c.User {
 			auth.SignUpUser(w, req)
 		} else {

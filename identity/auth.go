@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"log"
 	"math/rand"
+	"net"
 	"net/http"
 	"os"
 	"strconv"
@@ -249,7 +250,8 @@ func AuthenticateFacebook(w http.ResponseWriter, req *http.Request, userType str
 		response, err = GenerateTokenByFacebookAccount(reqData)
 	case c.Merchant:
 		// do sign up merchant
-		response, err = SignUpMerchantFB(reqData)
+		ip , _, _ := net.SplitHostPort(req.RemoteAddr)
+		response, err = SignUpMerchantFB(reqData, ip)
 	case c.User:
 		//do sign up user
 		response, err = SignUpUserFB(reqData)
