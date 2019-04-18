@@ -37,16 +37,37 @@ func GetBucketLocation() {
 	fmt.Println(result)
 }
 
-func GeneratePreSignedUrl(fileName string) (url string , err error) {
+func GeneratePreSignedUrl(fileName string) (url string, err error) {
 	req, _ := s3Client.PutObjectRequest(&s3.PutObjectInput{
-		Bucket: aws.String(s3BucketName),
-		Key: aws.String(fileName),
+		Bucket:      aws.String(s3BucketName),
+		Key:         aws.String(fileName),
 		ContentType: aws.String("image/jpeg"),
 	})
 
 	url, err = req.Presign(expirationTime)
 
 	return url, err
+}
+
+func UploadImage(fileName string, fileUrl string) {
+	f, err := os.Open(fileUrl)
+
+	if err != nil {
+		panic(err)
+	}
+
+	result, err := s3Uploader.Upload(&s3manager.UploadInput{
+		Bucket:      aws.String(s3BucketName),
+		Key:         aws.String(fileName),
+		ContentType: aws.String("image/jpeg"),
+		Body:        f,
+	})
+
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("file uploaded: %s\n", result.Location)
 }
 
 func UploadBlankProfilePicture() {
@@ -58,10 +79,10 @@ func UploadBlankProfilePicture() {
 	}
 
 	result, err := s3Uploader.Upload(&s3manager.UploadInput{
-		Bucket: aws.String(s3BucketName),
-		Key: aws.String(fileName),
+		Bucket:      aws.String(s3BucketName),
+		Key:         aws.String(fileName),
 		ContentType: aws.String("image/jpeg"),
-		Body: f,
+		Body:        f,
 	})
 
 	if err != nil {
@@ -119,5 +140,3 @@ func UploadBlankProfilePicture() {
 //		fmt.Println(err)
 //	}
 //}
-
-

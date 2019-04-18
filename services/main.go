@@ -128,5 +128,6 @@ func init() {
 	//CreateEmailNotification("quyhuyen.vu@gmail.com", "", "hello")
 
 	//UploadBlankProfilePicture()
+	//UploadImage("br_pizza.jpg", "/home/huyen/Documents/freez/BR-PIZZA.jpg")
 	//GetBucketLocation()
 }
