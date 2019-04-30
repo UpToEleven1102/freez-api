@@ -73,9 +73,9 @@ func StripeConnectDestinationCharge(token string, accId string, desc string, amo
 		Amount:      stripe.Int64(total),
 		Currency:    stripe.String(string(stripe.CurrencyUSD)),
 		Description: stripe.String(desc),
-		Destination: &stripe.DestinationParams{
-			Amount:  stripe.Int64(desAmount),
-			Account: stripe.String(accId),
+		TransferData: &stripe.ChargeTransferDataParams{
+			Amount: stripe.Int64(desAmount),
+			Destination: stripe.String(accId),
 		},
 	}
 
@@ -93,6 +93,7 @@ func StripeConnectCreateAccount(merchant models.Merchant, ipAdd string) (*stripe
 	params := &stripe.AccountParams{
 		Country:               stripe.String("US"),
 		Email:                 stripe.String(merchant.Email),
+		BusinessType: stripe.String("individual"),
 		RequestedCapabilities: []*string{stripe.String("platform_payments")},
 		DefaultCurrency:       stripe.String(string(stripe.CurrencyUSD)),
 		ExternalAccount: &stripe.AccountExternalAccountParams{
