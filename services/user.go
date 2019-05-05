@@ -205,6 +205,12 @@ func ChargeUser(data models.OrderRequestData) (orderId interface{}, err error) {
 	return CreateOrder(data)
 }
 
+func AddPointsPerPurchase(userID string, numPoints int) error {
+	_, err := DB.Exec(`UPDATE user SET freez_point=freez_point+? WHERE id=?`, numPoints, userID)
+
+	return err
+}
+
 func GetUserByFbId(facebookID string) (interface{}, error) {
 	r, err := DB.Query(`SELECT id, phone_number, email, name, password, image, ST_AsText(last_location), freez_point
 			FROM user WHERE facebook_id=?`, facebookID)

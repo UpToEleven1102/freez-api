@@ -177,7 +177,18 @@ func UserHandler(w http.ResponseWriter, req *http.Request, objectID string, clai
 			err = services.CreateNotification(config.NotifTypePaymentMadeID, orderId.(int64), data.UserID, "New order", "Payment made by customer", claims)
 			if err != nil {
 				log.Println("Notify payment made", err)
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
+				return nil
 			}
+
+			err = services.AddPointsPerPurchase(data.UserID, 10)
+
+			if err != nil {
+				log.Println(err.Error())
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
+				return nil
+			}
+
 			_ = json.NewEncoder(w).Encode(models.DataResponse{Success:true})
 
 		default:
