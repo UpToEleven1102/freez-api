@@ -330,13 +330,14 @@ func GetNearbyMerchantsLastLocation(location models.Location, filters ...string)
 	var filter string
 
 	if len(filters) > 0 {
-		filter = ` AND `
+		filter = ` AND (`
 		for idx, f := range filters {
 			filter += `category='`+f+`'`
 			if idx!=len(filters)-1 {
 				filter += ` OR `
 			}
 		}
+		filter += ")"
 	}
 
 	r, err := DB.Query(`SELECT online, category, email, name, mobile, phone_number, image, l.merchant_id, ST_AsText(location) as location, ST_Distance_Sphere(location, ST_GeomFromText(?)) as distance
@@ -347,7 +348,6 @@ func GetNearbyMerchantsLastLocation(location models.Location, filters ...string)
 								  LEFT JOIN merchant m
 								    ON l.merchant_id=m.id
 									  HAVING distance < ? AND online=true` + filter,userLocation, minDistance)
-
 	if err != nil {
 		return nil, err
 	}
