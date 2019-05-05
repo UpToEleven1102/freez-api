@@ -174,7 +174,7 @@ func GetMerchantByEmail(email string) (interface{}, error) {
 func GetMerchantById(id string) (interface{}, error) {
 	var merchant models.Merchant
 
-	r, err := DB.Query(`SELECT id, online, mobile, phone_number, email, name, password, image, ST_AsText(last_location) FROM merchant WHERE id=?`, id)
+	r, err := DB.Query(`SELECT id, online, mobile, category, phone_number, email, name, password, image, ST_AsText(last_location) FROM merchant WHERE id=?`, id)
 
 	if err != nil {
 		return nil, err
@@ -184,7 +184,7 @@ func GetMerchantById(id string) (interface{}, error) {
 	var location string
 
 	if r.Next() {
-		err = r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image, &location)
+		err = r.Scan(&merchant.ID, &merchant.Online, &merchant.Mobile, &merchant.Category, &merchant.PhoneNumber, &merchant.Email, &merchant.Name, &merchant.Password, &merchant.Image, &location)
 		merchant.LastLocation.Long, merchant.LastLocation.Lat, _ = getLongLat(location)
 		if err != nil {
 			return nil, err
