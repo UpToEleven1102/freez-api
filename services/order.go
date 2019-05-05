@@ -78,11 +78,13 @@ func getItemOrder(orderId int) (items []interface{}, err error) {
 }
 
 func GetOrderHistoryByUserId(userID string) (orders []interface{}, err error) {
-
 	r, err := DB.Query(`SELECT o.id, user_id, merchant_id, o.stripe_id, refund, amount, date , online, mobile, phone_number, email, name, ST_AsText(last_location), image 
 								FROM m_order o
 								LEFT JOIN merchant m ON o.merchant_id=m.id 
-								WHERE user_id=?`, userID)
+								WHERE user_id=?
+								ORDER BY date DESC 
+								LIMIT 20
+								`, userID)
 
 	if err != nil {
 		log.Println(err)

@@ -82,6 +82,7 @@ func GetUserById(id string) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	defer r.Close()
 
 	var location string
