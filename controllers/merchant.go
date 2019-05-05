@@ -143,6 +143,25 @@ func MerchantHandler(w http.ResponseWriter, req *http.Request, objectID string, 
 				return nil
 			}
 
+		case "food-type":
+			var merchant models.Merchant
+
+			err := json.NewDecoder(req.Body).Decode(&merchant)
+
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message: err.Error()})
+				return nil
+			}
+			merchant.ID = claims.Id
+			err = services.UpdateFoodType(merchant)
+
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message: err.Error()})
+				return nil
+			}
+
 		case "product-presign-url":
 			var product models.Product
 

@@ -245,6 +245,11 @@ func UpdateMerchant(merchant models.Merchant) (err error) {
 	return err
 }
 
+func UpdateFoodType(merchant models.Merchant) (err error) {
+	_, err = DB.Exec("UPDATE merchant SET category=? WHERE id=?", merchant.Category, merchant.ID)
+	return err
+}
+
 func AddNewLocation(location models.Location) (error) {
 	point := fmt.Sprintf(`POINT(%f %f)`, location.Location.Long, location.Location.Lat)
 	_, err:= DB.Exec(`INSERT INTO location (merchant_id, location) VALUES (?, ST_GeomFromText(?))`, location.Id, point)
