@@ -41,11 +41,11 @@ func SignInMerchant(w http.ResponseWriter, req *http.Request) {
 				return
 			}
 			w.WriteHeader(http.StatusAccepted)
-			_ = json.NewEncoder(w).Encode(models.DataResponse{Success:true, Message:token})
+			_ = json.NewEncoder(w).Encode(models.DataResponse{Success: true, Message: token})
 			return
 		}
 	}
-	_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:"Credentials Invalid"})
+	_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: "Credentials Invalid"})
 }
 
 func SignUpMerchantFB(reqData models.FacebookTokenData, ipAdd string) (response models.DataResponse, err error) {
@@ -62,15 +62,15 @@ func SignUpMerchantFB(reqData models.FacebookTokenData, ipAdd string) (response 
 	}
 
 	merchant := models.Merchant{
-		Email: userInfo.Email,
-		Image: userInfo.Picture,
-		Name: userInfo.Name,
+		Email:       userInfo.Email,
+		Image:       userInfo.Picture,
+		Name:        userInfo.Name,
 		PhoneNumber: reqData.PhoneNumber,
-		FacebookID: userInfo.ID,
-		Password: reqData.Password,
-		Mobile: reqData.IsMobile,
-		StripeID: reqData.Stripe_Token,
-		Category: reqData.Category,
+		FacebookID:  userInfo.ID,
+		Password:    reqData.Password,
+		Mobile:      reqData.IsMobile,
+		StripeID:    reqData.Stripe_Token,
+		Category:    reqData.Category,
 	}
 
 	acc, err := services.StripeConnectCreateAccount(merchant, ipAdd)
@@ -102,6 +102,7 @@ func SignUpMerchantFB(reqData models.FacebookTokenData, ipAdd string) (response 
 	return response, err
 }
 
+
 func SignUpMerchant(w http.ResponseWriter, req *http.Request, ipAdd string) {
 	body, err := ioutil.ReadAll(req.Body)
 	var response models.DataResponse
@@ -115,6 +116,8 @@ func SignUpMerchant(w http.ResponseWriter, req *http.Request, ipAdd string) {
 
 	var merchant models.Merchant
 
+	var merchantEntityInformation models.MerchantEntityInformation
+
 	err = json.Unmarshal(body, &merchant)
 
 	if err != nil {
@@ -124,12 +127,22 @@ func SignUpMerchant(w http.ResponseWriter, req *http.Request, ipAdd string) {
 		return
 	}
 
-	acc, err := services.StripeConnectCreateAccount(merchant, ipAdd)
+	err = json.Unmarshal(body, &merchantEntityInformation)
+
+	if err != nil {
+		log.Println(err)
+		response.Success = false
+		response.Message = err.Error()
+		writeResponse(w, response, http.StatusBadRequest)
+		return
+	}
+
+	acc, err := services.StripeConnectCreateAccountWithEntityVerification(merchant, ipAdd, merchantEntityInformation)
 
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
-		_ = json.NewEncoder(w).Encode(models.DataResponse{Success:false, Message:err.Error()})
+		_ = json.NewEncoder(w).Encode(models.DataResponse{Success: false, Message: err.Error()})
 		return
 	}
 
@@ -159,7 +172,7 @@ func SignUpMerchant(w http.ResponseWriter, req *http.Request, ipAdd string) {
 	w.WriteHeader(http.StatusCreated)
 
 	_ = json.NewEncoder(w).Encode(struct {
-		Success bool `json:"success"`
+		Success bool   `json:"success"`
 		Message string `json:"message"`
 	}{true, token})
 }

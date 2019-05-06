@@ -117,6 +117,53 @@ func StripeConnectCreateAccount(merchant models.Merchant, ipAdd string) (*stripe
 	return acc, err
 }
 
+
+func StripeConnectCreateAccountWithEntityVerification(merchant models.Merchant, ipAdd string, entityInfo models.MerchantEntityInformation) (*stripe.Account, error) {
+	params := &stripe.AccountParams{
+		Country:               stripe.String("US"),
+		Email:                 stripe.String(merchant.Email),
+		BusinessType: stripe.String("individual"),
+		RequestedCapabilities: []*string{stripe.String("platform_payments")},
+		DefaultCurrency:       stripe.String(string(stripe.CurrencyUSD)),
+		ExternalAccount: &stripe.AccountExternalAccountParams{
+			Token:    stripe.String(merchant.StripeID),
+			Currency: stripe.String(string(stripe.CurrencyUSD)),
+		},
+		Type: stripe.String(string(stripe.AccountTypeCustom)),
+		TOSAcceptance: &stripe.AccountTOSAcceptanceParams{
+			Date: stripe.Int64(time.Now().Unix()),
+			IP:   stripe.String(ipAdd),
+		},
+		Individual: &stripe.PersonParams{
+			FirstName: stripe.String(entityInfo.EntityInformation.FirstName),
+			LastName: stripe.String(entityInfo.EntityInformation.LastName),
+			Address: &stripe.AccountAddressParams{
+				Line1: stripe.String(entityInfo.EntityInformation.Line1),
+				City: stripe.String(entityInfo.EntityInformation.City),
+				State: stripe.String(entityInfo.EntityInformation.State),
+			},
+			DOB: &stripe.DOBParams{
+				Day: stripe.Int64(entityInfo.EntityInformation.DobDay),
+				Month: stripe.Int64(entityInfo.EntityInformation.DobMonth),
+				Year: stripe.Int64(entityInfo.EntityInformation.DobYear),
+			},
+			SSNLast4: stripe.String(entityInfo.EntityInformation.Last4Ssn),
+		},
+		BusinessProfile: &stripe.AccountBusinessProfileParams{
+			URL: stripe.String(entityInfo.EntityInformation.BusinessWebsite),
+		},
+	}
+
+	acc, err := account.New(params)
+
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	return acc, err
+}
+
 func StripeConnectGetAccountById(id string) (*stripe.Account, error) {
 	return account.GetByID(id, nil)
 }

@@ -130,3 +130,18 @@ type FacebookTokenData struct {
 	IsMobile     bool   `json:"is_mobile"`
 	Category     string `json:"category"`
 }
+
+type MerchantEntityInformation struct {
+	EntityInformation struct {
+		FirstName string `json:"first_name"`
+		LastName string `json:"last_name"`
+		DobDay int64 `json:"dob_day"`
+		DobMonth int64 `json:"dob_month"`
+		DobYear int64 `json:"dob_year"`
+		City string `json:"city"`
+		Last4Ssn string `json:"last_4_ssn"`
+		Line1 string `json:"line1"`
+		State string `json:"state"`
+		BusinessWebsite string `json:"business_website"`
+	} `json:"entity_information"`
+}
