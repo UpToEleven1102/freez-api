@@ -9,6 +9,7 @@ import (
 	"github.com/stripe/stripe-go/card"
 	"github.com/stripe/stripe-go/charge"
 	"github.com/stripe/stripe-go/refund"
+	"log"
 	"math"
 	"os"
 	"strconv"
@@ -115,6 +116,38 @@ func StripeConnectCreateAccount(merchant models.Merchant, ipAdd string) (*stripe
 	}
 
 	return acc, err
+}
+
+func  StripeConnectEntityVerification(id string, entityInfo models.MerchantEntityInformation) (* stripe.Account, error) {
+	stripeID, err := GetMerchantStripeIdByMerchantId(id)
+
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	params := &stripe.AccountParams{
+		Individual: &stripe.PersonParams{
+			FirstName: stripe.String(entityInfo.EntityInformation.FirstName),
+			LastName: stripe.String(entityInfo.EntityInformation.LastName),
+			Address: &stripe.AccountAddressParams{
+				Line1: stripe.String(entityInfo.EntityInformation.Line1),
+				City: stripe.String(entityInfo.EntityInformation.City),
+				State: stripe.String(entityInfo.EntityInformation.State),
+			},
+			DOB: &stripe.DOBParams{
+				Day: stripe.Int64(entityInfo.EntityInformation.DobDay),
+				Month: stripe.Int64(entityInfo.EntityInformation.DobMonth),
+				Year: stripe.Int64(entityInfo.EntityInformation.DobYear),
+			},
+			SSNLast4: stripe.String(entityInfo.EntityInformation.Last4Ssn),
+		},
+		BusinessProfile: &stripe.AccountBusinessProfileParams{
+			URL: stripe.String(entityInfo.EntityInformation.BusinessWebsite),
+		},
+	}
+
+	return account.Update(stripeID, params)
 }
 
 

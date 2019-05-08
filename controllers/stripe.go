@@ -25,6 +25,8 @@ func StripeOpsHandler(w http.ResponseWriter, req *http.Request, urlString string
 
 	objectID, _ := getUrlParam(urlString)
 
+	var jsonEncoder = json.NewEncoder(w)
+
 	switch req.Method {
 	case "GET":
 		switch objectID {
@@ -76,7 +78,6 @@ func StripeOpsHandler(w http.ResponseWriter, req *http.Request, urlString string
 		switch objectID {
 		case "card":
 			var data RequestObject
-			jsonEncoder := json.NewEncoder(w)
 
 			_ = json.NewDecoder(req.Body).Decode(&data)
 			fmt.Println(data)
@@ -153,7 +154,6 @@ func StripeOpsHandler(w http.ResponseWriter, req *http.Request, urlString string
 		case "card":
 			var data RequestObject
 
-			var jsonEncoder = json.NewEncoder(w)
 			_ = json.NewDecoder(req.Body).Decode(&data)
 			c, err := services.StripeConnectDeleteDebitCard(data.StripeID, data.CardID)
 
@@ -172,7 +172,6 @@ func StripeOpsHandler(w http.ResponseWriter, req *http.Request, urlString string
 		switch objectID {
 		case "card":
 			var data RequestObject
-			var jsonEncoder = json.NewEncoder(w)
 
 			_ = json.NewDecoder(req.Body).Decode(&data)
 			fmt.Println(data)
@@ -186,6 +185,23 @@ func StripeOpsHandler(w http.ResponseWriter, req *http.Request, urlString string
 			}
 
 			_ = jsonEncoder.Encode(card)
+
+		case "verify-entity":
+			var data models.MerchantEntityInformation
+			_ = json.NewDecoder(req.Body).Decode(&data)
+
+			fmt.Println(data)
+
+			_, err := services.StripeConnectEntityVerification(claims.Id, data)
+
+			if err != nil {
+				log.Println(err)
+
+				_ = jsonEncoder.Encode(models.DataResponse{Success: false, Message: err.Error()})
+				return nil
+			}
+
+			_ = jsonEncoder.Encode(models.DataResponse{Success: true})
 
 		default:
 			http.NotFound(w, req)

@@ -116,8 +116,6 @@ func SignUpMerchant(w http.ResponseWriter, req *http.Request, ipAdd string) {
 
 	var merchant models.Merchant
 
-	var merchantEntityInformation models.MerchantEntityInformation
-
 	err = json.Unmarshal(body, &merchant)
 
 	if err != nil {
@@ -127,17 +125,7 @@ func SignUpMerchant(w http.ResponseWriter, req *http.Request, ipAdd string) {
 		return
 	}
 
-	err = json.Unmarshal(body, &merchantEntityInformation)
-
-	if err != nil {
-		log.Println(err)
-		response.Success = false
-		response.Message = err.Error()
-		writeResponse(w, response, http.StatusBadRequest)
-		return
-	}
-
-	acc, err := services.StripeConnectCreateAccountWithEntityVerification(merchant, ipAdd, merchantEntityInformation)
+	acc, err := services.StripeConnectCreateAccount(merchant, ipAdd)
 
 	if err != nil {
 		log.Println(err)
