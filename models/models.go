@@ -139,7 +139,7 @@ type MerchantEntityInformation struct {
 		DobMonth int64 `json:"dob_month"`
 		DobYear int64 `json:"dob_year"`
 		City string `json:"city"`
-		Last4Ssn string `json:"last_4_ssn"`
+		//Last4Ssn string `json:"last_4_ssn"`
 		Line1 string `json:"line1"`
 		State string `json:"state"`
 		BusinessWebsite string `json:"business_website"`

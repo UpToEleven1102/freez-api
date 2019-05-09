@@ -140,7 +140,7 @@ func  StripeConnectEntityVerification(id string, entityInfo models.MerchantEntit
 				Month: stripe.Int64(entityInfo.EntityInformation.DobMonth),
 				Year: stripe.Int64(entityInfo.EntityInformation.DobYear),
 			},
-			SSNLast4: stripe.String(entityInfo.EntityInformation.Last4Ssn),
+			//SSNLast4: stripe.String(entityInfo.EntityInformation.Last4Ssn),
 		},
 		BusinessProfile: &stripe.AccountBusinessProfileParams{
 			URL: stripe.String(entityInfo.EntityInformation.BusinessWebsite),
@@ -180,7 +180,7 @@ func StripeConnectCreateAccountWithEntityVerification(merchant models.Merchant, 
 				Month: stripe.Int64(entityInfo.EntityInformation.DobMonth),
 				Year: stripe.Int64(entityInfo.EntityInformation.DobYear),
 			},
-			SSNLast4: stripe.String(entityInfo.EntityInformation.Last4Ssn),
+			//SSNLast4: stripe.String(entityInfo.EntityInformation.Last4Ssn),
 		},
 		BusinessProfile: &stripe.AccountBusinessProfileParams{
 			URL: stripe.String(entityInfo.EntityInformation.BusinessWebsite),
