@@ -52,7 +52,7 @@ func GetUserIDNotifyMerchantNearbyByMerchantID(merchantLocation models.Location)
 		if err != nil {
 			return nil, err
 		}
-		ids = append(ids,userId)
+		ids = append(ids, userId)
 	}
 	return ids, nil
 }
@@ -116,6 +116,28 @@ func GetMerchantStripeIdByMerchantId(merchantId string) (id string, err error) {
 	return id, err
 }
 
+func FilterMerchantByName(data models.SearchData, location models.Location) (merchants []interface{}, err error) {
+
+	point := fmt.Sprintf(`POINT(%f %f)`, location.Location.Long, location.Location.Lat)
+
+	r, err := DB.Query(`SELECT id, online, mobile, phone_number, email, name, image,
+       ST_Distance_Sphere(last_location, ?) FROM merchant WHERE merchant.name LIKE '%?%'`, point, data.SearchText)
+
+	if err != nil {
+		return nil, err
+	}
+	defer r.Close()
+
+	for r.Next() {
+		var merchant models.MerchantInfo
+		_ = r.Scan(&merchant.MerchantID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email,
+			&merchant.Name, &merchant.Image, &merchant.Distance)
+		merchants = append(merchants, merchant)
+	}
+
+	return merchants, err
+}
+
 func GetMerchantStripeAccount(merchantId string) (*stripe.Account, error) {
 	stripeId, err := GetMerchantStripeIdByMerchantId(merchantId)
 
@@ -138,7 +160,7 @@ func ChangeOnlineStatus(merchantId string) error {
 
 	merchant := m.(models.Merchant)
 
-	merchant.Online	= !merchant.Online
+	merchant.Online = !merchant.Online
 
 	_, err = DB.Exec(`UPDATE merchant SET online=? WHERE id=?;`, merchant.Online, merchant.ID)
 
@@ -226,7 +248,6 @@ func GetMerchantByFacebookID(facebookID string) (interface{}, error) {
 	}
 	defer r.Close()
 
-
 	var location string
 
 	if r.Next() {
@@ -241,7 +262,7 @@ func GetMerchantByFacebookID(facebookID string) (interface{}, error) {
 }
 
 func UpdateMerchant(merchant models.Merchant) (err error) {
-	_, err = DB.Exec(`UPDATE merchant SET mobile=?,phone_number=?,email=?,name=?,image=? WHERE id=?;`,merchant.Mobile, merchant.PhoneNumber, merchant.Email, merchant.Name, merchant.Image, merchant.ID)
+	_, err = DB.Exec(`UPDATE merchant SET mobile=?,phone_number=?,email=?,name=?,image=? WHERE id=?;`, merchant.Mobile, merchant.PhoneNumber, merchant.Email, merchant.Name, merchant.Image, merchant.ID)
 	return err
 }
 
@@ -252,7 +273,7 @@ func UpdateFoodType(merchant models.Merchant) (err error) {
 
 func AddNewLocation(location models.Location) (error) {
 	point := fmt.Sprintf(`POINT(%f %f)`, location.Location.Long, location.Location.Lat)
-	_, err:= DB.Exec(`INSERT INTO location (merchant_id, location) VALUES (?, ST_GeomFromText(?))`, location.Id, point)
+	_, err := DB.Exec(`INSERT INTO location (merchant_id, location) VALUES (?, ST_GeomFromText(?))`, location.Id, point)
 	if err != nil {
 		return err
 	}
@@ -302,9 +323,9 @@ func GetMerchantInfoById(id string, location models.Location) (interface{}, erro
 
 	var loc string
 
-	if r.Next()  {
+	if r.Next() {
 		var merchant models.MerchantInfo
-		_ = r.Scan(&merchant.Online ,&merchant.Email, &merchant.Name, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Image, &merchant.Category, &merchant.MerchantID, &loc, &merchant.Distance)
+		_ = r.Scan(&merchant.Online, &merchant.Email, &merchant.Name, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Image, &merchant.Category, &merchant.MerchantID, &loc, &merchant.Distance)
 
 		merchant.Location.Long, merchant.Location.Lat, err = getLongLat(loc)
 		if err != nil {
@@ -324,7 +345,7 @@ func GetMerchantInfoById(id string, location models.Location) (interface{}, erro
 	return nil, nil
 }
 
-func GetNearbyMerchantsLastLocation(location models.Location, filters ...string) (merchants []interface{}, err error){
+func GetNearbyMerchantsLastLocation(location models.Location, filters ...string) (merchants []interface{}, err error) {
 	userLocation := fmt.Sprintf(`POINT(%f %f)`, location.Location.Long, location.Location.Lat)
 
 	var filter string
@@ -332,8 +353,8 @@ func GetNearbyMerchantsLastLocation(location models.Location, filters ...string)
 	if len(filters) > 0 {
 		filter = ` AND (`
 		for idx, f := range filters {
-			filter += `category='`+f+`'`
-			if idx!=len(filters)-1 {
+			filter += `category='` + f + `'`
+			if idx != len(filters)-1 {
 				filter += ` OR `
 			}
 		}
@@ -347,7 +368,7 @@ func GetNearbyMerchantsLastLocation(location models.Location, filters ...string)
 								  ON l.ts=latest.ts
 								  LEFT JOIN merchant m
 								    ON l.merchant_id=m.id
-									  HAVING distance < ? AND online=true` + filter,userLocation, minDistance)
+									  HAVING distance < ? AND online=true`+filter, userLocation, minDistance)
 	if err != nil {
 		return nil, err
 	}
@@ -355,7 +376,7 @@ func GetNearbyMerchantsLastLocation(location models.Location, filters ...string)
 
 	var loc string
 
-	for r.Next()  {
+	for r.Next() {
 		var merchant models.MerchantInfo
 		_ = r.Scan(&merchant.Online, &merchant.Category, &merchant.Email, &merchant.Name, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Image, &merchant.MerchantID, &loc, &merchant.Distance)
 

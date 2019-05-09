@@ -85,6 +85,42 @@ func UserWebSocketHandler(ws *websocket.Conn) {
 				break
 			}
 
+		case searchMerchant:
+			var searchData models.SearchData
+			var location models.Location
+
+			err := json.Unmarshal([]byte(reqData.Payload), searchData)
+
+			if err != nil {
+				log.Println(err.Error())
+				break
+			}
+
+			err = json.Unmarshal([]byte(reqData.Payload), location)
+
+			if err != nil {
+				log.Println(err.Error())
+				break
+			}
+
+
+			log.Printf("%+v", searchData)
+			log.Printf("%+v", location)
+
+			merchants, err := services.FilterMerchantByName(searchData, location)
+
+			var b []byte
+
+			if err != nil {
+				b, _ = json.Marshal(models.DataResponse{Success:false, Message:err.Error()})
+			} else {
+				b, _ = json.Marshal(merchants)
+			}
+
+			if err = websocket.Message.Send(ws, string(b)); err != nil {
+				break
+			}
+
 		case postLocation:
 			var user models.User
 			user.ID = claims.Id
