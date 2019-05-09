@@ -115,6 +115,7 @@ func UserWebSocketHandler(ws *websocket.Conn) {
 				b, _ = json.Marshal(models.DataResponse{Success:false, Message:err.Error()})
 			} else {
 				b, _ = json.Marshal(merchants)
+				b, _ = json.Marshal(models.DataResponse{Success:true, Type: merchantNearby, Message: string(b)})
 			}
 
 			if err = websocket.Message.Send(ws, string(b)); err != nil {

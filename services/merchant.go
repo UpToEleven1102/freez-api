@@ -120,18 +120,34 @@ func FilterMerchantByName(data models.SearchData, location models.Location) (mer
 
 	point := fmt.Sprintf(`POINT(%f %f)`, location.Location.Long, location.Location.Lat)
 
-	r, err := DB.Query(`SELECT id, online, mobile, phone_number, email, name, image,
-       ST_Distance_Sphere(last_location, ?) FROM merchant WHERE merchant.name LIKE '%?%'`, point, data.SearchText)
+
+	r, err := DB.Query(`SELECT online, category, email, name, mobile, phone_number, image, l.merchant_id, ST_AsText(location) as location, ST_Distance_Sphere(location, ST_GeomFromText(?)) as distance
+								FROM location l INNER JOIN (
+								    SELECT merchant_id, MAX(ts) AS ts FROM location GROUP BY merchant_id
+								  ) latest
+								  ON l.ts=latest.ts
+								  LEFT JOIN merchant m
+								    ON l.merchant_id=m.id
+									  WHERE name LIKE '%?%'
+									  LIMIT ?
+									  `, point, data.SearchText, data.Limit)
 
 	if err != nil {
 		return nil, err
 	}
 	defer r.Close()
+	var loc string
 
 	for r.Next() {
 		var merchant models.MerchantInfo
-		_ = r.Scan(&merchant.MerchantID, &merchant.Online, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Email,
-			&merchant.Name, &merchant.Image, &merchant.Distance)
+		_ = r.Scan(&merchant.Online, &merchant.Category, &merchant.Email, &merchant.Name, &merchant.Mobile, &merchant.PhoneNumber, &merchant.Image, &merchant.MerchantID, &loc, &merchant.Distance)
+
+		merchant.Location.Long, merchant.Location.Lat, err = getLongLat(loc)
+		if err != nil {
+			fmt.Println(err.Error())
+			return nil, err
+		}
+
 		merchants = append(merchants, merchant)
 	}
 
