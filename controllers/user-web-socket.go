@@ -89,23 +89,23 @@ func UserWebSocketHandler(ws *websocket.Conn) {
 			var searchData models.SearchData
 			var location models.Location
 
-			err := json.Unmarshal([]byte(reqData.Payload), searchData)
+			err := json.Unmarshal([]byte(reqData.Payload), &searchData)
 
 			if err != nil {
 				log.Println(err.Error())
 				break
 			}
 
-			err = json.Unmarshal([]byte(reqData.Payload), location)
+			err = json.Unmarshal([]byte(reqData.Payload), &location)
 
 			if err != nil {
 				log.Println(err.Error())
 				break
 			}
 
-
-			log.Printf("%+v", searchData)
-			log.Printf("%+v", location)
+			if searchData.Limit == 0 {
+				searchData.Limit = 10
+			}
 
 			merchants, err := services.FilterMerchantByName(searchData, location)
 

@@ -128,7 +128,7 @@ func FilterMerchantByName(data models.SearchData, location models.Location) (mer
 								  ON l.ts=latest.ts
 								  LEFT JOIN merchant m
 								    ON l.merchant_id=m.id
-									  WHERE name LIKE '%?%'
+									  WHERE INSTR(name, ?) > 0
 									  LIMIT ?
 									  `, point, data.SearchText, data.Limit)
 
