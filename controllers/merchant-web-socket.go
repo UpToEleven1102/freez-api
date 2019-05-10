@@ -14,6 +14,7 @@ import (
 const (
 	requestInfo  = "request_info"
 	postLocation = "post_location"
+	searchMerchant = "search_merchant"
 )
 
 /*MerchantWebSocketHandler - HandleFunc for merchant websocket route
@@ -67,6 +68,7 @@ func MerchantWebSocketHandler(ws *websocket.Conn) {
 			if err = websocket.Message.Send(ws, string(b)); err != nil {
 				break
 			}
+
 		case postLocation:
 			var location models.Location
 			if err = json.Unmarshal([]byte(reqData.Payload), &location.Location); err != nil {
