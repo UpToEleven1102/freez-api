@@ -126,6 +126,7 @@ type FacebookTokenData struct {
 	UserID       string `json:"user_id"`
 	Stripe_Token string `json:"stripe_token"`
 	Password     string `json:"password"`
+	Description  string `json:"description"`
 	PhoneNumber  string `json:"phone_number"`
 	IsMobile     bool   `json:"is_mobile"`
 	Category     string `json:"category"`
@@ -133,7 +134,7 @@ type FacebookTokenData struct {
 
 type SearchData struct {
 	SearchText string `json:"search_text"`
-	Limit int `json:"limit"`
+	Limit      int    `json:"limit"`
 }
 
 type MerchantEntityInformation struct {

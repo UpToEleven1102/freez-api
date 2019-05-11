@@ -65,6 +65,7 @@ func SignUpMerchantFB(reqData models.FacebookTokenData, ipAdd string) (response 
 		Email:       userInfo.Email,
 		Image:       userInfo.Picture,
 		Name:        userInfo.Name,
+		Description: reqData.Description,
 		PhoneNumber: reqData.PhoneNumber,
 		FacebookID:  userInfo.ID,
 		Password:    reqData.Password,
@@ -80,7 +81,7 @@ func SignUpMerchantFB(reqData models.FacebookTokenData, ipAdd string) (response 
 	}
 	merchant.StripeID = acc.ID
 
-	merchant, err = services.CreateMerchant(merchant)
+	merchant, err = services.CreateMerchantFB(merchant)
 
 	fmt.Printf("merchant: %+v \n", merchant)
 
