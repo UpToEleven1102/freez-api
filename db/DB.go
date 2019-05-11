@@ -25,8 +25,6 @@ func seed(DB *sqlx.DB) {
 	DB.MustExec("DROP TABLE IF EXISTS product")
 	DB.MustExec("DROP TABLE IF EXISTS location")
 	DB.MustExec("DROP TABLE IF EXISTS favorite")
-	DB.MustExec("DROP TABLE IF EXISTS merchant")
-	DB.MustExec("DROP TABLE IF EXISTS merchant_category")
 	DB.MustExec("DROP TABLE IF EXISTS merchant_m_option")
 	DB.MustExec("DROP TABLE IF EXISTS m_option")
 	DB.MustExec("DROP TABLE IF EXISTS user")
@@ -35,7 +33,8 @@ func seed(DB *sqlx.DB) {
 	DB.MustExec("DROP TABLE IF EXISTS user_notification")
 	DB.MustExec("DROP TABLE IF EXISTS activity_type")
 	DB.MustExec("DROP TABLE IF EXISTS m_order")
-
+	DB.MustExec("DROP TABLE IF EXISTS merchant")
+	DB.MustExec("DROP TABLE IF EXISTS merchant_category")
 
 	DB.MustExec(schemaMerchantCategory)
 	DB.MustExec(schemaActivityType)
@@ -95,6 +94,7 @@ func Config() (*sqlx.DB, error) {
 	if DB != nil {
 		if os.Getenv("RESET_DB") == "true" {
 			seed(DB)
+			log.Println("Successfully reset DB")
 		}
 	}
 

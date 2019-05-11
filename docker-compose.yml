@@ -34,7 +34,7 @@ services:
     build: .
     image: freez-app-rest
     environment:
-      RESET_DB: "false"
+      RESET_DB: "true"
     ports:
       - 8080:8080
     links:

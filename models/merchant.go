@@ -6,6 +6,7 @@ type Merchant struct {
 	PhoneNumber  string          `json:"phone_number"`
 	Email        string          `json:"email"`
 	Name         string          `json:"name"`
+	Description  string          `json:"description"`
 	Mobile       bool            `json:"mobile"`
 	Password     string          `json:"password"`
 	Image        string          `json:"image"`
@@ -45,6 +46,7 @@ type MerchantNotificationInfo struct {
 }
 
 type MerchantInfo struct {
+	Description string        `json:"description"`
 	Online      bool          `json:"online"`
 	Category    string        `json:"category"`
 	MerchantID  string        `json:"merchant_id"`
@@ -61,9 +63,10 @@ type MerchantInfo struct {
 }
 
 type Product struct {
-	ID         int     `json:"id"`
-	MerchantId string  `json:"merchant_id"`
-	Name       string  `json:"name"`
-	Price      float64 `json:"price"`
-	Image      string  `json:"image"`
+	ID          int     `json:"id"`
+	MerchantId  string  `json:"merchant_id"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	Price       float64 `json:"price"`
+	Image       string  `json:"image"`
 }
