@@ -6,7 +6,7 @@ import (
 )
 
 func CreateProduct(product models.Product) error {
-	_, err := DB.Exec(`INSERT INTO product (name, price, merchant_id, image) VALUES(?, ?, ?, ?)`, product.Name, product.Price, product.MerchantId, product.Image)
+	_, err := DB.Exec(`INSERT INTO product (name, description, price, merchant_id, image) VALUES(?, ?, ?, ?, ?)`, product.Name, product.Description, product.Price, product.MerchantId, product.Image)
 
 	if err != nil {
 		log.Println(err)
@@ -17,7 +17,7 @@ func CreateProduct(product models.Product) error {
 }
 
 func GetProducts(merchantID string) (products []interface{}, err error) {
-	r, err := DB.Query(`SELECT id, name, price, merchant_id, image FROM product WHERE merchant_id=?`, merchantID)
+	r, err := DB.Query(`SELECT id, name, description, price, merchant_id, image FROM product WHERE merchant_id=?`, merchantID)
 
 	if err != nil {
 		log.Println(err)
@@ -27,7 +27,7 @@ func GetProducts(merchantID string) (products []interface{}, err error) {
 
 	var product models.Product
 	for r.Next() {
-		err = r.Scan(&product.ID, &product.Name, &product.Price, &product.MerchantId, &product.Image)
+		err = r.Scan(&product.ID, &product.Name, &product.Description, &product.Price, &product.MerchantId, &product.Image)
 		if err != nil {
 			log.Println(err)
 			return nil, err
@@ -40,7 +40,7 @@ func GetProducts(merchantID string) (products []interface{}, err error) {
 }
 
 func UpdateProduct(product models.Product) error {
-	_, err := DB.Exec(`UPDATE product SET name=?, price=?, image=? WHERE id=?`, product.Name, product.Price, product.Image, product.ID)
+	_, err := DB.Exec(`UPDATE product SET name=?, description=?, price=?, image=? WHERE id=?`, product.Name, product.Description, product.Price, product.Image, product.ID)
 
 	if err != nil {
 		log.Println(err)
