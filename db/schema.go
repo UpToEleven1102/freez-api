@@ -11,6 +11,7 @@ const schemaMerchant = `
 		phone_number text NOT NULL,
 		email VARCHAR(64) NOT NULL,
 		name text NOT NULL,
+		description text NULL,
 		password text NOT NULL,
 		last_location POINT,
 		image VARCHAR(255) NOT NULL DEFAULT 'https://freeze-app.s3.us-west-2.amazonaws.com/blank-profile-picture.jpg',
@@ -49,6 +50,7 @@ const schemaLocation = `
 const schemaProduct = `CREATE TABLE product(
 	id INT NOT NULL AUTO_INCREMENT,
 	name VARCHAR(64) NOT NULL,
+	description TEXT NULL,
 	price DECIMAL(10,2) NOT NULL,
 	merchant_id VARCHAR(64) NOT NULL,
 	image VARCHAR(255) NOT NULL DEFAULT 'https://www.houstonfoodbank.org/wp-content/uploads/2018/01/homepage_boxfood-276x300.png',
